@@ -1,0 +1,16 @@
+"cascade"
+{
+	"title"				"Cascade"
+	"base"				"orange-juice"
+	"maps"				"^gm_"
+	"category"			"pve"
+	"menusystem"			"1"
+
+	"author_name"			"Citrus"
+	"author_email"			""
+	"author_url"			""
+
+	"settings"
+	{
+	}
+}
