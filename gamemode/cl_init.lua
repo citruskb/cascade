@@ -1,5 +1,10 @@
 include("shared.lua")
 
+MySelf = MySelf or NULL
+hook.Add("InitPostEntity", "GetLocal", function()
+	MySelf = LocalPlayer()
+end)
+
 function GM:Initialize()
 	RunConsoleCommand("r_drawmodeldecals", "0") -- Could possibly cause crashes.
 	RunConsoleCommand("r_dynamic", "0") -- Flashlight dynamic lights of other players.
@@ -40,6 +45,52 @@ function GM:PlayerBindPress(pl, bind, wasin)
 		gamemode.Call("ToggleFlashlight")
 	end
 end
+
+
+-- Validity hack
+
+-- We do this so we don't need to check if the local player is valid constantly clientside in these functions.
+-- Empty functions get filled when the local player is found.
+function GM:Think() end
+function GM:_Think() end
+
+GM.Think = GM._Think
+GM.HUDShouldDraw = GM.Think
+GM.CalcView = GM.Think
+GM.ShouldDrawLocalPlayer = GM.Think
+GM.PostDrawOpaqueRenderables = GM.Think
+GM.PostDrawTranslucentRenderables = GM.Think
+GM.HUDPaint = GM.Think
+GM.HUDPaintBackground = GM.Think
+GM.CreateMove = GM.Think
+GM.PrePlayerDraw = GM.Think
+GM.PostPlayerDraw = GM.Think
+GM.InputMouseApply = GM.Think
+GM.GUIMousePressed = GM.Think
+GM.HUDWeaponPickedUp = GM.Think
+
+local gm_ = GM
+function LocalPlayerFound()
+	gm_.Think = gm_._Think
+	gm_.HUDShouldDraw = gm_._HUDShouldDraw
+	gm_.CalcView = gm_._CalcView
+	gm_.ShouldDrawLocalPlayer = gm_._ShouldDrawLocalPlayer
+	gm_.PostDrawTranslucentRenderables = gm_._PostDrawTranslucentRenderables
+	gm_.HUDPaint = gm_._HUDPaint
+	gm_.HUDPaintBackground = gm_._HUDPaintBackground
+	gm_.CreateMove = gm_._CreateMove
+	gm_.PrePlayerDraw = gm_._PrePlayerDraw
+	gm_.PostPlayerDraw = gm_._PostPlayerDraw
+	gm_.InputMouseApply = gm_._InputMouseApply
+	gm_.GUIMousePressed = gm_._GUIMousePressed
+	gm_.HUDWeaponPickedUp = gm_._HUDWeaponPickedUp
+	gm_.RenderScene = gm_._RenderScene
+	gm_.SetupSkyboxFog = gm_._SetupSkyboxFog
+	gm_.SetupWorldFog = gm_._SetupWorldFog
+
+	if render.GetDXLevel() >= 80 then gm_.RenderScreenspaceEffects = gm_._RenderScreenspaceEffects end
+end
+hook.Add("InitPostEntity", "InitPostEntity.LocalPlayerFound", LocalPlayerFound)
 
 -- The following functions should be set up as is with the underscore. No need to check if the local player is valid or not. 
 function GM:_Think() end
@@ -83,3 +134,34 @@ function GM:_RenderScene() end
 function GM:_SetupSkyboxFog(skyboxscale) return end
 
 function GM:_SetupWorldFog() return end
+--
+
+
+-- Skybox stuff
+function GM:PreDrawSkyBox() self.DrawingInSky = true end
+function GM:PostDrawSkyBox() self.DrawingInSky = false end
+--
+
+-- Overrides
+function GM:CreateCustomFonts() end
+function GM:PlayerDeath(pl, attacker) end
+function GM:ScalePlayerDamage(pl, hitgroup, dmginfo) end
+function GM:PlayerShouldTakeDamage(pl, attacker) return false end
+function GM:PostProcessPermitted(str) return false end
+--
+
+
+-- Footsteps
+function GM:PlayerStepSoundTime(pl, iType, bWalking)
+	if iType == STEPSOUNDTIME_NORMAL or iType == STEPSOUNDTIME_WATER_FOOT then
+		return 520 - pl:GetVelocity():Length()
+	end
+
+	if iType == STEPSOUNDTIME_ON_LADDER then return 500 end
+
+	if iType == STEPSOUNDTIME_WATER_KNEE then return 650 end
+
+	return 350
+end
+function GM:PlayerFootstep(pl, vFootPos, iFoot, strSoundName, fVolume) return end
+--
