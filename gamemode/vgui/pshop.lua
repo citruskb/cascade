@@ -96,6 +96,10 @@ function PANEL:Init()
 	DockCenter(lab, right)
 	--
 
+	-- Test the hitbox
+	local hitbox = vgui.Create("DPolyHitbox")
+	hitbox:SetPos(w * 0.5, h * 0.5)
+
 end
 
 function PANEL:Paint()

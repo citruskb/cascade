@@ -1,7 +1,7 @@
 include("shared.lua")
 
 include("vgui/dcollision.lua")
-include("vgui/dpolyhitbox.lua")
+include("vgui/dhitbox.lua")
 include("vgui/pitem.lua")
 include("vgui/pshop.lua")
 
