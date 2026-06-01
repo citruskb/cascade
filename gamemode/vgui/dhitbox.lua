@@ -68,22 +68,26 @@ local PolyFuncs = {
 
 function PANEL:Init()
 	-- [[ For testing ]]
+	--[[
 	self.Shape = POLY_RECTANGULAR
 	self.ShapeW = 100
 	self.ShapeH = 50
 
 	self.Angle = 0
+	]]
 	-- [[	]]
 
 	-- [[ For testing ]]
+	--[[
 	self.Shape = POLY_ELLIPSE
 	self.ShapeRX = 50
 	self.ShapeRY = 25
 
 	self.Angle = 0
+	]]
 	-- [[	]]
 
-	self:InvalidateLayout(true)
+	--self:InvalidateLayout(true)
 end
 
 function PANEL:PerformLayout(w, h)

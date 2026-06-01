@@ -96,9 +96,10 @@ function PANEL:Init()
 	DockCenter(lab, right)
 	--
 
-	-- Test the hitbox
-	local hitbox = vgui.Create("DPolyHitbox")
-	hitbox:SetPos(w * 0.5, h * 0.5)
+	-- Test items
+	local item = vgui.Create("PItem")
+	item:SetPos(w * 0.6, h * 0.5)
+	item:EnablePhysics()
 
 end
 

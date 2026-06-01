@@ -32,6 +32,9 @@ local nextTick = 0
 function GM:Think()
 	local ct = CurTime()
 
+	-- Update item physics, stuff like collision.
+	if #GM.PhysicsItems > 0 then gamemode.Call("ItemPhysicsThink") end
+
 	if nextTick > ct then return end
 	nextTick = ct + 1
 
