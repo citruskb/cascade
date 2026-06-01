@@ -64,6 +64,14 @@ function PANEL:Think()
 	-- If our colliders are overlapping with any other colliders, then
 end
 
+function PANEL:SetVelocity(x, y)
+	self.VX = x
+	self.VY = y
+end
+function PANEL:AddVelocity(xAdd, yAdd)
+	self.VX = x + xAdd
+	self.VY = y + yAdd
+end
 function PANEL:GetVelocity() return self.VX, self.VY end
 function PANEL:EnablePhysics()
 	self.Physics = true
@@ -84,11 +92,11 @@ function PANEL:GetHitbox() return self.hb end
 
 vgui.Register("PItem", PANEL, "DPanel")
 
-local function GetProjectedRange(points, normals)
+local function GetProjectedRange(points, normal)
 	local min, max
 	for j = 1, #points do
 		local x, y = points[j].x, points[j].y
-		local nx, ny = normals[j].x, normals[j].y
+		local nx, ny = normal.x, normal.y
 		local proj = x * nx + y * ny
 
 		if not min or (min and proj < min) then min = proj end
@@ -98,8 +106,14 @@ local function GetProjectedRange(points, normals)
 	return min, max
 end
 
+local function GetRangeOverlap(minA, maxA, minB, maxB)
+	return math.Min(maxA, maxB) - math.Max(minA, minB)
+end
+
 local normals = {}
 local collisions = {}
+local colHandled = {}
+local noCol = {}
 local polydata = {}
 
 function GM:ItemPhysicsThink()
@@ -126,6 +140,83 @@ function GM:ItemPhysicsThink()
 	end
 
 	-- Now that we have all the normals, we need the projection of each edge vs that normal.
+	for i = 1, normals do
+		local nv = normals[i]
+		for j = 1, nv do
+			local normal = nv[j]
+
+			-- First get the range for the shape we are focusing on...
+			local minA, maxA = GetProjectedRange(polydata[i], normal)
+
+			-- Now we need the range for the shape we are considering..
+			-- For every shape..
+
+			for o = 1, #GM.PhysicsItems do
+				if i == o then continue end -- Skip our current item.
+
+				-- Aready checked and determined no collision!
+				if noCol[i] and noCol[i][o] then continue end
+				if noCol[o] and noCol[o][i] then continue end
+
+				local minB, maxB = GetProjectedRange(polydata[o], normal)
+				local overlap = GetRangeOverlap(minA, maxA, minB, maxB)
+
+				-- No collision!!
+				if overlap < 0  then
+					noCol[i] = noCol[i] or {}
+					noCol[i][o] = true
+					if collisions[i] and collisions[i][o] then collisions[i][o] = nil end
+
+					noCol[o] = noCol[o] or {}
+					noCol[o][i] = true
+					if collisions[o] and collisions[o][i] then collisions[o][i] = nil end
+
+					continue
+				end
+
+				-- Select existing collision data, if it exists.
+				local colData = collisions[i] and collisions[i][o]
+				if not colData then
+					colData = collisions[o] and collisions[o][i]
+				end
+
+				-- We do this so we know whether to save to tab[o][i] vs tab[i][o]
+				local alt
+				if colData then alt = true end
+
+				-- Parse new data.
+				local newData = {overlap = overlap, normal = normal}
+
+				if not colData then
+					-- No collision data exists! Write it.
+					colData[i] = colData[i] or {}
+					colData[i][o] = newData
+				elseif colData and colData.overlap > overlap then
+					-- Collision data exists. Override it if our overlap is smaller.
+					if alt then
+						colData[o][i] = {overlap = overlap, normal = normal}
+					else
+						colData[i][o] = {overlap = overlap, normal = normal}
+					end
+				end
+			end
+		end
+	end
+
+	-- We have all our collision data now. Apply it.
+	for i = 1, collisions do
+		local objA = GM.PhysicsItems[i]
+		for j = 1, collisions[i] do
+			local objB = GM.PhysicsItems[j]
+			local data = collisions[i][j]
+			local overlap, normal = data.overlap, data.normal
+
+			-- TODO
+
+		end
+	end
+
+	--[[
 	for i = 1, #GM.PhysicsItems do
 		local min1, max1 = GetProjectedRange(polydata[i], normals[i])
 
@@ -142,4 +233,5 @@ function GM:ItemPhysicsThink()
 			end
 		end
 	end
+	]]
 end
