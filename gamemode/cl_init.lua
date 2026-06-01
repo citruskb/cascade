@@ -1,6 +1,11 @@
 include("shared.lua")
 
+include("vgui/dcollision.lua")
+include("vgui/dpolyhitbox.lua")
+include("vgui/pitem.lua")
 include("vgui/pshop.lua")
+
+GM.Debug = false
 
 MySelf = MySelf or NULL
 hook.Add("InitPostEntity", "GetLocal", function()

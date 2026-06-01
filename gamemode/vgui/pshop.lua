@@ -1,5 +1,3 @@
-local function Empty() end
-
 local function DockCenter(self, parent)
 	local dw, dh = (parent:GetWide() / 2) - (self:GetWide() / 2), (parent:GetTall() / 2) - (self:GetTall() / 2)
 	self:DockMargin(dw, dh, dw, dh)
@@ -44,23 +42,23 @@ function PANEL:Init()
 	botLeft:Dock(TOP)
 
 
-	-- Player stats
-	local stats = vgui.Create("DPanel", botLeft)
-	stats:SetSize(w * 0.2, 0)
-	stats:SetBackgroundColor(Color(0, 0, 255, 50))
-	stats:Dock(LEFT)
-	lab = EasyLabel(stats, "Player Stats", "SFontLarger")
-	DockCenter(lab, stats)
-	--
-
-
 	-- Playermodel
 	local model = vgui.Create("DPanel", botLeft)
 	model:SetSize(w * 0.2, 0)
-	model:SetBackgroundColor(Color(0, 255, 0, 50))
+	model:SetBackgroundColor(Color(0, 0, 255, 50))
 	model:Dock(LEFT)
 	lab = EasyLabel(model, "Player Model", "SFontLarger")
 	DockCenter(lab, model)
+	--
+
+
+	-- Stats & options
+	local stats = vgui.Create("DPanel", botLeft)
+	stats:SetSize(w * 0.2, 0)
+	stats:SetBackgroundColor(Color(0, 255, 0, 50))
+	stats:Dock(LEFT)
+	lab = EasyLabel(stats, "Stats", "SFontLarger")
+	DockCenter(lab, stats)
 	--
 
 
@@ -104,7 +102,7 @@ function PANEL:Paint()
 	Derma_DrawBackgroundBlur(self, self.Created)
 end
 
-vgui.Register("DShop", PANEL, "DPanel")
+vgui.Register("PShop", PANEL, "DPanel")
 
 function GM:ShowHelp(pl)
 	if IsValid(self.pShop) then
@@ -112,5 +110,5 @@ function GM:ShowHelp(pl)
 		return
 	end
 
-	self.pShop = vgui.Create("DShop")
+	self.pShop = vgui.Create("PShop")
 end
