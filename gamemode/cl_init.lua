@@ -1,5 +1,7 @@
 include("shared.lua")
 
+include("vgui/pshop.lua")
+
 MySelf = MySelf or NULL
 hook.Add("InitPostEntity", "GetLocal", function()
 	MySelf = LocalPlayer()
@@ -38,11 +40,16 @@ function GM:PlayerThink(pl) end
 
 local M_Player = FindMetaTable("Player")
 local P_Team = M_Player.Team
-function GM:PlayerBindPress(pl, bind, wasin)
+function GM:PlayerBindPress(pl, bind, pressed)
 	local pTeam = P_Team(MySelf)
 
 	if pTeam ~= TEAM_SPECTATOR and string.find(bind, "impulse 100") then
 		gamemode.Call("ToggleFlashlight")
+	end
+
+	if bind == "gm_showhelp" then
+		if pressed then self:ShowHelp() end
+		return true
 	end
 end
 
@@ -164,4 +171,29 @@ function GM:PlayerStepSoundTime(pl, iType, bWalking)
 	return 350
 end
 function GM:PlayerFootstep(pl, vFootPos, iFoot, strSoundName, fVolume) return end
+--
+
+
+-- EasyLabel
+function EasyLabel(parent, text, font, textcolor)
+	local dpanel = vgui.Create("DLabel", parent)
+	if font then
+		dpanel:SetFont(font or "DefaultFont")
+	end
+	dpanel:SetText(text)
+	dpanel:SizeToContents()
+	if textcolor then
+		dpanel:SetTextColor(textcolor)
+	end
+	dpanel:SetKeyboardInputEnabled(false)
+	dpanel:SetMouseInputEnabled(false)
+
+	return dpanel
+end
+--
+
+
+-- Fonts
+GM.font_family = "Typeface Mario 64"
+function GM:CreateCustomFonts() end
 --

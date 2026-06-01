@@ -1,6 +1,8 @@
 AddCSLuaFile("shared.lua")
 AddCSLuaFile("cl_init.lua")
 
+AddCSLuaFile("vgui/pshop.lua")
+
 include("shared.lua")
 include("sv_spawnlogic.lua")
 
