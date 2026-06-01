@@ -85,19 +85,20 @@ function PANEL:GetHitbox() return self.hb end
 vgui.Register("PItem", PANEL, "DPanel")
 
 local function GetProjectedRange(points, normals)
-	local min1, max1
+	local min, max
 	for j = 1, #points do
 		local x, y = points[j].x, points[j].y
 		local nx, ny = normals[j].x, normals[j].y
 		local proj = x * nx + y * ny
 
-		if not min1 or (min1 and proj < min1) then min1 = proj end
-		if not max1 or (max1 and proj > max1) then max1 = proj end
+		if not min or (min and proj < min) then min = proj end
+		if not max or (max and proj > max) then max = proj end
 	end
+
+	return min, max
 end
 
 local normals = {}
-local checked = {}
 local collisions = {}
 local polydata = {}
 
@@ -126,8 +127,6 @@ function GM:ItemPhysicsThink()
 
 	-- Now that we have all the normals, we need the projection of each edge vs that normal.
 	for i = 1, #GM.PhysicsItems do
-		if i == #GM.PhysicsItems then continue end -- Already checked everything.
-
 		local min1, max1 = GetProjectedRange(polydata[i], normals[i])
 
 		for j = 1, #GM.PhysicsItems do
