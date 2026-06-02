@@ -43,7 +43,7 @@ function PANEL:Init()
 	self.physbox = physbox
 end
 
---function PANEL:Paint() end
+function PANEL:Paint() end
 
 function PANEL:Think()
 	if not self.Physics then return end

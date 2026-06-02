@@ -16,8 +16,14 @@ function meta:SetVPhysA(pan) Rawset(self, "_vphysa", pan) end
 function meta:GetVPhysB() return Rawget(self, "_vphysb") end
 function meta:SetVPhysB(pan) Rawset(self, "_vphysb", pan) end
 
-function meta:GetParentA() return self:GetPanA():GetParent() end
-function meta:GetParentB() return self:GetPanB():GetParent() end
+function meta:GetParentA()
+	if not IsValid(self:GetVPhysA()) then return end
+	return self:GetVPhysA():GetParent()
+end
+function meta:GetParentB()
+	if not IsValid(self:GetVPhysB()) then return end
+	return self:GetVPhysB():GetParent()
+end
 
 function meta:GetOverlap() return Rawget(self, "_overlap") end
 function meta:SetOverlap(f) Rawset(self, "_overlap", f) end
@@ -55,18 +61,25 @@ end
 function VGUIColEvent:Call()
 	local rootA, rootB = self:GetParentA(), self:GetParentB()
 	local overlap, normal = self:GetOverlap(), self:GetNormal()
+	local mag = 0.1
 
 	-- Now apply the force to the root objects.
 	-- The root might be invalid if we are a solid wall!
+	local forceA = {x = -normal.x * overlap * mag, y = -normal.y * overlap * mag}
+	local forceB = {x = normal.x * overlap * mag, y = normal.y * overlap * mag}
 	if IsValid(rootA) and rootA.AddVel then
 		-- The normal vector is always pointing AWAY from the surface of element A.
-		local forceA = {x = -normal.x * overlap, y = -normal.y * overlap}
 		rootA:AddVel(forceA.x, forceA.y)
 	end
 	if IsValid(rootB) and rootB.AddVel then
-		local forceB = {x = normal.x * overlap, y = normal.y * overlap}
 		rootB:AddVel(forceB.x, forceB.y)
 	end
+
+	--[[
+	print("DID COLLISION!!", SysTime())
+	PrintTable(forceA)
+	PrintTable(forceB)
+	]]
 
 	-- Did our job.
 	self:Remove()

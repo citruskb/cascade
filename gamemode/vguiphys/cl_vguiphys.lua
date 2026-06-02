@@ -1,5 +1,3 @@
-print("LUA REFRESHED")
-
 -- Handle Lua refresh.
 if not vguiPhysLoaded then
 	GM.VGUIPhysboxes = {}
@@ -11,19 +9,23 @@ ITEM_GRAVITY = 0.008
 ITEM_TERMINAL_VELOCITY = 1.4
 
 local function GetFaceNormals(physbox)
-	local points = physbox:AggregatePolyData()
+	local points = physbox:GetTranslatedAggregatePolyData()
 	local normals = {}
 	for i = 1, #points do
 		local p1 = points[i]
 		local p2 = points[i == #points and 1 or i + 1]
-		normals[i] = {x = p1.y - p2.y, y = p2.x - p1.x}
+
+		local axisX, axisY = p1.y - p2.y, p2.x - p1.x
+		local len = math.Sqrt(axisX^2 + axisY^2)
+
+		normals[i] = {x = axisX / len, y = axisY / len}
 	end
 
 	return normals
 end
 
 local function GetProjRange(physbox, normal)
-	local points = physbox:AggregatePolyData()
+	local points = physbox:GetTranslatedAggregatePolyData()
 	local min, max
 
 	for i = 1, #points do
@@ -42,6 +44,13 @@ local function GetRangeOverlap(rangeA, rangeB)
 	return math.Min(rangeA.max, rangeB.max) - math.Max(rangeA.min, rangeB.min)
 end
 
+local function ReorientNormalIfNeeded(vphys, normal)
+	local center = vphys:GetAggregateCenter()
+	local dot = normal.x * center.x + normal.y * center.y
+
+	return dot < 0 and {-normal.x, -normal.y} or normal
+end
+
 local checkedCols = {}
 local function AlreadyCheckedCols(physboxA, physboxB)
 	return checkedCols[physboxA] and checkedCols[physboxA][physboxB] or checkedCols[physboxB] and checkedCols[physboxB][physboxA]
@@ -57,7 +66,6 @@ local function ResetVGUIPhysVars()
 	overlapData = {}
 end
 
-
 function GM:VGUIPhysThink()
 	ResetVGUIPhysVars()
 
@@ -65,12 +73,12 @@ function GM:VGUIPhysThink()
 	-- We need to tell if any of our physboxes are colliding.
 	-- VGUIPhysboxes are collections of hitboxes tied to particular objects.
 	-- While looping through all physboxes we go ahead and apply gravity too.
-	for _, vphys in pairs(self.VGUIPhysboxes) do
+	for vphys, _ in pairs(self.VGUIPhysboxes) do
 		if not IsValid(vphys) then continue end
 
 		-- Add our gravity up to our terminal velocity.
 		local _, vy = vphys:GetVel()
-		if vy < ITEM_TERMINAL_VELOCITY then
+		if vy and vy < ITEM_TERMINAL_VELOCITY then
 			vphys:AddVel(0, ITEM_GRAVITY)
 		end
 
@@ -93,7 +101,6 @@ function GM:VGUIPhysThink()
 		cachedSelfProjections[vphys] = tab
 	end
 
-
 	-- Next we step through each collection of normals.
 	for vphysA, normals in pairs(cachedFaceNormals) do
 
@@ -105,10 +112,9 @@ function GM:VGUIPhysThink()
 			-- Load up our cached information & initialize vars.
 			local fn = normals[i]
 			local projRangeA = selfProjections[i]
-			local smallestOverlap
 
 			-- Now we step through every other object and their projections against our fn.
-			for _, vphysB in pairs(self.VGUIPhysboxes) do
+			for vphysB, _ in pairs(self.VGUIPhysboxes) do
 
 				-- Clearly the same physbox shouldn't collide with itself.
 				if vphysA == vphysB then continue end
@@ -121,7 +127,7 @@ function GM:VGUIPhysThink()
 				local overlap = GetRangeOverlap(projRangeA, projRangeB)
 
 				-- Abort!! No overlap means no collision.
-				if overlap < 0 then
+				if overlap <= 0 then
 					checkedCols[vphysA] = checkedCols[vphysA] or {}
 					checkedCols[vphysA][vphysB] = true
 
@@ -132,11 +138,11 @@ function GM:VGUIPhysThink()
 				end
 
 				-- We save the smallest overlap and normal.
-				if not smallestOverlap or (smallestOverlap and overlap < smallestOverlap) then
-					smallestOverlap = overlap
 
+				local smallestOverlap = overlapData[vphysA] and overlapData[vphysA][vphysB] and overlapData[vphysA][vphysB].overlap
+				if not smallestOverlap or (smallestOverlap and overlap < smallestOverlap) then
 					overlapData[vphysA] = overlapData[vphysA] or {}
-					overlapData[vphysA][vphysB] = {overlap = smallestOverlap, normal = fn}
+					overlapData[vphysA][vphysB] = {overlap = overlap, normal = fn}
 				end
 
 			end
@@ -155,14 +161,17 @@ function GM:VGUIPhysThink()
 			local overlapDataB = overlapData[vphysB] and overlapData[vphysB][vphysA]
 			if not overlapDataB then continue end
 
-			local event
-			if overlapDataA.overlap < overlapDataB.overlap then
-				event = VGUIColEvent:Create(vphysA, vphysB, overlapDataA.overlap, overlapDataA.normal)
-			else
-				event = VGUIColEvent:Create(vphysB, vphysA, overlapDataB.overlap, overlapDataB.normal)
-			end
+			-- We do this because the normal has to originate from the first passed vphys.
+			-- This makes sure it's pointing the right way
 
-			table.Insert(collisionEvents, event)
+
+			if overlapDataA.overlap <= overlapDataB.overlap then
+				print("COLLISION EVENT DETECTED.")
+				VGUIColEvent:Create(vphysA, vphysB, overlapDataA.overlap, ReorientNormalIfNeeded(vphysA, overlapDataA.normal))
+			else
+				print("COLLISION EVENT DETECTED.")
+				VGUIColEvent:Create(vphysB, vphysA, overlapDataB.overlap, ReorientNormalIfNeeded(vphysB, overlapDataB.normal))
+			end
 		end
 
 	end

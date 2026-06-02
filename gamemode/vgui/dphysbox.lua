@@ -7,10 +7,7 @@ Also contains physics parameters such as center of mass, mass, interia, and if t
 PANEL = {}
 
 function PANEL:Init()
-	self.idx = table.Insert(GAMEMODE.VGUIPhysboxes, self)
-	print("ADDED: ", self.idx)
-	PrintTable(GAMEMODE.VGUIPhysboxes)
-
+	GAMEMODE.VGUIPhysboxes[self] = true
 	self.hbs = {}
 end
 
@@ -76,6 +73,47 @@ function PANEL:AggregatePolyData()
 		for k, hb in pairs(self.hbs) do
 			table.Add(ret, hb.polyData)
 		end
+		self.aggregatePolyData = ret
+	end
+
+	return ret
+end
+
+function PANEL:TranslatePointsLocalToScreen(tab)
+	local x, y = self:GetPos()
+	local sx, sy = self:LocalToScreen(x, y)
+
+	local trans = {}
+	for i = 1, #tab do
+		trans[i] = {x = tab[i].x + sx, y = tab[i].y + sy}
+	end
+
+	return trans
+end
+
+function PANEL:GetTranslatedAggregatePolyData()
+	local ret = self.transAggroData
+
+	if not ret then
+		ret = self:TranslatePointsLocalToScreen(self:AggregatePolyData())
+		self.transAggroData = ret
+	end
+
+	return ret
+end
+
+function PANEL:GetAggregateCenter()
+	local ret = self.aggregateCenter
+	local data = self:AggregatePolyData()
+
+	if not ret then
+		local xsum, ysum = 0, 0
+		for _, point in pairs(data) do
+			xsum = xsum + point.x
+			ysum = ysum + point.y
+		end
+		ret = {x = xsum / #data, y = ysum / #data}
+		self.aggregateCenter = ret
 	end
 
 	return ret
@@ -85,10 +123,14 @@ function PANEL:Paint(w, h)
 	-- TODO: Draw physics info close-by center of mass.
 end
 
-function PANEL:Think() self.aggregatePolyData = nil end
+function PANEL:Think()
+	self.aggregatePolyData = nil
+	self.transAggroData = nil
+	self.aggregateCenter = nil
+end
 
 function PANEL:OnRemove()
-	table.Remove(GAMEMODE.VGUIPhysboxes, self.idx)
+	GAMEMODE.VGUIPhysboxes[self] = nil
 end
 
 

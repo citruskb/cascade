@@ -84,6 +84,7 @@ function PANEL:PerformLayout(w, h)
 	self.polyData = PolyFuncs[self.Shape](self)
 end
 
+
 function PANEL:Paint(w, h)
 	if not GAMEMODE.Debug then return end
 
@@ -101,11 +102,6 @@ function PANEL:Paint(w, h)
 	surface.SetDrawColor(self.col)
 	draw.NoTexture()
 	surface.DrawPoly(data)
-
-	PrintTable(data)
-
-
-	--PrintTable(data)
 
 	-- Draw the lines making up said shape
 	for i = 1, #data do

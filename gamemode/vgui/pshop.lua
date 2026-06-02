@@ -20,32 +20,31 @@ function PANEL:Init()
 	-- Center top: Start button
 	-- Right: Shop ui
 
-
 	local left = vgui.Create("DPanel", self)
-	left:SetSize(w * 0.4, 0)
+	left:SetSize(w * 0.4, h)
 	left:SetBackgroundColor(Color(0, 0, 0, 0))
 	left:Dock(LEFT)
 
 
 	-- Inventory
 	local grid = vgui.Create("DPanel", left)
-	grid:SetSize(0, h * 0.6)
+	grid:SetSize(w * 0.4, h * 0.6)
 	grid:SetBackgroundColor(Color(255, 0, 0, 50))
 	grid:Dock(TOP)
 	local lab = EasyLabel(grid, "Grid Inventory", "SFontLarger")
-	DockCenter(lab, left)
+	DockCenter(lab, grid)
 	--
 
 
 	local botLeft = vgui.Create("DPanel", left)
-	botLeft:SetSize(0, h * 0.4)
+	botLeft:SetSize(w * 0.2, h * 0.4)
 	botLeft:SetBackgroundColor(Color(0, 0, 0, 0))
 	botLeft:Dock(TOP)
 
 
 	-- Playermodel
 	local model = vgui.Create("DPanel", botLeft)
-	model:SetSize(w * 0.2, 0)
+	model:SetSize(w * 0.2, h * 0.4)
 	model:SetBackgroundColor(Color(0, 0, 255, 50))
 	model:Dock(LEFT)
 	lab = EasyLabel(model, "Player Model", "SFontLarger")
@@ -55,7 +54,7 @@ function PANEL:Init()
 
 	-- Stats & options
 	local stats = vgui.Create("DPanel", botLeft)
-	stats:SetSize(w * 0.2, 0)
+	stats:SetSize(w * 0.2, h * 0.4)
 	stats:SetBackgroundColor(Color(0, 255, 0, 50))
 	stats:Dock(LEFT)
 	lab = EasyLabel(stats, "Stats", "SFontLarger")
@@ -65,23 +64,30 @@ function PANEL:Init()
 
 	-- Inventory
 	local middle = vgui.Create("DPanel", self)
-	middle:SetSize(w * 0.25, 0)
+	middle:SetSize(w * 0.25, h)
 	middle:SetBackgroundColor(Color(0, 0, 0, 0))
 	middle:Dock(LEFT)
-	lab = EasyLabel(middle, "Storage Inventory", "SFontLarger")
-	DockCenter(lab, middle)
 
 	local inventory = vgui.Create("DPanel", middle)
-	inventory:SetSize(0, h * 0.9)
-	inventory:SetBackgroundColor(Color(0, 0, 0, 0)) --Color(255, 255, 0, 50)
+	inventory:SetSize(w * 0.25, h * 0.9)
+	inventory:SetBackgroundColor(Color(255, 255, 0, 0)) --
 	inventory:Dock(TOP)
+	lab = EasyLabel(inventory, "Storage Inventory", "SFontLarger")
+	DockCenter(lab, inventory)
 
-	--[[
-	local invfloor = vgui.Create("DPhysbox", middle)
-	invfloor:AddHitbox(w * 0.25, h)
-	invfloor:Dock(TOP)
-	]]
+	local floorcontainer = vgui.Create("DPanel", middle)
+	floorcontainer:SetSize(w * 0.25, h * 0.1)
+	floorcontainer:SetBackgroundColor(Color(0, 0, 0, 0))
+	floorcontainer:Dock(TOP)
+
+	local invfloor = vgui.Create("DPhysbox", floorcontainer)
+	invfloor:SetSize(w * 0.25, h * 0.1)
+	invfloor:Dock(FILL)
+	invfloor:AddHitbox(w * 0.25, h * 0.1)
+	lab = EasyLabel(invfloor, "Floor (collisions)", "SFontLarger")
+	DockCenter(lab, invfloor)
 	--
+
 
 
 	local right = vgui.Create("DPanel", self)
@@ -113,7 +119,7 @@ function PANEL:Init()
 	local size = 50
 	item:SetSize(size, size)
 	item:SetBackgroundColor(Color(255, 255, 0, 255))
-	item:SetPos(w * 0.6, h * 0.5)
+	item:SetPos(w * 0.6, h * 0.4)
 	item.physbox:AddCustomHitbox({
 		{x = 10, y = 10},
 		{x = size - 10, y = 10},
@@ -122,7 +128,7 @@ function PANEL:Init()
 	})
 
 	item:EnablePhysics()
-	item:SetVel(0, -ITEM_TERMINAL_VELOCITY)
+	--item:SetVel(0, -ITEM_TERMINAL_VELOCITY)
 end
 
 function PANEL:Paint()
