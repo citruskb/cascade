@@ -8,6 +8,9 @@ PANEL = {}
 
 function PANEL:Init()
 	self.idx = table.Insert(GAMEMODE.VGUIPhysboxes, self)
+	print("ADDED: ", self.idx)
+	PrintTable(GAMEMODE.VGUIPhysboxes)
+
 	self.hbs = {}
 end
 
@@ -84,8 +87,24 @@ end
 
 function PANEL:Think() self.aggregatePolyData = nil end
 
-function PANEL:Remove()
+function PANEL:OnRemove()
 	table.Remove(GAMEMODE.VGUIPhysboxes, self.idx)
 end
 
-vgui.Register("DCollision", PANEL, "DPanel")
+
+-- [[ Hookup with items & others? ]]
+function PANEL:GetVel()
+	local parent = self:GetParent()
+	if parent.GetVel then return parent:GetVel() end
+end
+function PANEL:SetVel(x, y)
+	local parent = self:GetParent()
+	if parent.SetVel then parent:SetVel(x, y) end
+end
+function PANEL:AddVel(xAdd, yAdd)
+	local parent = self:GetParent()
+	if parent.AddVel then parent:AddVel(xAdd, yAdd) end
+end
+-- [[	]]
+
+vgui.Register("DPhysbox", PANEL, "DPanel")

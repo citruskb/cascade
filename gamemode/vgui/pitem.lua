@@ -40,16 +40,10 @@ function PANEL:Init()
 	self:SetMPos(0, 0)
 
 	local physbox = vgui.Create("DPhysbox", self)
-	physbox:AddCustomHitbox({
-		{x = 0, y = 25},
-		{x = 25, y = 25},
-		{x = -10, y = -25}
-	})
-
 	self.physbox = physbox
 end
 
-function PANEL:Paint() end
+--function PANEL:Paint() end
 
 function PANEL:Think()
 	if not self.Physics then return end

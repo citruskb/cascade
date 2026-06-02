@@ -1,3 +1,5 @@
+print("LUA REFRESHED")
+
 -- Handle Lua refresh.
 if not vguiPhysLoaded then
 	GM.VGUIPhysboxes = {}
@@ -20,12 +22,12 @@ local function GetFaceNormals(physbox)
 	return normals
 end
 
-local function GetProjRange(physbox, norm)
+local function GetProjRange(physbox, normal)
 	local points = physbox:AggregatePolyData()
 	local min, max
 
 	for i = 1, #points do
-		local x, y = points[j].x, points[j].y
+		local x, y = points[i].x, points[i].y
 		local nx, ny = normal.x, normal.y
 		local proj = x * nx + y * ny
 
@@ -64,6 +66,7 @@ function GM:VGUIPhysThink()
 	-- VGUIPhysboxes are collections of hitboxes tied to particular objects.
 	-- While looping through all physboxes we go ahead and apply gravity too.
 	for _, vphys in pairs(self.VGUIPhysboxes) do
+		if not IsValid(vphys) then continue end
 
 		-- Add our gravity up to our terminal velocity.
 		local _, vy = vphys:GetVel()

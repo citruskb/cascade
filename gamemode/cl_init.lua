@@ -5,7 +5,7 @@ include("vgui/dphysbox.lua")
 include("vgui/pitem.lua")
 include("vgui/pshop.lua")
 
-GM.Debug = false
+GM.Debug = true
 
 MySelf = MySelf or NULL
 hook.Add("InitPostEntity", "GetLocal", function()
@@ -88,6 +88,7 @@ function LocalPlayerFound()
 	if render.GetDXLevel() >= 80 then gm_.RenderScreenspaceEffects = gm_._RenderScreenspaceEffects end
 end
 hook.Add("InitPostEntity", "InitPostEntity.LocalPlayerFound", LocalPlayerFound)
+hook.Add("OnReloaded", "OnReloaded.LocalPlayerFound", LocalPlayerFound)
 
 -- The following functions should be set up as is with the underscore. No need to check if the local player is valid or not.
 local nextTick = 0

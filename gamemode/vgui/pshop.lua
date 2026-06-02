@@ -73,12 +73,14 @@ function PANEL:Init()
 
 	local inventory = vgui.Create("DPanel", middle)
 	inventory:SetSize(0, h * 0.9)
-	inventory:SetBackgroundColor(Color(255, 255, 0, 50))
+	inventory:SetBackgroundColor(Color(0, 0, 0, 0)) --Color(255, 255, 0, 50)
 	inventory:Dock(TOP)
 
+	--[[
 	local invfloor = vgui.Create("DPhysbox", middle)
 	invfloor:AddHitbox(w * 0.25, h)
 	invfloor:Dock(TOP)
+	]]
 	--
 
 
@@ -108,7 +110,17 @@ function PANEL:Init()
 
 	-- Test items
 	local item = vgui.Create("PItem", self)
+	local size = 50
+	item:SetSize(size, size)
+	item:SetBackgroundColor(Color(255, 255, 0, 255))
 	item:SetPos(w * 0.6, h * 0.5)
+	item.physbox:AddCustomHitbox({
+		{x = 10, y = 10},
+		{x = size - 10, y = 10},
+		{x = size - 10, y = size - 10},
+		{x = 10, y = size - 10},
+	})
+
 	item:EnablePhysics()
 	item:SetVel(0, -ITEM_TERMINAL_VELOCITY)
 end

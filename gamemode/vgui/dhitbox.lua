@@ -68,37 +68,13 @@ local PolyFuncs = {
 	end,
 	[POLY_CUSTOM] = function(self)
 		local ox, oy = self:GetPos()
-		local points = self.customPoints
-
 		return RotateDataAroundPoint(self.customPoints, ox, oy, self.Angle)
 	end
 }
 
 function PANEL:Init()
-	-- [[ For testing ]]
-	--[[
-	self.Shape = POLY_RECTANGULAR
-	self.ShapeW = 100
-	self.ShapeH = 50
-
-	self.Angle = 0
-	]]
-	-- [[	]]
-
-	-- [[ For testing ]]
-	--[[
-	self.Shape = POLY_ELLIPSE
-	self.ShapeRX = 50
-	self.ShapeRY = 25
-
-	self.Angle = 0
-	]]
-	-- [[	]]
-
-	self.col = Color(math.Random(50, 200), math.Random(50, 200), math.Random(50, 200), 50)
-	self.lineCol = Color(self.col.r + 50, self.col.g + 50, self.col.b + 50, 50)
-
-	self:InvalidateLayout(true)
+	self.col = Color(math.Random(50, 200), math.Random(50, 200), math.Random(50, 200), 120)
+	self.lineCol = Color(self.col.r + 50, self.col.g + 50, self.col.b + 50, 120)
 end
 
 -- We invalidate our layout every frame.
@@ -111,12 +87,25 @@ end
 function PANEL:Paint(w, h)
 	if not GAMEMODE.Debug then return end
 
+	--[[
+	local data = {
+		{x = 0, y = 0},
+		{x = 20, y = 0},
+		{x = 10, y = 40},
+	}
+	]]
+
 	local data = self.polyData
 
 	-- Draw the textured shape
 	surface.SetDrawColor(self.col)
 	draw.NoTexture()
 	surface.DrawPoly(data)
+
+	PrintTable(data)
+
+
+	--PrintTable(data)
 
 	-- Draw the lines making up said shape
 	for i = 1, #data do
