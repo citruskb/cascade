@@ -119,6 +119,12 @@ end
 -- [[	]]
 
 
+-- [[ The "root" element that should be impacted by collision events. ]]
+function PANEL:GetVGUIPhysRoot() return self.vguiPhysRoot end
+function PANEL:SetVGUIPhysRoot(pan) self.vguiPhysRoot = pan end
+-- [[	]]
+
+
 function PANEL:OnRemove()
 	if self.statichb then self:DisableStaticHitbox() end
 end

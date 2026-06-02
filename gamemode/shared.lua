@@ -1,5 +1,8 @@
 DeriveGamemode("orange-juice")
 
+GamemodeLoaderRoot(GM) -- Start loading libraries.
+IncludeLibrary("vguiphys")
+
 GM.Name		=	"Cascade"
 GM.Author	=	"Citrus"
 GM.Email	=	"citruskb@outlook.com"
@@ -13,6 +16,8 @@ TEAM_SPECTATOR = 2
 team.SetUp(TEAM_BATTLER, "Battlers", Color(70, 100, 240, 255))
 team.SetUp(TEAM_SPECTATOR, "Spectators", Color(200, 200, 200, 255))
 --
+
+
 
 
 local PlayerManager = player_manager
