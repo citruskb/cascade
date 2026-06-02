@@ -76,6 +76,7 @@ function PANEL:Init()
 	inventory:SetBackgroundColor(Color(255, 255, 0, 50))
 	inventory:Dock(TOP)
 
+	--[[
 	local invfloor = vgui.Create("DHitbox", middle)
 	invfloor:SetSize(0, h)
 	invfloor:SetBackgroundColor(Color(100, 50, 0, 50))
@@ -85,6 +86,7 @@ function PANEL:Init()
 	invfloor.ShapeH = h
 	invfloor.Angle = 0
 	invfloor:Dock(TOP)
+	]]
 	--
 
 

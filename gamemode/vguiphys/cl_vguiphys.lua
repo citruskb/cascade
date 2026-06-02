@@ -1,6 +1,7 @@
 -- Handle Lua refresh.
 if not vguiPhysLoaded then
 	GM.PhysicsItems = {}
+	GM.VGUIColEvents = {}
 	vguiPhysLoaded = true
 end
 
@@ -29,14 +30,14 @@ local normals = {}
 local collisions = {}
 local colHandled = {}
 local noCol = {}
-local polydata = {}
+local allPolyData = {}
 
 function GM:ItemPhysicsThink()
 	normals = {}
 	collisions = {}
 	colHandled = {}
 	noCol = {}
-	polydata = {}
+	allPolyData = {}
 
 	for i = 1, #self.PhysicsItems do
 
@@ -53,10 +54,10 @@ function GM:ItemPhysicsThink()
 		-- Get the normal to each side
 		local nv = {}
 
-		local points = polydata[i]
+		local points = allPolyData[i]
 		if not points then
-			polydata[i] = item:GetHitbox().PolyData
-			points = polydata[i]
+			allPolyData[i] = item:GetPhysbox():AggregatePolyData()
+			points = allPolyData[i]
 		end
 
 		for j = 1, #points do
@@ -75,7 +76,7 @@ function GM:ItemPhysicsThink()
 			local normal = nv[j]
 
 			-- First get the range for the shape we are focusing on...
-			local minA, maxA = GetProjectedRange(polydata[i], normal)
+			local minA, maxA = GetProjectedRange(allPolyData[i], normal)
 
 			-- Now we need the range for the shape we are considering..
 			-- For every shape..
@@ -87,7 +88,7 @@ function GM:ItemPhysicsThink()
 				if noCol[i] and noCol[i][o] then continue end
 				if noCol[o] and noCol[o][i] then continue end
 
-				local minB, maxB = GetProjectedRange(polydata[o], normal)
+				local minB, maxB = GetProjectedRange(allPolyData[o], normal)
 				local overlap = GetRangeOverlap(minA, maxA, minB, maxB)
 
 				-- No collision!!

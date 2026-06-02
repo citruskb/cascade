@@ -1,14 +1,14 @@
 -- Used to determine physics collision.
--- These hitbox panels may be irregularly shapped (Circular? Polynomial?)
+-- The debug hitboxes are drawn irregularly shapped using surface.DrawPoly() since even regularly shaped objects can rotate.
+-- This also means we need to update the panel every frame since thats where positional and rotational calculations come into play.
 
--- Pulls heavily from: https://gist.github.com/meepen/4b591bf1e26ec9ad97df244a6f265d29
--- Why reinvent the wheel?
+-- Pulls heavily from: https://gist.github.com/meepen/4b591bf1e26ec9ad97df244a6f265d29 as a concept.
 
 -- Controls how many segments cicular shapes should be composed of.
-POLY_RESOLUTION = 8
 
 POLY_RECTANGLE = 1
 POLY_ELLIPSE = 2
+POLY_CUSTOM = 3
 --POLY_SQUARE = 3
 --POLY_CIRCLE = 4
 
@@ -66,6 +66,12 @@ local PolyFuncs = {
 
 		return RotateDataAroundPoint(points, ox, oy, self.Angle)
 	end,
+	[POLY_CUSTOM] = function(self)
+		local ox, oy = self:GetPos()
+		local points = self.customPoints
+
+		return RotateDataAroundPoint(self.customPoints, ox, oy, self.Angle)
+	end
 }
 
 function PANEL:Init()
@@ -89,21 +95,21 @@ function PANEL:Init()
 	]]
 	-- [[	]]
 
-	--self:InvalidateLayout(true)
+	self:InvalidateLayout(true)
 end
 
+-- We invalidate our layout every frame.
+function PANEL:Think() self:InvalidateLayout() end
+
 function PANEL:PerformLayout(w, h)
-	self.PolyData = PolyFuncs[self.Shape](self)
+	self.polyData = PolyFuncs[self.Shape](self)
 end
 
 function PANEL:Paint(w, h)
+	if not self.Debug then return end
 	surface.SetDrawColor(Color(255, 100, 0, 255))
 	draw.NoTexture()
-	--surface.SetTexture(debugMat)
-	--surface.DrawPoly(self.PolyData)
-	--local dat = {{x = 0, y = 100}, {x = 100, y = 200}, {x = 300, y = 100}}
-	surface.DrawRect(0, 0, self.ShapeW, self.ShapeH)
-	--surface.DrawPoly(dat)
+	surface.DrawPoly(self.polyData)
 end
 
 

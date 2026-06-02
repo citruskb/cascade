@@ -26,6 +26,9 @@ function meta:SetOverlap(f) Rawset(self, "_overlap", f) end
 -- Normal is a table with and x and y value associated with the 2D direction.
 function meta:GetNormal() return Rawget(self, "_normal") end
 function meta:SetNormal(tab) Rawset(self, "_normal", tab) end
+
+function meta:GetIDX() return Rawget(self, "_idx") end
+function meta:SetIDX(int) Rawset(self, "_idx", int) end
 -- [[	]]
 
 
@@ -43,4 +46,44 @@ function VGUIColEvent:__Create(panA, panB, overlap, normal)
 	Rawset(self, "_panb", panB)
 	Rawset(self, "_overlap", overlap)
 	Rawset(self, "_normal", normal)
+
+	local idx = table.Insert(GAMEMODE.VGUIColEvents, self)
+	Rawset(self, "_idx", idx)
+
+	self.isVGUIColEvent = true
+end
+
+function VGUIColEvent:Call()
+	--TODO apply force to the relevant object. 
+
+	-- Did our job.
+	self:Remove()
+end
+
+function VGUIColEvent:ToString()
+	local str = "[VGUIColEvent] "
+	str = str .. self:GetVGUIPhysRootA() .. " x " .. self:GetVGUIPhysRootB()
+	str = str .. " | overlap: " .. self:GetOverlap()
+
+	local n = self:GetNormal()
+	str = str .. " | normal: (" .. n.x .. ", " .. n.y .. ")"
+
+	return str
+end
+
+function VGUIColEvent:Eq(other)
+	if not self.isVGUIColEvent or not other.isVGUIColEvent then return false end
+
+	local rootA, rootB = self:GetVGUIPhysRootA(), self:GetVGUIPhysRootB()
+	local oRootA, oRootB = other:GetVGUIPhysRootA(), other:GetVGUIPhysRootB()
+
+	if rootA == oRootA and rootB == oRootB then return true end
+	if rootA == oRootB and rootB == oRootA then return true end
+
+	return false
+end
+
+function meta:Remove()
+	table.Remove(GAMEMODE.VGUIColEvents, self:GetIDX())
+	table.Empty(self)
 end

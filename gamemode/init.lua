@@ -1,8 +1,8 @@
 AddCSLuaFile("shared.lua")
 AddCSLuaFile("cl_init.lua")
 
-AddCSLuaFile("vgui/dcollision.lua")
 AddCSLuaFile("vgui/dhitbox.lua")
+AddCSLuaFile("vgui/dphysbox.lua")
 AddCSLuaFile("vgui/pitem.lua")
 AddCSLuaFile("vgui/pshop.lua")
 
