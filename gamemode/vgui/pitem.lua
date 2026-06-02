@@ -105,6 +105,8 @@ function PANEL:AddMPos(xAdd, yAdd)
 end
 -- [[	]]
 
+
+-- [[ Define physics enable ]]
 function PANEL:EnablePhysics()
 	self.Physics = true
 	self:SetVel(0, 0)
@@ -120,6 +122,9 @@ function PANEL:DisablePhysics()
 	table.Remove(GAMEMODE.PhysicsItems, self.idx)
 	self.idx = nil
 end
+-- [[	]]
+
+
 function PANEL:GetHitbox() return self.hb end
 
 function PANEL:OnRemove()
@@ -165,10 +170,7 @@ function GM:ItemPhysicsThink()
 		local item = self.PhysicsItems[i]
 		local _, vy = item:GetVel()
 		if vy < ITEM_TERMINAL_VELOCITY then
-			print("add gravity")
 			item:AddVel(0, ITEM_GRAVITY)
-		else
-			print("dont", vy, ITEM_TERMINAL_VELOCITY)
 		end
 
 		-- SAT collisions

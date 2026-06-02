@@ -66,10 +66,25 @@ function PANEL:Init()
 	-- Inventory
 	local middle = vgui.Create("DPanel", self)
 	middle:SetSize(w * 0.25, 0)
-	middle:SetBackgroundColor(Color(0, 0, 0, 0)) --Color(255, 255, 0, 50)
+	middle:SetBackgroundColor(Color(0, 0, 0, 0))
 	middle:Dock(LEFT)
 	lab = EasyLabel(middle, "Storage Inventory", "SFontLarger")
 	DockCenter(lab, middle)
+
+	local inventory = vgui.Create("DPanel", middle)
+	inventory:SetSize(0, h * 0.9)
+	inventory:SetBackgroundColor(Color(255, 255, 0, 50))
+	inventory:Dock(TOP)
+
+	local invfloor = vgui.Create("DHitbox", middle)
+	invfloor:SetSize(0, h)
+	invfloor:SetBackgroundColor(Color(100, 50, 0, 50))
+	invfloor:EnableStaticHitbox()
+	invfloor.Shape = POLY_RECTANGLE
+	invfloor.ShapeW = w * 0.25
+	invfloor.ShapeH = h
+	invfloor.Angle = 0
+	invfloor:Dock(TOP)
 	--
 
 
@@ -102,7 +117,6 @@ function PANEL:Init()
 	item:SetPos(w * 0.6, h * 0.5)
 	item:EnablePhysics()
 	item:SetVel(0, -ITEM_TERMINAL_VELOCITY)
-
 end
 
 function PANEL:Paint()

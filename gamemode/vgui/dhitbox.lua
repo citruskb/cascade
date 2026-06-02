@@ -12,6 +12,8 @@ POLY_ELLIPSE = 2
 --POLY_SQUARE = 3
 --POLY_CIRCLE = 4
 
+if not GM.StaticHitboxes then GM.StaticHitboxes = {} end
+
 PANEL = {}
 
 local debugMat = surface.GetTextureID("vgui/white")
@@ -99,9 +101,26 @@ function PANEL:Paint(w, h)
 	draw.NoTexture()
 	--surface.SetTexture(debugMat)
 	--surface.DrawPoly(self.PolyData)
-	local dat = {{x = 0, y = 100}, {x = 100, y = 200}, {x = 300, y = 100}}
-	surface.DrawRect(0, 0, 100, 50)
+	--local dat = {{x = 0, y = 100}, {x = 100, y = 200}, {x = 300, y = 100}}
+	surface.DrawRect(0, 0, self.ShapeW, self.ShapeH)
 	--surface.DrawPoly(dat)
+end
+
+
+-- [[ Handle some static hitbox behavior.. ]]
+function PANEL:EnableStaticHitbox()
+	self.statichb = true
+	self.idx = table.Insert(GAMEMODE.StaticHitboxes, self)
+end
+function PANEL:DisableStaticHitbox()
+	self.statichb = nil
+	table.Remove(GAMEMODE.StaticHitboxes, self.idx)
+end
+-- [[	]]
+
+
+function PANEL:OnRemove()
+	if self.statichb then self:DisableStaticHitbox() end
 end
 
 vgui.Register("DHitbox", PANEL, "DPanel")
