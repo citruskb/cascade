@@ -95,6 +95,9 @@ function PANEL:Init()
 	]]
 	-- [[	]]
 
+	self.col = Color(math.Random(50, 200), math.Random(50, 200), math.Random(50, 200), 50)
+	self.lineCol = Color(self.col.r + 50, self.col.g + 50, self.col.b + 50, 50)
+
 	self:InvalidateLayout(true)
 end
 
@@ -106,10 +109,24 @@ function PANEL:PerformLayout(w, h)
 end
 
 function PANEL:Paint(w, h)
-	if not self.Debug then return end
-	surface.SetDrawColor(Color(255, 100, 0, 255))
+	if not GAMEMODE.Debug then return end
+
+	local data = self.polyData
+
+	-- Draw the textured shape
+	surface.SetDrawColor(self.col)
 	draw.NoTexture()
-	surface.DrawPoly(self.polyData)
+	surface.DrawPoly(data)
+
+	-- Draw the lines making up said shape
+	for i = 1, #data do
+		local pointA = data[i]
+		local pointB = i == #data and data[1] or data[i + 1]
+
+		local xA, yA, xB, yB = pointA.x, pointA.y, pointB.x, pointB.y
+		surface.SetDrawColor(self.lineCol)
+		surface.DrawLine(xA, yA, xB, yB)
+	end
 end
 
 

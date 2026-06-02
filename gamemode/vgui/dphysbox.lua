@@ -19,7 +19,6 @@ function PANEL:AddHitbox(parent, w, h)
 	hb.Shape = POLY_RECTANGLE
 	hb.ShapeW, hb.ShapeH = w, h
 	hb.Angle = 0
-	--hb.Debug = true
 	hb:InvalidateLayout(true)
 end
 
@@ -37,7 +36,6 @@ function PANEL:AddCustomHitbox(parent, data)
 	hb.Shape = POLY_CUSTOM
 	hb.customPoints = data
 	hb.Angle = 0
-	hb.Debug = true
 	hb:InvalidateLayout(true)
 
 	table.Insert(self.hbs, hb)
