@@ -129,27 +129,4 @@ function PANEL:Paint(w, h)
 	end
 end
 
-
--- [[ Handle some static hitbox behavior.. ]]
-function PANEL:EnableStaticHitbox()
-	self.statichb = true
-	self.idx = table.Insert(GAMEMODE.StaticHitboxes, self)
-end
-function PANEL:DisableStaticHitbox()
-	self.statichb = nil
-	table.Remove(GAMEMODE.StaticHitboxes, self.idx)
-end
--- [[	]]
-
-
--- [[ The "root" element that should be impacted by collision events. ]]
-function PANEL:GetVGUIPhysRoot() return self.vguiPhysRoot end
-function PANEL:SetVGUIPhysRoot(pan) self.vguiPhysRoot = pan end
--- [[	]]
-
-
-function PANEL:OnRemove()
-	if self.statichb then self:DisableStaticHitbox() end
-end
-
 vgui.Register("DHitbox", PANEL, "DPanel")

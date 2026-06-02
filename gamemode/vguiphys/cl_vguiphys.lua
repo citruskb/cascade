@@ -8,22 +8,6 @@ end
 ITEM_GRAVITY = 0.008
 ITEM_TERMINAL_VELOCITY = 1.4
 
---[[
-local function GetProjectedRange(points, normal)
-	local min, max
-	for j = 1, #points do
-		local x, y = points[j].x, points[j].y
-		local nx, ny = normal.x, normal.y
-		local proj = x * nx + y * ny
-
-		if not min or (min and proj < min) then min = proj end
-		if not max or (max and proj > max) then max = proj end
-	end
-
-	return min, max
-end
-]]
-
 local function GetFaceNormals(physbox)
 	local points = physbox:AggregatePolyData()
 	local normals = {}
@@ -64,8 +48,12 @@ end
 local cachedFaceNormals = {}
 local cachedSelfProjections = {}
 local overlapData = {}
-local collisionEvents = {}
-local function ResetVGUIPhysVars() checkedCols = {} cachedFaceNormals = {} cachedSelfProjections = {} overlapData = {} collisionEvents = {} end
+local function ResetVGUIPhysVars()
+	checkedCols = {}
+	cachedFaceNormals = {}
+	cachedSelfProjections = {}
+	overlapData = {}
+end
 
 
 function GM:VGUIPhysThink()
@@ -178,6 +166,8 @@ function GM:VGUIPhysThink()
 
 
 	-- Finally, fire off all the collision events.
-	for _, event in pairs(collisionEvents) do event() end
+	-- Firing events also clears it from the table.
+	local tab = table.Copy(GAMEMODE.VGUIColEvents)
+	for _, event in pairs(tab) do event() end
 
 end

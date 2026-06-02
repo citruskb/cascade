@@ -40,23 +40,13 @@ function PANEL:Init()
 	self:SetMPos(0, 0)
 
 	local physbox = vgui.Create("DPhysbox", self)
-	physbox:AddCustomHitbox(self, {
+	physbox:AddCustomHitbox({
 		{x = 0, y = 25},
 		{x = 25, y = 25},
 		{x = -10, y = -25}
 	})
 
 	self.physbox = physbox
-
-	--[[
-	local hb = vgui.Create("DHitbox", self)
-	hb.Shape = POLY_RECTANGLE
-	hb.ShapeW = 100
-	hb.ShapeH = 50
-	hb.Angle = 0
-	hb:InvalidateLayout(true)
-	self.hb = hb
-	]]
 end
 
 function PANEL:Paint() end

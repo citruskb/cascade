@@ -11,6 +11,7 @@ function PANEL:Init()
 	self.hbs = {}
 end
 
+--[[ -- TODO
 function PANEL:AddHitbox(parent, w, h)
 	local pw, ph = parent:GetSize()
 	local hb = vgui.Create("DHitbox", parent)
@@ -22,13 +23,36 @@ function PANEL:AddHitbox(parent, w, h)
 	hb:InvalidateLayout(true)
 end
 
---[[ -- TODO
 function PANEL:AddCircularHitbox()
 
 end
 ]]
 
-function PANEL:AddCustomHitbox(parent, data)
+function PANEL:AddHitbox(w, h, offset)
+	local parent = self:GetParent()
+	local pw, ph = parent:GetSize()
+	local hb = vgui.Create("DHitbox", parent)
+	hb:SetSize(pw, ph)
+
+	offset = offset or 0
+
+	hb.Shape = POLY_CUSTOM
+	hb.customPoints = {
+		{x = 0 + offset, y = 0 + offset},
+		{x = w + offset, y = 0 + offset},
+		{x = w + offset, y = h + offset},
+		{x = 0 + offset, y = h + offset},
+	}
+	hb.Angle = 0
+	hb:InvalidateLayout(true)
+
+	table.Insert(self.hbs, hb)
+end
+
+
+
+function PANEL:AddCustomHitbox(data)
+	local parent = self:GetParent()
 	local pw, ph = parent:GetSize()
 	local hb = vgui.Create("DHitbox", parent)
 	hb:SetSize(pw, ph)
