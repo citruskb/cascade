@@ -1,6 +1,6 @@
 -- Handle Lua refresh.
 if not vguiPhysLoaded then
-	GM.PhysicsItems = {}
+	GM.VGUIPhysboxes = {}
 	GM.VGUIColEvents = {}
 	vguiPhysLoaded = true
 end
@@ -8,6 +8,7 @@ end
 ITEM_GRAVITY = 0.008
 ITEM_TERMINAL_VELOCITY = 1.4
 
+--[[
 local function GetProjectedRange(points, normal)
 	local min, max
 	for j = 1, #points do
@@ -21,149 +22,162 @@ local function GetProjectedRange(points, normal)
 
 	return min, max
 end
+]]
 
-local function GetRangeOverlap(minA, maxA, minB, maxB)
-	return math.Min(maxA, maxB) - math.Max(minA, minB)
+local function GetFaceNormals(physbox)
+	local points = physbox:AggregatePolyData()
+	local normals = {}
+	for i = 1, #points do
+		local p1 = points[i]
+		local p2 = points[i == #points and 1 or i + 1]
+		normals[i] = {x = p1.y - p2.y, y = p2.x - p1.x}
+	end
+
+	return normals
 end
 
-local normals = {}
-local collisions = {}
-local colHandled = {}
-local noCol = {}
-local allPolyData = {}
+local function GetProjRange(physbox, norm)
+	local points = physbox:AggregatePolyData()
+	local min, max
 
-function GM:ItemPhysicsThink()
-	normals = {}
-	collisions = {}
-	colHandled = {}
-	noCol = {}
-	allPolyData = {}
+	for i = 1, #points do
+		local x, y = points[j].x, points[j].y
+		local nx, ny = normal.x, normal.y
+		local proj = x * nx + y * ny
 
-	for i = 1, #self.PhysicsItems do
+		if not min or (min and proj < min) then min = proj end
+		if not max or (max and proj > max) then max = proj end
+	end
 
-		-- Gravity
-		local item = self.PhysicsItems[i]
-		local _, vy = item:GetVel()
+	return {min = min, max = max}
+end
+
+local function GetRangeOverlap(rangeA, rangeB)
+	return math.Min(rangeA.max, rangeB.max) - math.Max(rangeA.min, rangeB.min)
+end
+
+local checkedCols = {}
+local function AlreadyCheckedCols(physboxA, physboxB)
+	return checkedCols[physboxA] and checkedCols[physboxA][physboxB] or checkedCols[physboxB] and checkedCols[physboxB][physboxA]
+end
+
+local cachedFaceNormals = {}
+local cachedSelfProjections = {}
+local overlapData = {}
+local collisionEvents = {}
+local function ResetVGUIPhysVars() checkedCols = {} cachedFaceNormals = {} cachedSelfProjections = {} overlapData = {} collisionEvents = {} end
+
+
+function GM:VGUIPhysThink()
+	ResetVGUIPhysVars()
+
+	-- SAT collisions.
+	-- We need to tell if any of our physboxes are colliding.
+	-- VGUIPhysboxes are collections of hitboxes tied to particular objects.
+	-- While looping through all physboxes we go ahead and apply gravity too.
+	for _, vphys in pairs(self.VGUIPhysboxes) do
+
+		-- Add our gravity up to our terminal velocity.
+		local _, vy = vphys:GetVel()
 		if vy < ITEM_TERMINAL_VELOCITY then
-			item:AddVel(0, ITEM_GRAVITY)
+			vphys:AddVel(0, ITEM_GRAVITY)
 		end
 
-		-- SAT collisions
+		-- SAT collisions involves stepping through each table of points ("shape") associated with a hitbox.
+		-- We need the normal of each side of each shape.
+		-- Then we need to project each shape against each normal.
+		-- If projections of each normal of both shapes overlap, then there is a collision event.
+		-- The shortest normal of all of these is the direction we should move objects to separate them.
+		-- We need to know which object this normal came from so that we know which direction to apply forces.
 
-		-- Step through the points of each phys item
-		-- Get the normal to each side
-		local nv = {}
+		-- Get our face normals for each. We need to do this one way or another.
+		local normals = GetFaceNormals(vphys)
+		cachedFaceNormals[vphys] = normals
 
-		local points = allPolyData[i]
-		if not points then
-			allPolyData[i] = item:GetPhysbox():AggregatePolyData()
-			points = allPolyData[i]
+		-- We should go ahead and cache our projections against our own normals too.
+		local tab = {}
+		for i = 1, #normals do
+			tab[i] = GetProjRange(vphys, normals[i])
 		end
-
-		for j = 1, #points do
-			local p1 = points[j]
-			local p2 = points[j == #points and 1 or j + 1]
-			nv[j] = {x = p1.y - p2.y, y = p2.x - p1.x}
-		end
-
-		normals[i] = nv
+		cachedSelfProjections[vphys] = tab
 	end
 
-	-- Now that we have all the normals, we need the projection of each edge vs that normal.
-	for i = 1, #normals do
-		local nv = normals[i]
-		for j = 1, #nv do
-			local normal = nv[j]
 
-			-- First get the range for the shape we are focusing on...
-			local minA, maxA = GetProjectedRange(allPolyData[i], normal)
+	-- Next we step through each collection of normals.
+	for vphysA, normals in pairs(cachedFaceNormals) do
 
-			-- Now we need the range for the shape we are considering..
-			-- For every shape..
+		local selfProjections = cachedSelfProjections[vphysA]
 
-			for o = 1, #self.PhysicsItems do
-				if i == o then continue end -- Skip our current item.
+		-- Step through each normal.
+		for i = 1, #normals do
 
-				-- Aready checked and determined no collision!
-				if noCol[i] and noCol[i][o] then continue end
-				if noCol[o] and noCol[o][i] then continue end
+			-- Load up our cached information & initialize vars.
+			local fn = normals[i]
+			local projRangeA = selfProjections[i]
+			local smallestOverlap
 
-				local minB, maxB = GetProjectedRange(allPolyData[o], normal)
-				local overlap = GetRangeOverlap(minA, maxA, minB, maxB)
+			-- Now we step through every other object and their projections against our fn.
+			for _, vphysB in pairs(self.VGUIPhysboxes) do
 
-				-- No collision!!
-				if overlap < 0  then
-					noCol[i] = noCol[i] or {}
-					noCol[i][o] = true
-					if collisions[i] and collisions[i][o] then collisions[i][o] = nil end
+				-- Clearly the same physbox shouldn't collide with itself.
+				if vphysA == vphysB then continue end
 
-					noCol[o] = noCol[o] or {}
-					noCol[o][i] = true
-					if collisions[o] and collisions[o][i] then collisions[o][i] = nil end
+				-- We've already determined that these two aren't overlapping.
+				if AlreadyCheckedCols(vphysA, vphysB) then continue end
 
-					continue
-				end
+				-- Check if there is range overlap.
+				local projRangeB = GetProjRange(vphysB, fn)
+				local overlap = GetRangeOverlap(projRangeA, projRangeB)
 
-				-- Select existing collision data, if it exists.
-				local colData = collisions[i] and collisions[i][o]
-				if not colData then
-					colData = collisions[o] and collisions[o][i]
-				end
+				-- Abort!! No overlap means no collision.
+				if overlap < 0 then
+					checkedCols[vphysA] = checkedCols[vphysA] or {}
+					checkedCols[vphysA][vphysB] = true
 
-				-- We do this so we know whether to save to tab[o][i] vs tab[i][o]
-				local alt
-				if colData then alt = true end
-
-				-- Parse new data.
-				local newData = {overlap = overlap, normal = normal}
-
-				if not colData then
-					-- No collision data exists! Write it.
-					colData[i] = colData[i] or {}
-					colData[i][o] = newData
-				elseif colData and colData.overlap > overlap then
-					-- Collision data exists. Override it if our overlap is smaller.
-					if alt then
-						colData[o][i] = {overlap = overlap, normal = normal}
-					else
-						colData[i][o] = {overlap = overlap, normal = normal}
+					if overlapData[vphysA] and overlapData[vphysA][vphysB] then
+						overlapData[vphysA][vphysB] = nil
 					end
+					break
 				end
+
+				-- We save the smallest overlap and normal.
+				if not smallestOverlap or (smallestOverlap and overlap < smallestOverlap) then
+					smallestOverlap = overlap
+
+					overlapData[vphysA] = overlapData[vphysA] or {}
+					overlapData[vphysA][vphysB] = {overlap = smallestOverlap, normal = fn}
+				end
+
 			end
-		end
-	end
-
-	-- We have all our collision data now. Apply it.
-	--[[
-	for i = 1, collisions do
-		local objA = self.PhysicsItems[i]
-		for j = 1, collisions[i] do
-			local objB = self.PhysicsItems[j]
-			local data = collisions[i][j]
-			local overlap, normal = data.overlap, data.normal
-
-			-- TODO
 
 		end
+
 	end
-	]]
 
-	--[[
-	for i = 1, #GM.PhysicsItems do
-		local min1, max1 = GetProjectedRange(polydata[i], normals[i])
 
-		for j = 1, #GM.PhysicsItems do
-			if i == j then continue end
+	-- Put all the pieces together to determine if a collision happened
+	for vphysA, others in pairs(overlapData) do
 
-			local min2, max2 = GetProjectedRange(polydata[j], normals[i])
-			local overlapping = max1 > min2 and max2 > min1
-			if not overlapping then
-				-- No collision!
-				continue
+		for vphysB, overlapDataA in pairs(others) do
+
+			-- There has to be an analog, else there was only overlap for one of the objects.
+			local overlapDataB = overlapData[vphysB] and overlapData[vphysB][vphysA]
+			if not overlapDataB then continue end
+
+			local event
+			if overlapDataA.overlap < overlapDataB.overlap then
+				event = VGUIColEvent:Create(vphysA, vphysB, overlapDataA.overlap, overlapDataA.normal)
 			else
-				-- Maybe collision.
+				event = VGUIColEvent:Create(vphysB, vphysA, overlapDataB.overlap, overlapDataB.normal)
 			end
+
+			table.Insert(collisionEvents, event)
 		end
+
 	end
-	]]
+
+
+	-- Finally, fire off all the collision events.
+	for _, event in pairs(collisionEvents) do event() end
+
 end

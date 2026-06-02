@@ -117,17 +117,10 @@ end
 function PANEL:EnablePhysics()
 	self.Physics = true
 	self:SetVel(0, 0)
-
-	-- Add to global tab to receive physics updates.
-	self.idx = table.Insert(GAMEMODE.PhysicsItems, self)
 end
 function PANEL:DisablePhysics()
 	self.Physics = false
 	self.vel = nil
-
-	-- Remove from global tab to stop receiving physics updates.
-	table.Remove(GAMEMODE.PhysicsItems, self.idx)
-	self.idx = nil
 end
 -- [[	]]
 

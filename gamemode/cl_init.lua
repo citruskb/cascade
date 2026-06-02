@@ -95,7 +95,7 @@ function GM:_Think()
 	local ct = CurTime()
 
 	-- Update item physics, stuff like collision.
-	if #self.PhysicsItems > 0 then gamemode.Call("ItemPhysicsThink") end
+	if #self.VGUIPhysboxes > 0 then gamemode.Call("VGUIPhysThink") end
 
 	if nextTick > ct then return end
 	nextTick = ct + 1

@@ -7,6 +7,7 @@ Also contains physics parameters such as center of mass, mass, interia, and if t
 PANEL = {}
 
 function PANEL:Init()
+	self.idx = table.Insert(GAMEMODE.VGUIPhysboxes, self)
 	self.hbs = {}
 end
 
@@ -43,9 +44,13 @@ function PANEL:AddCustomHitbox(parent, data)
 end
 
 function PANEL:AggregatePolyData()
-	local ret = {}
-	for k, hb in pairs(self.hbs) do
-		table.Add(ret, hb.polyData)
+	local ret = self.aggregatePolyData
+
+	if not ret then
+		ret = {}
+		for k, hb in pairs(self.hbs) do
+			table.Add(ret, hb.polyData)
+		end
 	end
 
 	return ret
@@ -53,6 +58,12 @@ end
 
 function PANEL:Paint(w, h)
 	-- TODO: Draw physics info close-by center of mass.
+end
+
+function PANEL:Think() self.aggregatePolyData = nil end
+
+function PANEL:Remove()
+	table.Remove(GAMEMODE.VGUIPhysboxes, self.idx)
 end
 
 vgui.Register("DCollision", PANEL, "DPanel")
