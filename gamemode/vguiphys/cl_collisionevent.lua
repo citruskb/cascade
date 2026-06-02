@@ -16,10 +16,6 @@ function meta:SetPanA(pan) Rawset(self, "_pana", pan) end
 function meta:GetPanB() return Rawget(self, "_panb") end
 function meta:SetPanB(pan) Rawset(self, "_panb", pan) end
 
--- This is the actual root element we want to move based on collision events of the hitbox.
-function meta:GetVGUIPhysRootA() return self:GetPanA():GetVGUIPhysRoot() end
-function meta:GetVGUIPhysRootB() return self:GetPanB():GetVGUIPhysRoot() end
-
 function meta:GetOverlap() return Rawget(self, "_overlap") end
 function meta:SetOverlap(f) Rawset(self, "_overlap", f) end
 
@@ -54,7 +50,21 @@ function VGUIColEvent:__Create(panA, panB, overlap, normal)
 end
 
 function VGUIColEvent:Call()
-	--TODO apply force to the relevant object. 
+	local vphysA, vphysB = self:GetPanA(), self:GetPanB()
+	local rootA, rootB = vphysA:GetParent(), vphysB:GetParent()
+	local overlap, normal = self:GetOverlap(), self:GetNormal()
+
+	-- Now apply the force to the root objects.
+	-- The root might be invalid if we are a solid wall!
+	if IsValid(rootA) and rootA.AddVel then
+		-- The normal vector is always pointing AWAY from the surface of element A.
+		local forceA = {x = -normal.x * overlap, y = -normal.y * overlap}
+		rootA:AddVel(forceA.x, forceA.y)
+	end
+	if IsValid(rootB) and rootB.AddVel then
+		local forceB = {x = normal.x * overlap, y = normal.y * overlap}
+		rootB:AddVel(forceB.x, forceB.y)
+	end
 
 	-- Did our job.
 	self:Remove()
