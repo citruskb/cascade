@@ -61,18 +61,18 @@ end
 function VGUIColEvent:Call()
 	local rootA, rootB = self:GetParentA(), self:GetParentB()
 	local overlap, normal = self:GetOverlap(), self:GetNormal()
-	local mag = 0.1
 
 	-- Now apply the force to the root objects.
 	-- The root might be invalid if we are a solid wall!
-	local forceA = {x = -normal.x * overlap * mag, y = -normal.y * overlap * mag}
-	local forceB = {x = normal.x * overlap * mag, y = normal.y * overlap * mag}
-	if IsValid(rootA) and rootA.AddVel then
+	local TranslateA = {x = -normal.x * overlap / 2, y = -normal.y * overlap / 2}
+	local TranslateB = {x = normal.x * overlap / 2, y = normal.y * overlap / 2}
+	if IsValid(rootA) and rootA.AddMPos then
 		-- The normal vector is always pointing AWAY from the surface of element A.
-		rootA:AddVel(forceA.x, forceA.y)
+		--rootA:AddVel(forceA.x, forceA.y)
+		rootA:AddMPos(TranslateA.x, TranslateA.y)
 	end
-	if IsValid(rootB) and rootB.AddVel then
-		rootB:AddVel(forceB.x, forceB.y)
+	if IsValid(rootB) and rootB.AddMPos then
+		rootB:AddMPos(TranslateB.x, TranslateB.y)
 	end
 
 	--[[

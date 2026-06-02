@@ -7,9 +7,10 @@ end
 
 ITEM_GRAVITY = 0.008
 ITEM_TERMINAL_VELOCITY = 1.4
+ITEM_COLLISION_SLOP = ITEM_TERMINAL_VELOCITY + 0.1
 
-local function GetFaceNormals(physbox)
-	local points = physbox:GetTranslatedAggregatePolyData()
+local function GetFaceNormals(vphys)
+	local points = vphys:GetTranslatedAggregatePolyData()
 	local normals = {}
 	for i = 1, #points do
 		local p1 = points[i]
@@ -44,11 +45,15 @@ local function GetRangeOverlap(rangeA, rangeB)
 	return math.Min(rangeA.max, rangeB.max) - math.Max(rangeA.min, rangeB.min)
 end
 
-local function ReorientNormalIfNeeded(vphys, normal)
-	local center = vphys:GetAggregateCenter()
-	local dot = normal.x * center.x + normal.y * center.y
+-- We do this because the normal has to originate from the first passed vphys.
+-- This makes sure it's pointing the right way
+-- A ---> B
+local function ReorientNormalIfNeeded(vphysA, vphysB, normalA)
+	local centerA, centerB = vphysA:GetAggregateCenter(), vphysB:GetAggregateCenter()
+	local centerDir = {x = centerB.x - centerA.x, y = centerB.y - centerA.y}
+	local dot = normalA.x * centerDir.x + normalA.y * centerDir.y
 
-	return dot < 0 and {-normal.x, -normal.y} or normal
+	return dot < 0 and {x = -normalA.x, y = -normalA.y} or normalA
 end
 
 local checkedCols = {}
@@ -78,6 +83,7 @@ function GM:VGUIPhysThink()
 
 		-- Add our gravity up to our terminal velocity.
 		local _, vy = vphys:GetVel()
+		if vy then print("vel", vphys:GetVel()) end
 		if vy and vy < ITEM_TERMINAL_VELOCITY then
 			vphys:AddVel(0, ITEM_GRAVITY)
 		end
@@ -127,7 +133,7 @@ function GM:VGUIPhysThink()
 				local overlap = GetRangeOverlap(projRangeA, projRangeB)
 
 				-- Abort!! No overlap means no collision.
-				if overlap <= 0 then
+				if overlap <= ITEM_COLLISION_SLOP then
 					checkedCols[vphysA] = checkedCols[vphysA] or {}
 					checkedCols[vphysA][vphysB] = true
 
@@ -161,16 +167,10 @@ function GM:VGUIPhysThink()
 			local overlapDataB = overlapData[vphysB] and overlapData[vphysB][vphysA]
 			if not overlapDataB then continue end
 
-			-- We do this because the normal has to originate from the first passed vphys.
-			-- This makes sure it's pointing the right way
-
-
 			if overlapDataA.overlap <= overlapDataB.overlap then
-				print("COLLISION EVENT DETECTED.")
-				VGUIColEvent:Create(vphysA, vphysB, overlapDataA.overlap, ReorientNormalIfNeeded(vphysA, overlapDataA.normal))
+				VGUIColEvent:Create(vphysA, vphysB, overlapDataA.overlap, ReorientNormalIfNeeded(vphysA, vphysB, overlapDataA.normal))
 			else
-				print("COLLISION EVENT DETECTED.")
-				VGUIColEvent:Create(vphysB, vphysA, overlapDataB.overlap, ReorientNormalIfNeeded(vphysB, overlapDataB.normal))
+				VGUIColEvent:Create(vphysB, vphysA, overlapDataB.overlap, ReorientNormalIfNeeded(vphysB, vphysA, overlapDataB.normal))
 			end
 		end
 
