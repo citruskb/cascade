@@ -95,9 +95,13 @@ function PANEL:PerformLayout(w, h)
 end
 
 function PANEL:Paint(w, h)
-	surface.SetDrawColor(Color(255, 0, 0))
-	surface.SetTexture(debugMat)
-	surface.DrawPoly(self.PolyData)
+	surface.SetDrawColor(Color(255, 100, 0, 255))
+	draw.NoTexture()
+	--surface.SetTexture(debugMat)
+	--surface.DrawPoly(self.PolyData)
+	local dat = {{x = 0, y = 100}, {x = 100, y = 200}, {x = 300, y = 100}}
+	surface.DrawRect(0, 0, 100, 50)
+	--surface.DrawPoly(dat)
 end
 
 vgui.Register("DHitbox", PANEL, "DPanel")

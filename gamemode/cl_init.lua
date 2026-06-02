@@ -28,24 +28,6 @@ function GM:OnReloaded()
 	timer.Simple(0, function() LocalPlayerFound() end)
 end
 
-local nextTick = 0
-function GM:Think()
-	local ct = CurTime()
-
-	-- Update item physics, stuff like collision.
-	if #GM.PhysicsItems > 0 then gamemode.Call("ItemPhysicsThink") end
-
-	if nextTick > ct then return end
-	nextTick = ct + 1
-
-	local allPlayers = player.GetAll()
-	for i = 1, #allPlayers do
-		local pl = allPlayers[i]
-		gamemode.Call("PlayerThink", pl)
-	end
-end
-function GM:PlayerThink(pl) end
-
 local M_Player = FindMetaTable("Player")
 local P_Team = M_Player.Team
 function GM:PlayerBindPress(pl, bind, pressed)
@@ -107,8 +89,24 @@ function LocalPlayerFound()
 end
 hook.Add("InitPostEntity", "InitPostEntity.LocalPlayerFound", LocalPlayerFound)
 
--- The following functions should be set up as is with the underscore. No need to check if the local player is valid or not. 
-function GM:_Think() end
+-- The following functions should be set up as is with the underscore. No need to check if the local player is valid or not.
+local nextTick = 0
+function GM:_Think()
+	local ct = CurTime()
+
+	-- Update item physics, stuff like collision.
+	if #self.PhysicsItems > 0 then gamemode.Call("ItemPhysicsThink") end
+
+	if nextTick > ct then return end
+	nextTick = ct + 1
+
+	local allPlayers = player.GetAll()
+	for i = 1, #allPlayers do
+		local pl = allPlayers[i]
+		gamemode.Call("PlayerThink", pl)
+	end
+end
+function GM:PlayerThink(pl) end
 
 function GM:_HUDShouldDraw(name)
 	return (self.clFilmMode and name == "CHudWeaponSelection") --or not HideHUDElements[name]

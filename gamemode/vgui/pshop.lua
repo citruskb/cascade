@@ -20,6 +20,7 @@ function PANEL:Init()
 	-- Center top: Start button
 	-- Right: Shop ui
 
+
 	local left = vgui.Create("DPanel", self)
 	left:SetSize(w * 0.4, 0)
 	left:SetBackgroundColor(Color(0, 0, 0, 0))
@@ -65,7 +66,7 @@ function PANEL:Init()
 	-- Inventory
 	local middle = vgui.Create("DPanel", self)
 	middle:SetSize(w * 0.25, 0)
-	middle:SetBackgroundColor(Color(255, 255, 0, 50))
+	middle:SetBackgroundColor(Color(0, 0, 0, 0)) --Color(255, 255, 0, 50)
 	middle:Dock(LEFT)
 	lab = EasyLabel(middle, "Storage Inventory", "SFontLarger")
 	DockCenter(lab, middle)
@@ -97,9 +98,10 @@ function PANEL:Init()
 	--
 
 	-- Test items
-	local item = vgui.Create("PItem")
+	local item = vgui.Create("PItem", self)
 	item:SetPos(w * 0.6, h * 0.5)
 	item:EnablePhysics()
+	item:SetVel(0, -ITEM_TERMINAL_VELOCITY)
 
 end
 

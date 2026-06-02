@@ -33,15 +33,18 @@
 -- Add noises to pick up/dropping and to collision bounce
 if not GM.PhysicsItems then GM.PhysicsItems = {} end
 
-ITEM_GRAVITY = 2
+ITEM_GRAVITY = 0.008
+ITEM_TERMINAL_VELOCITY = 1.4
 
 PANEL = {}
 
 function PANEL:Init()
 	self:DisablePhysics()
 
-	local hb = vgui.Create("DHitbox")
-	hb.Shape = POLY_RECTANGULAR
+	self:SetMPos(0, 0)
+
+	local hb = vgui.Create("DHitbox", self)
+	hb.Shape = POLY_RECTANGLE
 	hb.ShapeW = 100
 	hb.ShapeH = 50
 	hb.Angle = 0
@@ -54,41 +57,74 @@ function PANEL:Paint() end
 function PANEL:Think()
 	if not self.Physics then return end
 
-	-- Update position based on gravity.
-	local x, y = self:GetPos()
-	local vx, vy = self:GetVelocity()
+	--print("Pos:", self:GetPos(), "Vel:", self:GetVel())
 
-	-- Update postion based on velocity.
-	self:SetPos(x + vx, y + vy)
+	-- Update position based on velocity.
+	-- The reason we use "mx" "my" as a medium is because panels don't track fractional position.
+	local mx, my = self:GetMPos()
+	local vx, vy = self:GetVel()
 
-	-- If our colliders are overlapping with any other colliders, then
+	self:SetMPos(mx + vx, my + vy)
+	mx, my = self:GetMPos()
+	local rmx, rmy = math.Round(mx, 0), math.Round(my, 0)
+
+	local dx, dy = math.Abs(mx) >= 1 and rmx or 0, math.Abs(my) >= 1 and rmy or 0
+
+	if dx ~= 0 or dy ~= 0 then
+		local x, y = self:GetPos()
+		self:SetPos(x + dx, y + dy)
+		self:AddMPos(-dx, -dy)
+	end
+
+	self:InvalidateLayout(true)
 end
 
-function PANEL:SetVelocity(x, y)
-	self.VX = x
-	self.VY = y
+
+-- [[ Define velocity ]]
+function PANEL:GetVel()
+	local tab = self.vel
+	return tab.x, tab.y
 end
-function PANEL:AddVelocity(xAdd, yAdd)
-	self.VX = x + xAdd
-	self.VY = y + yAdd
+function PANEL:SetVel(x, y) self.vel = {x = x, y = y} end
+function PANEL:AddVel(xAdd, yAdd)
+	local vx, vy = self:GetVel()
+	self:SetVel(vx + xAdd, vy + yAdd)
 end
-function PANEL:GetVelocity() return self.VX, self.VY end
+-- [[	]]
+
+
+-- [[ Define fractional movement ]]
+function PANEL:GetMPos()
+	local tab = self.mpos
+	return tab.x, tab.y
+end
+function PANEL:SetMPos(x, y) self.mpos = {x = x, y = y} end
+function PANEL:AddMPos(xAdd, yAdd)
+	local mx, my = self:GetMPos()
+	self:SetMPos(mx + xAdd, my + yAdd)
+end
+-- [[	]]
+
 function PANEL:EnablePhysics()
 	self.Physics = true
-	self.vx, self.vy = 0, 0
+	self:SetVel(0, 0)
 
 	-- Add to global tab to receive physics updates.
-	self.idx = table.Insert(GM.PhysicsItems, self)
+	self.idx = table.Insert(GAMEMODE.PhysicsItems, self)
 end
 function PANEL:DisablePhysics()
 	self.Physics = false
-	self.vx, self.vy = nil, nil
+	self.vel = nil
 
 	-- Remove from global tab to stop receiving physics updates.
-	table.Remove(GM.PhysicsItems, self.idx)
+	table.Remove(GAMEMODE.PhysicsItems, self.idx)
 	self.idx = nil
 end
 function PANEL:GetHitbox() return self.hb end
+
+function PANEL:OnRemove()
+	if self.Physics then self:DisablePhysics() end
+end
 
 vgui.Register("PItem", PANEL, "DPanel")
 
@@ -117,16 +153,33 @@ local noCol = {}
 local polydata = {}
 
 function GM:ItemPhysicsThink()
-	-- SAT collisions
+	normals = {}
+	collisions = {}
+	colHandled = {}
+	noCol = {}
+	polydata = {}
 
-	-- Step through the points of each phys item
-	-- Get the normal to each side
-	for i = 1, #GM.PhysicsItems do
+	for i = 1, #self.PhysicsItems do
+
+		-- Gravity
+		local item = self.PhysicsItems[i]
+		local _, vy = item:GetVel()
+		if vy < ITEM_TERMINAL_VELOCITY then
+			print("add gravity")
+			item:AddVel(0, ITEM_GRAVITY)
+		else
+			print("dont", vy, ITEM_TERMINAL_VELOCITY)
+		end
+
+		-- SAT collisions
+
+		-- Step through the points of each phys item
+		-- Get the normal to each side
 		local nv = {}
 
 		local points = polydata[i]
 		if not points then
-			polydata[i] = GM.PhysicsItems[i]:GetHitbox().PolyData
+			polydata[i] = item:GetHitbox().PolyData
 			points = polydata[i]
 		end
 
@@ -140,9 +193,9 @@ function GM:ItemPhysicsThink()
 	end
 
 	-- Now that we have all the normals, we need the projection of each edge vs that normal.
-	for i = 1, normals do
+	for i = 1, #normals do
 		local nv = normals[i]
-		for j = 1, nv do
+		for j = 1, #nv do
 			local normal = nv[j]
 
 			-- First get the range for the shape we are focusing on...
@@ -151,7 +204,7 @@ function GM:ItemPhysicsThink()
 			-- Now we need the range for the shape we are considering..
 			-- For every shape..
 
-			for o = 1, #GM.PhysicsItems do
+			for o = 1, #self.PhysicsItems do
 				if i == o then continue end -- Skip our current item.
 
 				-- Aready checked and determined no collision!
@@ -204,10 +257,11 @@ function GM:ItemPhysicsThink()
 	end
 
 	-- We have all our collision data now. Apply it.
+	--[[
 	for i = 1, collisions do
-		local objA = GM.PhysicsItems[i]
+		local objA = self.PhysicsItems[i]
 		for j = 1, collisions[i] do
-			local objB = GM.PhysicsItems[j]
+			local objB = self.PhysicsItems[j]
 			local data = collisions[i][j]
 			local overlap, normal = data.overlap, data.normal
 
@@ -215,6 +269,7 @@ function GM:ItemPhysicsThink()
 
 		end
 	end
+	]]
 
 	--[[
 	for i = 1, #GM.PhysicsItems do
