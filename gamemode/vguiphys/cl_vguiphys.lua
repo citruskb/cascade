@@ -183,3 +183,8 @@ function GM:VGUIPhysThink()
 	for _, event in pairs(tab) do event() end
 
 end
+
+function GM:VGUIPhysPass()
+	-- Resolve collisions
+	-- Multiple passes ensures that cascading effects dont happen and a more accurate final resolution is found.
+end
