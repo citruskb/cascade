@@ -52,6 +52,7 @@ function GM:Think() end
 function GM:_Think() end
 
 GM.Think = GM._Think
+GM.Tick = GM.Think
 GM.HUDShouldDraw = GM.Think
 GM.CalcView = GM.Think
 GM.ShouldDrawLocalPlayer = GM.Think
@@ -69,6 +70,7 @@ GM.HUDWeaponPickedUp = GM.Think
 local gm_ = GM
 function LocalPlayerFound()
 	gm_.Think = gm_._Think
+	gm_.Tick = gm_._Tick
 	gm_.HUDShouldDraw = gm_._HUDShouldDraw
 	gm_.CalcView = gm_._CalcView
 	gm_.ShouldDrawLocalPlayer = gm_._ShouldDrawLocalPlayer
@@ -90,15 +92,17 @@ end
 hook.Add("InitPostEntity", "InitPostEntity.LocalPlayerFound", LocalPlayerFound)
 hook.Add("OnReloaded", "OnReloaded.LocalPlayerFound", LocalPlayerFound)
 
--- The following functions should be set up as is with the underscore. No need to check if the local player is valid or not.
-local nextTick = 0
-function GM:_Think()
-	local ct = CurTime()
-
+function GM:_Tick()
 	-- Update item physics if it makes sense to.
 	if (table.Count(self.VGUIPhysboxes) > 0 or table.Count(self.VGUIHitboxes) > 0) then
 		gamemode.Call("VGUIPhysThink")
 	end
+end
+
+-- The following functions should be set up as is with the underscore. No need to check if the local player is valid or not.
+local nextTick = 0
+function GM:_Think()
+	local ct = CurTime()
 
 	if nextTick > ct then return end
 	nextTick = ct + 1
