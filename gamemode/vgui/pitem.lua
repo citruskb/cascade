@@ -38,6 +38,7 @@ function PANEL:Init()
 	self:DisablePhysics()
 
 	self:SetMPos(0, 0)
+	self:SetDesiredTranslation(0, 0)
 
 	local physbox = vgui.Create("DPhysbox", self)
 	self.physbox = physbox
@@ -53,9 +54,10 @@ function PANEL:Think()
 	-- Update position based on velocity.
 	-- The reason we use "mx" "my" as a medium is because panels don't track fractional position.
 	local mx, my = self:GetMPos()
+	local tx, ty = self:GetDesiredTranslation()
 	local vx, vy = self:GetVel()
 
-	self:SetMPos(mx + vx, my + vy)
+	self:SetMPos(mx + tx + vx, my + ty + vy)
 	mx, my = self:GetMPos()
 	local rmx, rmy = math.Round(mx, 0), math.Round(my, 0)
 
@@ -93,6 +95,33 @@ function PANEL:SetMPos(x, y) self.mpos = {x = x, y = y} end
 function PANEL:AddMPos(xAdd, yAdd)
 	local mx, my = self:GetMPos()
 	self:SetMPos(mx + xAdd, my + yAdd)
+end
+-- [[	]]
+
+
+-- [[ Define desired movement (used for collision resolution passes) ]]
+function PANEL:GetDesiredTranslation()
+	local tab = self.translation
+	return Rawget(tab, "x"), Rawget(tab, "y")
+end
+function PANEL:SetDesiredTranslation(x, y)
+	local tab = self.translation or {}
+	Rawset(tab, "x", x)
+	Rawset(tab, "y", y)
+end
+function PANEL:AddDesiredTranslation(xAdd, yAdd)
+	local x, y = self:GetDesiredTranslation()
+	self:SetDesiredTranslation(x + xAdd, y + yAdd)
+end
+function PANEL:HasDesiredTranslation()
+	local x, y = self:GetDesiredTranslation()
+	return x ~= 0 or y ~= 0
+end
+
+function PANEL:GetDesiredPosition()
+	local x, y = self:GetPos()
+	local tx, ty = self:GetDesiredTranslation()
+	return x + tx, y + ty
 end
 -- [[	]]
 

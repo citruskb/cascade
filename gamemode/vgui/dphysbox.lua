@@ -81,11 +81,12 @@ end
 
 function PANEL:TranslatePointsLocalToScreen(tab)
 	local x, y = self:GetPos()
+	local tx, ty = self:GetDesiredTranslation()
 	local sx, sy = self:LocalToScreen(x, y)
 
 	local trans = {}
 	for i = 1, #tab do
-		trans[i] = {x = tab[i].x + sx, y = tab[i].y + sy}
+		trans[i] = {x = tab[i].x + tx + sx, y = tab[i].y + ty + sy}
 	end
 
 	return trans
@@ -146,6 +147,26 @@ end
 function PANEL:AddVel(xAdd, yAdd)
 	local parent = self:GetParent()
 	if parent.AddVel then parent:AddVel(xAdd, yAdd) end
+end
+-- [[	]]
+
+
+-- [[ Hookup with items & others? ]]
+function PANEL:GetDesiredTranslation()
+	local parent = self:GetParent()
+	if parent.GetDesiredTranslation then return parent:GetDesiredTranslation() end
+end
+function PANEL:SetDesiredTranslation(x, y)
+	local parent = self:GetParent()
+	if parent.SetDesiredTranslation then parent:SetDesiredTranslation(x, y) end
+end
+function PANEL:AddDesiredTranslation(xAdd, yAdd)
+	local parent = self:GetParent()
+	if parent.AddDesiredTranslation then parent:AddDesiredTranslation(xAdd, yAdd) end
+end
+function PANEL:HasDesiredTranslation()
+	local parent = self:GetParent()
+	if parent.HasDesiredTranslation then return parent:HasDesiredTranslation() end
 end
 -- [[	]]
 
