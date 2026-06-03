@@ -5,10 +5,16 @@ if not vguiPhysLoaded then
 	vguiPhysLoaded = true
 end
 
+-- How many loops do we make attempting to resolve collisions?
 VGUIPHYS_PASSES = 6
+
+-- Allow some degree of overlap between objects without taking collision corrective action.
 VGUIPHYS_SLOP = 1
 
+-- Amount to nudge velocity downwards every frame.
 VGUIPHYS_GRAVITY = 0.008
+
+-- Stop nudging velocity downards after reaching this velocity.
 VGUIPHYS_TERMINAL_VELOCITY = 1.4
 
 function GM:VGUIPhysThink()
