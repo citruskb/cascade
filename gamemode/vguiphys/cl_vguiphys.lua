@@ -1,6 +1,7 @@
 -- Handle Lua refresh.
 if not vguiPhysLoaded then
 	GM.VGUIPhysboxes = {}
+	GM.VGUIHitboxes = {}
 	vguiPhysLoaded = true
 end
 

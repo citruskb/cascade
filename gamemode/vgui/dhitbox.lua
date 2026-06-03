@@ -73,17 +73,28 @@ local PolyFuncs = {
 }
 
 function PANEL:Init()
+	GAMEMODE.VGUIPhysboxes[self] = true
+
 	self.col = Color(math.Random(50, 200), math.Random(50, 200), math.Random(50, 200), 120)
 	self.lineCol = Color(self.col.r + 50, self.col.g + 50, self.col.b + 50, 120)
+
+	self.isHitbox = true
 end
 
 -- We invalidate our layout every frame.
-function PANEL:Think() self:InvalidateLayout() end
+function PANEL:Think()
+	self.transAggroData = nil
+	self.aggregateCenter = nil
+	self:InvalidateLayout()
+end
+
+function PANEL:OnRemove()
+	GAMEMODE.VGUIHitboxes[self] = nil
+end
 
 function PANEL:PerformLayout(w, h)
 	self.polyData = PolyFuncs[self.Shape](self)
 end
-
 
 function PANEL:Paint(w, h)
 	if not GAMEMODE.Debug then return end
@@ -113,5 +124,37 @@ function PANEL:Paint(w, h)
 		surface.DrawLine(xA, yA, xB, yB)
 	end
 end
+
+-- [[ Compatability with some dphysbox functions. ]]
+function PANEL:AggregatePolyData()
+	return self.polyData
+end
+function PANEL:GetTranslatedAggregatePolyData()
+	local ret = self.transAggroData
+
+	if not ret then
+		ret = self:GetParent():TranslatePointsLocalToScreen(self:AggregatePolyData())
+		self.transAggroData = ret
+	end
+
+	return ret
+end
+function PANEL:GetAggregateCenter()
+	local ret = self.aggregateCenter
+	local data = self:AggregatePolyData()
+
+	if not ret then
+		local xsum, ysum = 0, 0
+		for _, point in pairs(data) do
+			xsum = xsum + point.x
+			ysum = ysum + point.y
+		end
+		ret = {x = xsum / #data, y = ysum / #data}
+		self.aggregateCenter = ret
+	end
+
+	return ret
+end
+-- [[	]]
 
 vgui.Register("DHitbox", PANEL, "DPanel")

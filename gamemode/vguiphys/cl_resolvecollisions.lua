@@ -2,11 +2,11 @@ local gamemode_Call = gamemode.Call
 local GM = gm_
 
 function GM:ResolveAllVGUICollisions()
-	local physboxes = Rawget(gm_, "VGUIPhysboxes")
+	local physboxes = Rawget(gm_, "VGUIHitboxes")
 	for i = 1, VGUIPHYS_PASSES do
-		for k, vphysA in pairs(physboxes) do
-			for __, vphysB in pairs(physboxes) do
-				local collision = gamemode_Call("VGUISAT", vphysA, vphysB)
+		for k, hbA in pairs(physboxes) do
+			for __, hbB in pairs(physboxes) do
+				local collision = gamemode_Call("VGUISAT", hbA, hbB)
 				if not collision then continue end
 
 				gamemode_Call("ResolveVGUICollision", collision)
@@ -16,6 +16,7 @@ function GM:ResolveAllVGUICollisions()
 end
 
 function GM:ResolveVGUICollision(data)
+	--local hbA, hbB = Rawget(data, "hbA"), Rawget(data, "hbB") -- TODO: Might not be needed?
 	local vphysA = Rawget(data, "vphysA")
 	local vphysB = Rawget(data, "vphysB")
 	local overlap = Rawget(data, "overlap")

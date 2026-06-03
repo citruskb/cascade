@@ -2,10 +2,10 @@
 SAT - Separating Axis Theorem
 "If one can find a line (axis) where shadows of two polygons don't overlap, then the polygons aren't colliding."
 
-Is vphysA colliding with vphysB?
-vphys = potentially a collection of polygons that represent a single colideable gameobject
+Is hbA colliding with hbB?
+vphys = potentially a collection of hb's that represent a single colideable gameobject
 
-Step 1: Check if projections of vphysA and vphysB overlap for every perpendicular normal of vphysA
+Step 1: Check if projections of hbA and hbB overlap for every perpendicular normal of hbA
 We want to save how much each overlap is along with the normal, since the smallest overlap ..
 represents the MTV, or minimum translation vector--the direction of smallest distance to separate the two objects.
 The normal provides the directions we need to separate the two objects.
@@ -14,7 +14,7 @@ Step 2: If any projections don't overlap, abort early. No collision.
 
 Step 3: If all projections overlap, potential collision.
 
-Step 4: Repeat Step 1 but checking vphysA and vphysB vs every perpendicular normal of vphysB
+Step 4: Repeat Step 1 but checking hbA and hbB vs every perpendicular normal of hbB
 
 Step 5: If any projections don't overlap, abort early. No collision.
 
@@ -23,7 +23,7 @@ Step 6: If all projections overlap, there is a collision!
 Step 7: between all overlaps in step 1 and 4, return the overlap and normal.
 Note we need to make sure the normal is pointing a consistent direction (say, A ----> B) for proper collisions handling.
 
-I can probably make this go way faster by caching calculations and looking up calculations that have already been done..
+We can probably make this go way faster by caching calculations and looking up calculations that have already been done..
 when looping through all vphys elements checking for collisions.
 
 WARNING. Need to make sure this area is highly optimized. It could pontentially be running many thousands of times per second!
@@ -53,8 +53,8 @@ local function SetCachedInfo(obj, id, val)
 	Rawset(data, id, val)
 end
 
-local function GetOrCacheNormal(vphys, points, i)
-	local normal = GetCachedInfo(vphys, "normal" .. i)
+local function GetOrCacheNormal(hb, points, i)
+	local normal = GetCachedInfo(hb, "normal" .. i)
 
 	if not normal then
 		local p1 = Rawget(points, i)
@@ -63,7 +63,7 @@ local function GetOrCacheNormal(vphys, points, i)
 
 		local len = math.Sqrt(axisX ^ 2 + axisY ^ 2)
 		normal = {x = axisX / len, y = axisY / len}
-		SetCachedInfo(vphys, "normal" .. i, normal)
+		SetCachedInfo(hb, "normal" .. i, normal)
 	end
 
 	return normal
@@ -72,8 +72,8 @@ end
 
 -- We know that for any given normal, an array of points will always project the same way.
 -- We can leverage this for caching.
-local function GetOrCacheProjRange(vphys, points, normal)
-	local projRangeData = GetCachedInfo(vphys, "projRange")
+local function GetOrCacheProjRange(hb, points, normal)
+	local projRangeData = GetCachedInfo(hb, "projRange")
 	local projRange
 	local nx, ny = Rawget(normal, "x"), Rawget(normal, "y")
 
@@ -101,20 +101,20 @@ local function GetOrCacheProjRange(vphys, points, normal)
 			Rawset(Rawget(dataToCache, nx), ny, projRange)
 		end
 
-		SetCachedInfo(vphys, "projRange", dataToCache)
+		SetCachedInfo(hb, "projRange", dataToCache)
 	end
 
 	return projRange
 end
 
-local function GetCachedCollision(vphysA, vphysB)
-	return GetCachedInfo("collisions", ToString(vphsA) .. ToString(vphysB))
+local function GetCachedCollision(hbA, hbB)
+	return GetCachedInfo("collisions", ToString(hbA) .. ToString(hbB))
 end
 
-local function SetCachedCollision(vphysA, vphysB, data)
-	if GetCachedCollision(vphysA, vphysB) then Error("[VGUIPHYS] - Doubled up collision event!") end
+local function SetCachedCollision(hbA, hbB, data)
+	if GetCachedCollision(hbA, hbB) then Error("[VGUIPHYS] - Doubled up collision event!") end
 
-	local sa, sb = ToString(vphysA), ToString(vphysB)
+	local sa, sb = ToString(hbA), ToString(hbA, hbB)
 	SetCachedInfo("collisions", sa .. sb, data)
 	SetCachedInfo("collisions", sb .. sa, data)
 end
@@ -123,15 +123,15 @@ local function GetRangeOverlap(rangeA, rangeB)
 	return math_Min(Rawget(rangeA, "max"), Rawget(rangeB, "max")) - math_Max(Rawget(rangeA, "min"), Rawget(rangeB, "min"))
 end
 
-local function OrientMTV(vphysA, vphysB, normalA)
-	local centerA, centerB = vphysA:GetAggregateCenter(), vphysB:GetAggregateCenter()
+local function OrientMTV(hbA, hbB, normalA)
+	local centerA, centerB = hbA:GetAggregateCenter(), hbB:GetAggregateCenter()
 
-	-- Find the direction pointing from the center of vphysB towards the center of vphysA.
+	-- Find the direction pointing from the center of hbB towards the center of hbA.
 	local cax, cay = Rawget(centerA, "x"), Rawget(centerA, "y")
 	local cbx, cby = RawGet(centerB, "x"), Rawget(centerB, "y")
 	local centerDir = {x = cbx - cax, y = cby - cay}
 
-	-- Find the dot product of the center dir with the normal calculated from vphysA.
+	-- Find the dot product of the center dir with the normal calculated from hbA.
 	local nax, nay = Rawget(normalA, "x"), Rawget(normalA, "y")
 	local cdx, cdy = Rawget(centerDir, "x"), Rawget(centerDir, "y")
 	local dot = nax * cdx + nay * cdy
@@ -143,13 +143,13 @@ end
 
 
 
-function GM:VGUISAT(vphysA, vphysB)
-	-- Check if we have checked say.. vphysB vs vphysA already?
-	local collision = GetCachedCollision(vphysA, vphysB)
+function GM:VGUISAT(hbA, hbB)
+	-- Check if we have checked say.. hbB vs hbA already?
+	local collision = GetCachedCollision(hbA, hbB)
 	if collision then return end
 
-	local pointsA = vphysA:GetTranslatedAggregatePolyData()
-	local pointsB = vphysB:GetTranslatedAggregatePolyData()
+	local pointsA = hbA:GetTranslatedAggregatePolyData()
+	local pointsB = hbB:GetTranslatedAggregatePolyData()
 
 	local smallestOverlap, mtv, relativeTo
 
@@ -159,13 +159,13 @@ function GM:VGUISAT(vphysA, vphysB)
 	for i = 1, #pointsA do
 
 		-- We get our normal for the given points.
-		local normalA = GetOrCacheNormal(vphysA, pointsA, i)
+		local normalA = GetOrCacheNormal(hbA, pointsA, i)
 
-		-- Next, we get the projection of vphysA vs that normal.
-		local projRangeA = GetOrCacheProjRange(vphysA, pointsA, normalA)
+		-- Next, we get the projection of hbA vs that normal.
+		local projRangeA = GetOrCacheProjRange(hbA, pointsA, normalA)
 
-		-- We do the same for vphysB.
-		local projRangeB = GetOrCacheProjRange(vphysB, pointsB, normalA)
+		-- We do the same for hbB.
+		local projRangeB = GetOrCacheProjRange(hbB, pointsB, normalA)
 
 		-- Get our overlap!
 		local overlap = GetRangeOverlap(projRangeA, projRangeB)
@@ -177,16 +177,16 @@ function GM:VGUISAT(vphysA, vphysB)
 		if smallestOverlap and overlap > smallestOverlap then continue end
 		smallestOverlap = overlap
 		mtv = normalA
-		relativeTo = vphysA
+		relativeTo = hbA
 
 	end
 
-	-- Now we need to repeat the same process, but for vphysB!
+	-- Now we need to repeat the same process, but for hbB!
 	for i = 1, #pointsB do
 
-		local normalB = GetOrCacheNormal(vphysB, pointsB, i)
-		local projRangeB = GetOrCacheProjRange(vphysB, pointsB, normalB)
-		local projRangeA = GetOrCacheProjRange(vphysA, pointsA, normalB)
+		local normalB = GetOrCacheNormal(hbB, pointsB, i)
+		local projRangeB = GetOrCacheProjRange(hbB, pointsB, normalB)
+		local projRangeA = GetOrCacheProjRange(hbB, pointsA, normalB)
 		local overlap = GetRangeOverlap(projRangeB, projRangeA)
 
 		if overlap <= VGUIPHYS_SLOP then return end
@@ -194,7 +194,7 @@ function GM:VGUISAT(vphysA, vphysB)
 		if smallestOverlap and overlap > smallestOverlap then continue end
 		smallestOverlap = overlap
 		mtv = normalB
-		relativeTo = vphysB
+		relativeTo = hbB
 
 	end
 
@@ -202,19 +202,19 @@ function GM:VGUISAT(vphysA, vphysB)
 	-- But we need to make sure we are pointing our MTV the correct direction.
 	-- And relative to the right object.
 
-	-- If our mtv is relative to vphysB instead of vphysA then simply swap the two.
-	if relativeTo == vphysB then
-		local copy_vphysA, copy_vphysB = vphysA, vphysB
-		vphysA, vphysB = copy_vphysB, copy_vphysA
-		copy_vphysA, copy_vphysB = nil, nil
+	-- If our mtv is relative to hbA instead of hbB then simply swap the two.
+	if relativeTo == hbB then
+		local ref_hbA, ref_hbB = hbA, hbB
+		hbA, hbB = ref_hbB, ref_hbA
+		ref_hbA, ref_hbB = nil, nil
 	end
 
 	-- Orient our MTV correctly.
-	mtv = OrientMTV(vphysA, vphysB, mtv)
+	mtv = OrientMTV(hbA, hbB, mtv)
 
 	-- Finally build and cache our collision information, and return it.
-	collision = {vphysA = vphysA, vphysB = vphysB, overlap = overlap, mtv = mtv}
-	SetCachedCollision(vphysA, vphysB, collision)
+	collision = {hbA = hbA, hbB = hbB, vphysA = hbA:GetParent(), vphysB = hbB:GetParent(), overlap = overlap, mtv = mtv}
+	SetCachedCollision(hbA, hbB, collision)
 
 	return collision
 end

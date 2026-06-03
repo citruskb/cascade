@@ -95,8 +95,10 @@ local nextTick = 0
 function GM:_Think()
 	local ct = CurTime()
 
-	-- Update item physics, stuff like collision.
-	if table.Count(self.VGUIPhysboxes) > 0 then gamemode.Call("VGUIPhysThink") end
+	-- Update item physics if it makes sense to.
+	if (table.Count(self.VGUIPhysboxes) > 0 or table.Count(self.VGUIHitboxes) > 0) then
+		gamemode.Call("VGUIPhysThink")
+	end
 
 	if nextTick > ct then return end
 	nextTick = ct + 1

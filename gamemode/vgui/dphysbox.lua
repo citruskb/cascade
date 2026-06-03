@@ -9,6 +9,7 @@ PANEL = {}
 function PANEL:Init()
 	GAMEMODE.VGUIPhysboxes[self] = true
 	self.hbs = {}
+	self.isPhysbox = true
 end
 
 --[[ -- TODO
