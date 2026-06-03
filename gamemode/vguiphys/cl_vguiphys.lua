@@ -12,7 +12,7 @@ VGUIPHYS_PASSES = 6
 VGUIPHYS_SLOP = 1
 
 -- Amount to nudge velocity downwards every frame.
-VGUIPHYS_GRAVITY = 0.008
+VGUIPHYS_GRAVITY = 0.024
 
 -- Stop nudging velocity downards after reaching this velocity.
 VGUIPHYS_TERMINAL_VELOCITY = 1.4
@@ -24,7 +24,6 @@ function GM:VGUIPhysThink()
 
 		-- Add our gravity up to our terminal velocity.
 		local _, vy = vphys:GetVel()
-		if vy then print("vel", vphys:GetVel()) end
 		if vy and vy < VGUIPHYS_TERMINAL_VELOCITY then
 			vphys:AddVel(0, VGUIPHYS_GRAVITY)
 		end

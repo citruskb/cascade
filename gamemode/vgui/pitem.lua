@@ -49,8 +49,6 @@ function PANEL:Paint() end
 function PANEL:Think()
 	if not self.Physics then return end
 
-	--print("Pos:", self:GetPos(), "Vel:", self:GetVel())
-
 	-- Update position based on velocity.
 	-- The reason we use "mx" "my" as a medium is because panels don't track fractional position.
 	local mx, my = self:GetMPos()
@@ -105,7 +103,12 @@ function PANEL:GetDesiredTranslation()
 	return Rawget(tab, "x"), Rawget(tab, "y")
 end
 function PANEL:SetDesiredTranslation(x, y)
-	local tab = self.translation or {}
+	local tab = self.translation
+	if not tab then
+		tab = {}
+		self.translation = tab
+	end
+
 	Rawset(tab, "x", x)
 	Rawset(tab, "y", y)
 end

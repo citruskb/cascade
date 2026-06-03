@@ -120,6 +120,7 @@ function PANEL:Init()
 	item:SetSize(size, size)
 	item:SetBackgroundColor(Color(255, 255, 0, 255))
 	item:SetPos(w * 0.6, h * 0.4)
+	item.physbox:SetSize(size, size)
 	item.physbox:AddCustomHitbox({
 		{x = 10, y = 10},
 		{x = size - 10, y = 10},
@@ -128,7 +129,7 @@ function PANEL:Init()
 	})
 
 	item:EnablePhysics()
-	--item:SetVel(0, -ITEM_TERMINAL_VELOCITY)
+	item:SetVel(0, -VGUIPHYS_TERMINAL_VELOCITY)
 end
 
 function PANEL:Paint()

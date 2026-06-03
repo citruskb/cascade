@@ -1,11 +1,10 @@
 local gamemode_Call = gamemode.Call
-local GM = gm_
 
 function GM:ResolveAllVGUICollisions()
-	local physboxes = Rawget(gm_, "VGUIHitboxes")
+	local hitboxes = GAMEMODE.VGUIHitboxes
 	for i = 1, VGUIPHYS_PASSES do
-		for k, hbA in pairs(physboxes) do
-			for __, hbB in pairs(physboxes) do
+		for hbA, _  in pairs(hitboxes) do
+			for hbB, _ in pairs(hitboxes) do
 				local collision = gamemode_Call("VGUISAT", hbA, hbB)
 				if not collision then continue end
 
@@ -22,7 +21,7 @@ function GM:ResolveVGUICollision(data)
 	local overlap = Rawget(data, "overlap")
 	local mtv = Rawget(data, "mtv")
 
-	local rootA, rootB = vphysA:GetParentA(), vphysB:GetParentB()
+	local rootA, rootB = vphysA:GetParent(), vphysB:GetParent()
 
 	-- We desire to apply a translation to resolve the collision.
 	-- The root might be invalid if we are a solid wall!

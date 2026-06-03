@@ -30,10 +30,9 @@ end
 ]]
 
 function PANEL:AddHitbox(w, h, offset)
-	local parent = self:GetParent()
-	local pw, ph = parent:GetSize()
-	local hb = vgui.Create("DHitbox", parent)
-	hb:SetSize(pw, ph)
+	local mw, mh = self:GetSize()
+	local hb = vgui.Create("DHitbox", self)
+	hb:SetSize(mw, mh)
 
 	offset = offset or 0
 
@@ -53,10 +52,9 @@ end
 
 
 function PANEL:AddCustomHitbox(data)
-	local parent = self:GetParent()
-	local pw, ph = parent:GetSize()
-	local hb = vgui.Create("DHitbox", parent)
-	hb:SetSize(pw, ph)
+	local w, h = self:GetSize()
+	local hb = vgui.Create("DHitbox", self)
+	hb:SetSize(w, h)
 
 	hb.Shape = POLY_CUSTOM
 	hb.customPoints = data
@@ -156,6 +154,8 @@ end
 function PANEL:GetDesiredTranslation()
 	local parent = self:GetParent()
 	if parent.GetDesiredTranslation then return parent:GetDesiredTranslation() end
+
+	return 0, 0
 end
 function PANEL:SetDesiredTranslation(x, y)
 	local parent = self:GetParent()

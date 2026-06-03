@@ -84,7 +84,7 @@ local function GetOrCacheProjRange(hb, points, normal)
 	if not projRange then
 		local min, max
 		for j = 1, #points do
-			local x, y = Rawget(Rawget(points, j), x), Rawget(Rawget(points, j), y)
+			local x, y = Rawget(Rawget(points, j), "x"), Rawget(Rawget(points, j), "y")
 			local proj = x * nx + y * ny
 
 			if not min or (min and proj < min) then min = proj end
@@ -92,16 +92,15 @@ local function GetOrCacheProjRange(hb, points, normal)
 		end
 
 		projRange = {min = min, max = max}
-		local dataToCache = {}
 
-		if Rawget(projRangeData, nx) then
-			Rawset(Rawget(dataToCache, nx), ny, projRange)
+		if projRangeData and Rawget(projRangeData, nx) then
+			Rawset(Rawget(projRangeData, nx), ny, projRange)
 		else
+			local dataToCache = {}
 			Rawset(dataToCache, nx, {})
 			Rawset(Rawget(dataToCache, nx), ny, projRange)
+			SetCachedInfo(hb, "projRange", dataToCache)
 		end
-
-		SetCachedInfo(hb, "projRange", dataToCache)
 	end
 
 	return projRange
@@ -128,7 +127,7 @@ local function OrientMTV(hbA, hbB, normalA)
 
 	-- Find the direction pointing from the center of hbB towards the center of hbA.
 	local cax, cay = Rawget(centerA, "x"), Rawget(centerA, "y")
-	local cbx, cby = RawGet(centerB, "x"), Rawget(centerB, "y")
+	local cbx, cby = Rawget(centerB, "x"), Rawget(centerB, "y")
 	local centerDir = {x = cbx - cax, y = cby - cay}
 
 	-- Find the dot product of the center dir with the normal calculated from hbA.
@@ -144,6 +143,12 @@ end
 
 
 function GM:VGUISAT(hbA, hbB)
+	-- A hitbox can't collide with itself.
+	if hbA == hbB then return end
+
+	-- A hitbox part of the same object can't collide with itself either.
+	if hbA:GetParent() == hbB:GetParent() then return end
+
 	-- Check if we have checked say.. hbB vs hbA already?
 	local collision = GetCachedCollision(hbA, hbB)
 	if collision then return end

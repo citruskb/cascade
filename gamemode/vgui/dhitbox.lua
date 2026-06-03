@@ -73,7 +73,7 @@ local PolyFuncs = {
 }
 
 function PANEL:Init()
-	GAMEMODE.VGUIPhysboxes[self] = true
+	GAMEMODE.VGUIHitboxes[self] = true
 
 	self.col = Color(math.Random(50, 200), math.Random(50, 200), math.Random(50, 200), 120)
 	self.lineCol = Color(self.col.r + 50, self.col.g + 50, self.col.b + 50, 120)
