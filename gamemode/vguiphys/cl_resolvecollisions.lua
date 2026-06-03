@@ -35,4 +35,12 @@ function GM:ResolveVGUICollision(data)
 		local TranslateB = {x = mtv.x * overlap / 2, y = mtv.y * overlap / 2}
 		rootB:GetDesiredTranslation(Rawget(TranslateB, "x"), Rawget(TranslateB, "y"))
 	end
+
+	-- Detect resting collisions.
+	-- Hopefully stop resting jittering on the ground.
+	local mtvy = Rawget(mtv, "y")
+	local velx, vely = rootA:GetVel()
+	if mtvy > 0.9 and vely < 0 then
+		rootA:SetVel(velx, 0)
+	end
 end
