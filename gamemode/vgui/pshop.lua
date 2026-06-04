@@ -114,22 +114,33 @@ function PANEL:Init()
 	DockCenter(lab, right)
 	--
 
-	-- Test items
-	local item = vgui.Create("PItem", self)
-	local size = 50
-	item:SetSize(size, size)
-	item:SetBackgroundColor(Color(255, 255, 0, 255))
-	item:SetPos(w * 0.6, h * 0.4)
-	item.physbox:SetSize(size, size)
-	item.physbox:AddCustomHitbox({
-		{x = 10, y = 10},
-		{x = size - 10, y = 10},
-		{x = size - 10, y = size - 10},
-		{x = 10, y = size - 10},
-	})
 
-	item:EnablePhysics()
-	item:SetVel(0, -VGUIPHYS_TERMINAL_VELOCITY)
+
+	-- Test items
+	local function MakeBox(size, bx, by, yvel)
+		local item = vgui.Create("PItem", self)
+		item:SetSize(size, size)
+		item:SetPos(bx, by)
+		item.physbox:SetSize(size, size)
+		item.physbox:AddCustomHitbox({
+			{x = 1, y = 1},
+			{x = size - 1, y = 1},
+			{x = size - 1, y = size - 1},
+			{x = 1, y = size - 1},
+		})
+
+		item:EnablePhysics()
+		item:SetVel(0, yvel)
+	end
+
+	MakeBox(20, w * 0.52, h * 0.4, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
+	MakeBox(60, w * 0.42, h * 0.4, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
+	MakeBox(40, w * 0.62, h * 0.4, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
+
+	--MakeBox(50, w * 0.6, h * 0.35, -VGUIPHYS_TERMINAL_VELOCITY)
+
+	--MakeBox(50, w * 0.6, h * 0.3, -VGUIPHYS_TERMINAL_VELOCITY)
+
 end
 
 function PANEL:Paint()

@@ -21,6 +21,9 @@ function GM:VGUIPhysThink()
 	-- Handle gravity.
 	for vphys, _ in pairs(self.VGUIPhysboxes) do
 		if not IsValid(vphys) then continue end
+		if vphys.resting then continue end
+
+		print(vphys, "is NOT resting.")
 
 		-- Add our gravity up to our terminal velocity.
 		local _, vy = vphys:GetVel()

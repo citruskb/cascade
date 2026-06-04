@@ -83,7 +83,6 @@ end
 
 -- We invalidate our layout every frame.
 function PANEL:Think()
-	self.transAggroData = nil
 	self.aggregateCenter = nil
 	self:InvalidateLayout()
 end
@@ -130,14 +129,7 @@ function PANEL:AggregatePolyData()
 	return self.polyData
 end
 function PANEL:GetTranslatedAggregatePolyData()
-	local ret = self.transAggroData
-
-	if not ret then
-		ret = self:GetParent():TranslatePointsLocalToScreen(self:AggregatePolyData())
-		self.transAggroData = ret
-	end
-
-	return ret
+	return self:GetParent():TranslatePointsLocalToScreen(self:AggregatePolyData())
 end
 function PANEL:GetAggregateCenter()
 	local ret = self.aggregateCenter

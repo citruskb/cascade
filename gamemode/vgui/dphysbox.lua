@@ -125,9 +125,15 @@ end
 
 function PANEL:Think()
 	self.aggregatePolyData = nil
-	self.transAggroData = nil
 	self.aggregateCenter = nil
 end
+
+-- This var should only be cached for single physpasses
+hook.Add("VGUIPhysPassComplete", "VGUIPhysPassComplete.dphysbox", function()
+	for physbox, v in pairs(GAMEMODE.VGUIPhysboxes) do
+		physbox.transAggroData = nil
+	end
+end)
 
 function PANEL:OnRemove()
 	GAMEMODE.VGUIPhysboxes[self] = nil

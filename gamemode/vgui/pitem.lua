@@ -55,7 +55,11 @@ function PANEL:Think()
 	local tx, ty = self:GetDesiredTranslation()
 	local vx, vy = self:GetVel()
 
+	--print("tx", tx, "ty", ty)
+
 	self:SetMPos(mx + tx + vx, my + ty + vy)
+	self:SetDesiredTranslation(0, 0)
+
 	mx, my = self:GetMPos()
 	local rmx, rmy = math.Round(mx, 0), math.Round(my, 0)
 

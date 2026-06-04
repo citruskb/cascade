@@ -34,7 +34,7 @@ local math_Min = math.Min
 
 local cache = {}
 local function ResetCache() cache = {} end
-hook.Add("VGUIPhysPass", "VGUIPhysPass.ResetVGUISATCache", ResetCache)
+hook.Add("VGUIPhysPassComplete", "VGUIPhysPassComplete.ResetVGUISATCache", ResetCache)
 
 local function GetCachedInfo(obj, id)
 	local data = Rawget(cache, obj)
@@ -107,15 +107,16 @@ local function GetOrCacheProjRange(hb, points, normal)
 end
 
 local function GetCachedCollision(hbA, hbB)
-	return GetCachedInfo("collisions", ToString(hbA) .. ToString(hbB))
+	local collisions = GetCachedInfo(hbA, "collisions")
+	if not collisions then return end
+
+	return Rawget(collisions, hbB)
 end
 
-local function SetCachedCollision(hbA, hbB, data)
+local function SetCachedCollision(hbA, hbB)
 	if GetCachedCollision(hbA, hbB) then Error("[VGUIPHYS] - Doubled up collision event!") end
-
-	local sa, sb = ToString(hbA), ToString(hbA, hbB)
-	SetCachedInfo("collisions", sa .. sb, data)
-	SetCachedInfo("collisions", sb .. sa, data)
+	SetCachedInfo(hbA, "collisions", {[hbB] = true})
+	SetCachedInfo(hbB, "collisions", {[hbA] = true})
 end
 
 local function GetRangeOverlap(rangeA, rangeB)
@@ -176,7 +177,9 @@ function GM:VGUISAT(hbA, hbB)
 		local overlap = GetRangeOverlap(projRangeA, projRangeB)
 
 		-- If overlap is too small.. hard stop. No collision.
-		if overlap <= VGUIPHYS_SLOP then return end
+		if overlap <= VGUIPHYS_SLOP then
+			return
+		end
 
 		-- Save information regarding our collision with the MTV if it's found.
 		if smallestOverlap and overlap > smallestOverlap then continue end
@@ -194,7 +197,9 @@ function GM:VGUISAT(hbA, hbB)
 		local projRangeA = GetOrCacheProjRange(hbB, pointsA, normalB)
 		local overlap = GetRangeOverlap(projRangeB, projRangeA)
 
-		if overlap <= VGUIPHYS_SLOP then return end
+		if overlap <= VGUIPHYS_SLOP then
+			return
+		end
 
 		if smallestOverlap and overlap > smallestOverlap then continue end
 		smallestOverlap = overlap
@@ -218,7 +223,7 @@ function GM:VGUISAT(hbA, hbB)
 	mtv = OrientMTV(hbA, hbB, mtv)
 
 	-- Finally build and cache our collision information, and return it.
-	collision = {hbA = hbA, hbB = hbB, vphysA = hbA:GetParent(), vphysB = hbB:GetParent(), overlap = overlap, mtv = mtv}
+	collision = {hbA = hbA, hbB = hbB, vphysA = hbA:GetParent(), vphysB = hbB:GetParent(), overlap = smallestOverlap, mtv = mtv}
 	SetCachedCollision(hbA, hbB, collision)
 
 	return collision
