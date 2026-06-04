@@ -36,9 +36,8 @@ PANEL = {}
 
 function PANEL:Init()
 	self:DisablePhysics()
-
-	self:SetMPos(0, 0)
-	self:SetDesiredTranslation(0, 0)
+	self:SetMPos(Vector2(0, 0))
+	self:SetDesiredTranslation(Vector2(0, 0))
 
 	local physbox = vgui.Create("DPhysbox", self)
 	self.physbox = physbox
@@ -49,26 +48,24 @@ function PANEL:Paint() end
 function PANEL:Think()
 	if not self.Physics then return end
 
-	-- Update position based on velocity.
-	-- The reason we use "mx" "my" as a medium is because panels don't track fractional position.
-	local mx, my = self:GetMPos()
-	local tx, ty = self:GetDesiredTranslation()
-	local vx, vy = self:GetVel()
+	-- Update position based on velocity and desired translations.
+	-- The reason we use "mpos" as a medium is because panels don't track fractional position
 
-	--print("tx", tx, "ty", ty)
+	local t = self:GetDesiredTranslation()
+	local v = self:GetVel()
+	local mpos = self:GetMPos()
+	mpos:Add(t:Add(v))
+	t:Zero()
 
-	self:SetMPos(mx + tx + vx, my + ty + vy)
-	self:SetDesiredTranslation(0, 0)
-
-	mx, my = self:GetMPos()
+	local mx, my = mpos:Unpack()
 	local rmx, rmy = math.Round(mx, 0), math.Round(my, 0)
-
 	local dx, dy = math.Abs(mx) >= 1 and rmx or 0, math.Abs(my) >= 1 and rmy or 0
+	local delta = Vector2(dx, dy)
 
-	if dx ~= 0 or dy ~= 0 then
-		local x, y = self:GetPos()
-		self:SetPos(x + dx, y + dy)
-		self:AddMPos(-dx, -dy)
+	if not delta:IsZero() then
+		local pos = self:GetVPos()
+		pos:Add(delta)
+		mpos:Sub(delta)
 	end
 
 	self:InvalidateLayout(true)
@@ -76,67 +73,31 @@ end
 
 
 -- [[ Define velocity ]]
-function PANEL:GetVel()
-	local tab = self.vel
-	return tab.x, tab.y
-end
-function PANEL:SetVel(x, y) self.vel = {x = x, y = y} end
-function PANEL:AddVel(xAdd, yAdd)
-	local vx, vy = self:GetVel()
-	self:SetVel(vx + xAdd, vy + yAdd)
-end
+function PANEL:GetVel() return self.vel end
+function PANEL:SetVel(vec2) self.vel = vec2 end
+function PANEL:AddVel(vec2) self:GetVel():Add(vec2) end
 -- [[	]]
 
 
 -- [[ Define fractional movement ]]
-function PANEL:GetMPos()
-	local tab = self.mpos
-	return tab.x, tab.y
-end
-function PANEL:SetMPos(x, y) self.mpos = {x = x, y = y} end
-function PANEL:AddMPos(xAdd, yAdd)
-	local mx, my = self:GetMPos()
-	self:SetMPos(mx + xAdd, my + yAdd)
-end
+function PANEL:GetMPos() return self.mpos end
+function PANEL:SetMPos(vec2) self.mpos = vec2 end
+function PANEL:AddMPos(vec2) self:GetMPos():Add(vec2) end
 -- [[	]]
 
 
 -- [[ Define desired movement (used for collision resolution passes) ]]
-function PANEL:GetDesiredTranslation()
-	local tab = self.translation
-	return Rawget(tab, "x"), Rawget(tab, "y")
-end
-function PANEL:SetDesiredTranslation(x, y)
-	local tab = self.translation
-	if not tab then
-		tab = {}
-		self.translation = tab
-	end
-
-	Rawset(tab, "x", x)
-	Rawset(tab, "y", y)
-end
-function PANEL:AddDesiredTranslation(xAdd, yAdd)
-	local x, y = self:GetDesiredTranslation()
-	self:SetDesiredTranslation(x + xAdd, y + yAdd)
-end
-function PANEL:HasDesiredTranslation()
-	local x, y = self:GetDesiredTranslation()
-	return x ~= 0 or y ~= 0
-end
-
-function PANEL:GetDesiredPosition()
-	local x, y = self:GetPos()
-	local tx, ty = self:GetDesiredTranslation()
-	return x + tx, y + ty
-end
+function PANEL:GetDesiredTranslation() return self.translation end
+function PANEL:SetDesiredTranslation(vec2) self.translation = vec2 end
+function PANEL:AddDesiredTranslation(vec2) self:GetDesiredTranslation():Add(vec2) end
+function PANEL:HasDesiredTranslation() return not self:GetDesiredTranslation():IsZero() end
 -- [[	]]
 
 
 -- [[ Define physics enable ]]
 function PANEL:EnablePhysics()
 	self.Physics = true
-	self:SetVel(0, 0)
+	self:GetVel():Zero()
 end
 function PANEL:DisablePhysics()
 	self.Physics = false

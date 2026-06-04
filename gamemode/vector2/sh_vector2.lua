@@ -5,6 +5,8 @@ local math_Cos = math.Cos
 local math_Sin = math.Sin
 local math_PI = math.PI
 
+VECTOR2_ZERO = Vector2(0, 0)
+
 local function GetNormalVars(vector2)
 	local len = vector2:Length()
 	local nx = Rawget(vector2, "x") / len
@@ -211,6 +213,12 @@ function meta:Set(other)
 	Rawset(self, "y", Rawget(other, "y"))
 end
 
+-- Sets the x and y of the vector.
+function meta:SetUnpacked(x, y)
+	Rawset(self, "x", x)
+	Rawset(self, "y", y)
+end
+
 -- The same as Sub above but modifies this vector.
 function meta:Sub(other)
 	Rawset(self, "x", Rawget(self, "x") - Rawget(other, "x"))
@@ -234,4 +242,5 @@ function meta:Zero()
 	Rawset(self, "x", 0)
 	Rawset(self, "y", 0)
 end
+
 -- [[	]]

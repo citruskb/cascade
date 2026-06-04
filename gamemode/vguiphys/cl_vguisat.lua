@@ -57,12 +57,11 @@ local function GetOrCacheNormal(hb, points, i)
 	local normal = GetCachedInfo(hb, "normal" .. i)
 
 	if not normal then
-		local p1 = Rawget(points, i)
-		local p2 = Rawget(points, i == #points and 1 or i + 1)
-		local axisX, axisY = Rawget(p1, "y") - Rawget(p2, "y"), Rawget(p2, "x") - Rawget(p1, "x")
+		local vec1 = Rawget(points, i)
+		local vec2 = Rawget(points, i == #points and 1 or i + 1)
+		normal = Vector2(Rawget(vec1, "y") - Rawget(vec2, "y"), Rawget(vec2, "x") - Rawget(vec1, "x"))
+		normal:Normalize()
 
-		local len = math.Sqrt(axisX ^ 2 + axisY ^ 2)
-		normal = {x = axisX / len, y = axisY / len}
 		SetCachedInfo(hb, "normal" .. i, normal)
 	end
 
@@ -75,7 +74,7 @@ end
 local function GetOrCacheProjRange(hb, points, normal)
 	local projRangeData = GetCachedInfo(hb, "projRange")
 	local projRange
-	local nx, ny = Rawget(normal, "x"), Rawget(normal, "y")
+	local nx, ny = normal:Unpack()
 
 	if projRangeData and Rawget(projRangeData, nx) and Rawget(Rawget(projRangeData, nx), ny) then
 		projRange = Rawget(Rawget(projRangeData, nx), ny)
@@ -84,7 +83,8 @@ local function GetOrCacheProjRange(hb, points, normal)
 	if not projRange then
 		local min, max
 		for j = 1, #points do
-			local x, y = Rawget(Rawget(points, j), "x"), Rawget(Rawget(points, j), "y")
+			local point = Rawget(points, j)
+			local x, y = point:Unpack()
 			local proj = x * nx + y * ny
 
 			if not min or (min and proj < min) then min = proj end
@@ -127,17 +127,10 @@ local function OrientMTV(hbA, hbB, normalA)
 	local centerA, centerB = hbA:GetAggregateCenter(), hbB:GetAggregateCenter()
 
 	-- Find the direction pointing from the center of hbB towards the center of hbA.
-	local cax, cay = Rawget(centerA, "x"), Rawget(centerA, "y")
-	local cbx, cby = Rawget(centerB, "x"), Rawget(centerB, "y")
-	local centerDir = {x = cbx - cax, y = cby - cay}
+	local centerDir = centerB - centerA
 
-	-- Find the dot product of the center dir with the normal calculated from hbA.
-	local nax, nay = Rawget(normalA, "x"), Rawget(normalA, "y")
-	local cdx, cdy = Rawget(centerDir, "x"), Rawget(centerDir, "y")
-	local dot = nax * cdx + nay * cdy
-
-	-- If this dot product is negative, it means we need to flip our MTV. Otherwise, the normal is the MTV.
-	return dot < 0 and {x = -nax, y = -nay} or normalA
+	-- If the dot product is negative, it means we need to flip our MTV. Otherwise, the normal is the MTV.
+	return centerDir:Dot(normalA) < 0 and -normalA or normalA
 end
 
 
@@ -154,8 +147,8 @@ function GM:VGUISAT(hbA, hbB)
 	local collision = GetCachedCollision(hbA, hbB)
 	if collision then return end
 
-	local pointsA = hbA:GetTranslatedAggregatePolyData()
-	local pointsB = hbB:GetTranslatedAggregatePolyData()
+	local pointsA = hbA:GetTranslatedAggregateVectorData()
+	local pointsB = hbB:GetTranslatedAggregateVectorData()
 
 	local smallestOverlap, mtv, relativeTo
 

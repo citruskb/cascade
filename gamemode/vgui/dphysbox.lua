@@ -12,23 +12,6 @@ function PANEL:Init()
 	self.isPhysbox = true
 end
 
---[[ -- TODO
-function PANEL:AddHitbox(parent, w, h)
-	local pw, ph = parent:GetSize()
-	local hb = vgui.Create("DHitbox", parent)
-	hb:SetSize(pw, ph)
-
-	hb.Shape = POLY_RECTANGLE
-	hb.ShapeW, hb.ShapeH = w, h
-	hb.Angle = 0
-	hb:InvalidateLayout(true)
-end
-
-function PANEL:AddCircularHitbox()
-
-end
-]]
-
 function PANEL:AddHitbox(w, h, offset)
 	local mw, mh = self:GetSize()
 	local hb = vgui.Create("DHitbox", self)
@@ -37,11 +20,11 @@ function PANEL:AddHitbox(w, h, offset)
 	offset = offset or 0
 
 	hb.Shape = POLY_CUSTOM
-	hb.customPoints = {
-		{x = 0 + offset, y = 0 + offset},
-		{x = w + offset, y = 0 + offset},
-		{x = w + offset, y = h + offset},
-		{x = 0 + offset, y = h + offset},
+	hb.vectorPoints = {
+		Vector2(0 + offset, 0 + offset),
+		Vector2(w + offset, 0 + offset),
+		Vector2(w + offset, h + offset),
+		Vector2(0 + offset, h + offset),
 	}
 	hb.Angle = 0
 	hb:InvalidateLayout(true)
@@ -49,53 +32,51 @@ function PANEL:AddHitbox(w, h, offset)
 	table.Insert(self.hbs, hb)
 end
 
-
-
 function PANEL:AddCustomHitbox(data)
 	local w, h = self:GetSize()
 	local hb = vgui.Create("DHitbox", self)
 	hb:SetSize(w, h)
 
 	hb.Shape = POLY_CUSTOM
-	hb.customPoints = data
+	hb.vectorPoints = data
 	hb.Angle = 0
 	hb:InvalidateLayout(true)
 
 	table.Insert(self.hbs, hb)
 end
 
-function PANEL:AggregatePolyData()
-	local ret = self.aggregatePolyData
+function PANEL:AggregateVectorData()
+	local ret = self.aggregateVectorData
 
 	if not ret then
 		ret = {}
 		for k, hb in pairs(self.hbs) do
-			table.Add(ret, hb.polyData)
+			table.Add(ret, hb.manipulatedVectorData)
 		end
-		self.aggregatePolyData = ret
+		self.aggregateVectorData = ret
 	end
 
 	return ret
 end
 
 function PANEL:TranslatePointsLocalToScreen(tab)
-	local x, y = self:GetPos()
-	local tx, ty = self:GetDesiredTranslation()
-	local sx, sy = self:LocalToScreen(x, y)
+	local t = self:GetDesiredTranslation()
+	local s = Vector2(self:LocalToScreen(x, y))
 
 	local trans = {}
 	for i = 1, #tab do
-		trans[i] = {x = tab[i].x + tx + sx, y = tab[i].y + ty + sy}
+		local point = tab[i]
+		trans[i] = point + t + s
 	end
 
 	return trans
 end
 
-function PANEL:GetTranslatedAggregatePolyData()
+function PANEL:GetTranslatedAggregateVectorData()
 	local ret = self.transAggroData
 
 	if not ret then
-		ret = self:TranslatePointsLocalToScreen(self:AggregatePolyData())
+		ret = self:TranslatePointsLocalToScreen(self:AggregateVectorData())
 		self.transAggroData = ret
 	end
 
@@ -104,15 +85,16 @@ end
 
 function PANEL:GetAggregateCenter()
 	local ret = self.aggregateCenter
-	local data = self:AggregatePolyData()
+	local data = self:AggregateVectorData()
 
 	if not ret then
 		local xsum, ysum = 0, 0
 		for _, point in pairs(data) do
-			xsum = xsum + point.x
-			ysum = ysum + point.y
+			local x, y = point:Unpack()
+			xsum = xsum + x
+			ysum = ysum + y
 		end
-		ret = {x = xsum / #data, y = ysum / #data}
+		ret = Vector2(xsum / #data, ysum / #data)
 		self.aggregateCenter = ret
 	end
 
@@ -124,7 +106,7 @@ function PANEL:Paint(w, h)
 end
 
 function PANEL:Think()
-	self.aggregatePolyData = nil
+	self.aggregateVectorData = nil
 	self.aggregateCenter = nil
 end
 
@@ -145,13 +127,13 @@ function PANEL:GetVel()
 	local parent = self:GetParent()
 	if parent.GetVel then return parent:GetVel() end
 end
-function PANEL:SetVel(x, y)
+function PANEL:SetVel(vec2)
 	local parent = self:GetParent()
-	if parent.SetVel then parent:SetVel(x, y) end
+	if parent.SetVel then parent:SetVel(vec2) end
 end
-function PANEL:AddVel(xAdd, yAdd)
+function PANEL:AddVel(vec2)
 	local parent = self:GetParent()
-	if parent.AddVel then parent:AddVel(xAdd, yAdd) end
+	if parent.AddVel then parent:AddVel(vec2) end
 end
 -- [[	]]
 
@@ -161,15 +143,15 @@ function PANEL:GetDesiredTranslation()
 	local parent = self:GetParent()
 	if parent.GetDesiredTranslation then return parent:GetDesiredTranslation() end
 
-	return 0, 0
+	return VECTOR2_ZERO
 end
-function PANEL:SetDesiredTranslation(x, y)
+function PANEL:SetDesiredTranslation(vec2)
 	local parent = self:GetParent()
-	if parent.SetDesiredTranslation then parent:SetDesiredTranslation(x, y) end
+	if parent.SetDesiredTranslation then parent:SetDesiredTranslation(vec2) end
 end
-function PANEL:AddDesiredTranslation(xAdd, yAdd)
+function PANEL:AddDesiredTranslation(vec2)
 	local parent = self:GetParent()
-	if parent.AddDesiredTranslation then parent:AddDesiredTranslation(xAdd, yAdd) end
+	if parent.AddDesiredTranslation then parent:AddDesiredTranslation(vec2) end
 end
 function PANEL:HasDesiredTranslation()
 	local parent = self:GetParent()

@@ -23,14 +23,8 @@ function GM:ResolveAllVGUICollisions()
 end
 
 local function ApplyTranslations(rootA, vphysA, rootB, vphysB, translationA)
-	local tx, ty = Rawget(translationA, "x"), Rawget(translationA, "y")
-	if IsValid(rootA) and rootA.GetDesiredTranslation then
-		rootA:AddDesiredTranslation(tx, ty)
-	end
-
-	if IsValid(rootB) and rootB.GetDesiredTranslation then
-		rootB:AddDesiredTranslation(-tx, -ty)
-	end
+	if IsValid(rootA) and rootA.GetDesiredTranslation then rootA:AddDesiredTranslation(translationA) end
+	if IsValid(rootB) and rootB.GetDesiredTranslation then rootB:AddDesiredTranslation(-translationA) end
 end
 
 function GM:ResolveVGUICollision(data)
@@ -48,6 +42,7 @@ function GM:ResolveVGUICollision(data)
 	-- Only do a corrective translation if penetration is large enough.
 	if overlap <= VGUIPHYS_SLOP then return end
 	local cappedOverlap = math.Min(overlap, 1)
-	local translationA = {x = -mtv.x * cappedOverlap, y = -mtv.y * cappedOverlap}
+	local translationA = -mtv * cappedOverlap
+
 	ApplyTranslations(rootA, vphysA, rootB, vphysB, translationA)
 end

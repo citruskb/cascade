@@ -24,8 +24,6 @@ function GM:VGUIPhysThink()
 		if not IsValid(vphys) then continue end
 		if vphys.resting then continue end
 
-		print(vphys, "is NOT resting.")
-
 		-- Add our gravity up to our terminal velocity.
 		local _, vy = vphys:GetVel()
 		if vy and vy < VGUIPHYS_TERMINAL_VELOCITY then

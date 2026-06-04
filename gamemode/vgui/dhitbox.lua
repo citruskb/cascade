@@ -68,7 +68,7 @@ local PolyFuncs = {
 	end,
 	[POLY_CUSTOM] = function(self)
 		local ox, oy = self:GetPos()
-		return RotateDataAroundPoint(self.customPoints, ox, oy, self.Angle)
+		return RotateDataAroundPoint(self.vectorPoints, ox, oy, self.Angle)
 	end
 }
 
@@ -92,19 +92,19 @@ function PANEL:OnRemove()
 end
 
 function PANEL:PerformLayout(w, h)
-	self.polyData = PolyFuncs[self.Shape](self)
+	local manipulated = PolyFuncs[self.Shape](self)
+	self.manipulatedVectorData = manipulated
+
+	-- TODO: Check if this is only be necessary when drawing hitboxes? Probably moderate perf save.
+	self.polyData = {}
+	for i = 1, #manipulated do
+		local x, y = manipulated[i]:Unpack()
+		self.polyData[i] = {x = x, y = y}
+	end
 end
 
 function PANEL:Paint(w, h)
 	if not GAMEMODE.Debug then return end
-
-	--[[
-	local data = {
-		{x = 0, y = 0},
-		{x = 20, y = 0},
-		{x = 10, y = 40},
-	}
-	]]
 
 	local data = self.polyData
 
@@ -125,23 +125,25 @@ function PANEL:Paint(w, h)
 end
 
 -- [[ Compatability with some dphysbox functions. ]]
-function PANEL:AggregatePolyData()
-	return self.polyData
+function PANEL:AggregateVectorData()
+	return self.manipulatedVectorData
 end
-function PANEL:GetTranslatedAggregatePolyData()
-	return self:GetParent():TranslatePointsLocalToScreen(self:AggregatePolyData())
+function PANEL:GetTranslatedAggregateVectorData()
+	return self:GetParent():TranslatePointsLocalToScreen(self:AggregateVectorData())
 end
 function PANEL:GetAggregateCenter()
 	local ret = self.aggregateCenter
-	local data = self:AggregatePolyData()
+	local data = self:AggregateVectorData()
 
 	if not ret then
 		local xsum, ysum = 0, 0
 		for _, point in pairs(data) do
-			xsum = xsum + point.x
-			ysum = ysum + point.y
+			local x, y = point:Unpack()
+
+			xsum = xsum + x
+			ysum = ysum + y
 		end
-		ret = {x = xsum / #data, y = ysum / #data}
+		ret = Vector2(xsum / #data, ysum / #data)
 		self.aggregateCenter = ret
 	end
 
