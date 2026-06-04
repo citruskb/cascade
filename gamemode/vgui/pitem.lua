@@ -55,12 +55,6 @@ function PANEL:Think()
 	local v = self:GetVel()
 	local mpos = self:GetMPos()
 
-	--[[
-	print("\n")
-	print(t)
-	print(v)
-	print(mpos)
-	]]
 	mpos:DoAdd(t + v)
 	t:Zero()
 

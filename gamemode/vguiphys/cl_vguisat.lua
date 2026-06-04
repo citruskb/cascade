@@ -169,8 +169,15 @@ function GM:VGUISAT(hbA, hbB)
 		-- Get our overlap!
 		local overlap = GetRangeOverlap(projRangeA, projRangeB)
 
+		-- No collision.
+		if overlap <= 0 then
+			SetCachedCollision(hbA, hbB)
+			return
+		end
+
 		-- Save information regarding our collision with the MTV if it's found.
 		if smallestOverlap and overlap > smallestOverlap then continue end
+
 		smallestOverlap = overlap
 		mtv = normalA
 		relativeTo = hbA
@@ -185,7 +192,13 @@ function GM:VGUISAT(hbA, hbB)
 		local projRangeA = GetOrCacheProjRange(hbB, pointsA, normalB)
 		local overlap = GetRangeOverlap(projRangeB, projRangeA)
 
+		if overlap <= 0 then
+			SetCachedCollision(hbA, hbB)
+			return
+		end
+
 		if smallestOverlap and overlap > smallestOverlap then continue end
+
 		smallestOverlap = overlap
 		mtv = normalB
 		relativeTo = hbB
@@ -206,9 +219,8 @@ function GM:VGUISAT(hbA, hbB)
 	-- Orient our MTV correctly.
 	mtv = OrientMTV(hbA, hbB, mtv)
 
-	-- Finally build and cache our collision information, and return it.
-	collision = {hbA = hbA, hbB = hbB, vphysA = hbA:GetParent(), vphysB = hbB:GetParent(), overlap = smallestOverlap, mtv = mtv}
-	SetCachedCollision(hbA, hbB, collision)
+	-- Finally cache that we checked our collision and return our collision information.
+	SetCachedCollision(hbA, hbB)
 
-	return collision
+	return {hbA = hbA, hbB = hbB, vphysA = hbA:GetParent(), vphysB = hbB:GetParent(), overlap = smallestOverlap, mtv = mtv}
 end

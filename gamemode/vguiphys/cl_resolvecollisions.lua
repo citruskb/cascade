@@ -26,8 +26,34 @@ local function ApplyTranslations(rootA, vphysA, rootB, vphysB, translationA)
 	if IsValid(rootA) and rootA.GetDesiredTranslation then rootA:AddDesiredTranslation(translationA) end
 	if IsValid(rootB) and rootB.GetDesiredTranslation then rootB:AddDesiredTranslation(-translationA) end
 end
+local function ResolveVelocity(rootA, vphysA, rootB, vphysB, mtv)
+	local velA = rootA.GetVel and rootA:GetVel()
+	if velA then
+		print("velA")
+		print(velA)
+		local dot = velA:Dot(mtv)
+
+		print("dot", dot)
+		if dot > 0 then
+			velA:DoSub(mtv * dot)
+		end
+	end
+
+	local velB = rootB.GetVel and rootB:GetVel()
+	if velB then
+		print("velB")
+		print(velB)
+		local dot = velB:Dot(mtv)
+
+		print("dot", dot)
+		if dot > 0 then
+			velB:DoSub(mtv * dot)
+		end
+	end
+end
 
 function GM:ResolveVGUICollision(data)
+	print("resolving collision!")
 	--local hbA, hbB = Rawget(data, "hbA"), Rawget(data, "hbB") -- TODO: Might not be needed?
 	local vphysA = Rawget(data, "vphysA")
 	local vphysB = Rawget(data, "vphysB")
@@ -40,9 +66,11 @@ function GM:ResolveVGUICollision(data)
 	-- The root might be invalid if we are a solid wall!
 
 	-- Only do a corrective translation if penetration is large enough.
-	if overlap <= VGUIPHYS_SLOP then return end
-	local cappedOverlap = math.Min(overlap, 1)
-	local translationA = -mtv * cappedOverlap
+	if overlap > VGUIPHYS_SLOP then 
+		local cappedOverlap = math.Min(overlap, 1)
+		local translationA = -mtv * cappedOverlap
+		ApplyTranslations(rootA, vphysA, rootB, vphysB, translationA)
+	end
 
-	ApplyTranslations(rootA, vphysA, rootB, vphysB, translationA)
+	ResolveVelocity(rootA, vphysA, rootB, vphysB, mtv)
 end
