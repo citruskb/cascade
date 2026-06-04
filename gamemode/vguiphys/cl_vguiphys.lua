@@ -18,6 +18,7 @@ VGUIPHYS_GRAVITY = 0.024
 VGUIPHYS_TERMINAL_VELOCITY = 1.4
 
 function GM:VGUIPhysThink()
+
 	-- Handle gravity.
 	for vphys, _ in pairs(self.VGUIPhysboxes) do
 		if not IsValid(vphys) then continue end
@@ -32,5 +33,8 @@ function GM:VGUIPhysThink()
 		end
 	end
 
+	-- Resolve our collisions.
 	gamemode.Call("ResolveAllVGUICollisions")
+
+	-- Set objects resting if doing so makes sense.
 end

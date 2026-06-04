@@ -176,11 +176,6 @@ function GM:VGUISAT(hbA, hbB)
 		-- Get our overlap!
 		local overlap = GetRangeOverlap(projRangeA, projRangeB)
 
-		-- If overlap is too small.. hard stop. No collision.
-		if overlap <= VGUIPHYS_SLOP then
-			return
-		end
-
 		-- Save information regarding our collision with the MTV if it's found.
 		if smallestOverlap and overlap > smallestOverlap then continue end
 		smallestOverlap = overlap
@@ -196,10 +191,6 @@ function GM:VGUISAT(hbA, hbB)
 		local projRangeB = GetOrCacheProjRange(hbB, pointsB, normalB)
 		local projRangeA = GetOrCacheProjRange(hbB, pointsA, normalB)
 		local overlap = GetRangeOverlap(projRangeB, projRangeA)
-
-		if overlap <= VGUIPHYS_SLOP then
-			return
-		end
 
 		if smallestOverlap and overlap > smallestOverlap then continue end
 		smallestOverlap = overlap

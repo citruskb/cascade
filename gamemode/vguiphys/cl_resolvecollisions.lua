@@ -1,10 +1,14 @@
+GM.VGUIPhysPassCount = 0
 local gamemode_Call = gamemode.Call
 
 function GM:VGUIPhysPassComplete() end
+function GM:VGUIPhysCollisionsResolved() return self.VGUIPhysPassCount == VGUIPHYS_PASSES end
 
 function GM:ResolveAllVGUICollisions()
 	local hitboxes = GAMEMODE.VGUIHitboxes
 	for i = 1, VGUIPHYS_PASSES do
+		GAMEMODE.VGUIPhysPassCount = i
+
 		for hbA, _  in pairs(hitboxes) do
 			for hbB, _ in pairs(hitboxes) do
 				local collision = gamemode_Call("VGUISAT", hbA, hbB)
@@ -15,6 +19,17 @@ function GM:ResolveAllVGUICollisions()
 		end
 
 		gamemode_Call("VGUIPhysPassComplete")
+	end
+end
+
+local function ApplyTranslations(rootA, vphysA, rootB, vphysB, translationA)
+	local tx, ty = Rawget(translationA, "x"), Rawget(translationA, "y")
+	if IsValid(rootA) and rootA.GetDesiredTranslation then
+		rootA:AddDesiredTranslation(tx, ty)
+	end
+
+	if IsValid(rootB) and rootB.GetDesiredTranslation then
+		rootB:AddDesiredTranslation(-tx, -ty)
 	end
 end
 
@@ -30,40 +45,9 @@ function GM:ResolveVGUICollision(data)
 	-- We desire to apply a translation to resolve the collision.
 	-- The root might be invalid if we are a solid wall!
 
-	if IsValid(rootA) then
-		if rootA.GetDesiredTranslation then
-			local TranslateA = {x = -mtv.x * overlap / 2, y = -mtv.y * overlap / 2}
-			rootA:AddDesiredTranslation(Rawget(TranslateA, "x"), Rawget(TranslateA, "y"))
-		end
-
-
-		if rootA.GetVel then
-			local mtvy = Rawget(mtv, "y")
-			local velx, vely = rootA:GetVel()
-			if mtvy > 0.9 and vely >= 0 then
-				rootA:SetVel(velx, 0)
-				vphysA.resting = true
-			else
-				vphysA.resting = false
-			end
-		end
-	end
-
-	if IsValid(rootB) and rootB.GetDesiredTranslation then
-		if rootB.GetDesiredTranslation then
-			local TranslateB = {x = mtv.x * overlap / 2, y = mtv.y * overlap / 2}
-			rootB:AddDesiredTranslation(Rawget(TranslateB, "x"), Rawget(TranslateB, "y"))
-		end
-
-		if rootB.GetVel then
-			local mtvy = Rawget(mtv, "y")
-			local velx, vely = rootB:GetVel()
-			if mtvy < -0.9 and vely >= 0 then
-				rootB:SetVel(velx, 0)
-				vphysB.resting = true
-			else
-				vphysB.resting = false
-			end
-		end
-	end
+	-- Only do a corrective translation if penetration is large enough.
+	if overlap <= VGUIPHYS_SLOP then return end
+	local cappedOverlap = math.Min(overlap, 1)
+	local translationA = {x = -mtv.x * cappedOverlap, y = -mtv.y * cappedOverlap}
+	ApplyTranslations(rootA, vphysA, rootB, vphysB, translationA)
 end
