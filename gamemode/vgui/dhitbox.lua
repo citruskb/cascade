@@ -6,11 +6,7 @@
 
 -- Controls how many segments cicular shapes should be composed of.
 
-POLY_RECTANGLE = 1
-POLY_ELLIPSE = 2
-POLY_CUSTOM = 3
---POLY_SQUARE = 3
---POLY_CIRCLE = 4
+POLY_CUSTOM = 1
 
 if not GM.StaticHitboxes then GM.StaticHitboxes = {} end
 
@@ -18,57 +14,30 @@ PANEL = {}
 
 local debugMat = surface.GetTextureID("vgui/white")
 
-local function RotateDataAroundPoint(data, ox, oy, angle)
+local function RotateDataAroundPoint(data, point, angle)
 	if angle == 0 then return data end
+
+	local ox, oy = point:Unpack()
 
 	local radians = math.Rad(angle)
 	local cosTheta, sinTheta = math.Cos(radians), math.Sin(radians)
 
 	local ret = {}
-	for i = 1, #shape do
-		local x, y = data[i].x, data[i].y
-		local point = {}
-		point.x = ox + cosTheta * (x-ox) - sinTheta * (y-oy)
-		point.y = oy + sinTheta * (x-ox) + cosTheta * (y-oy)
+	for i = 1, #data do
+		local x, y = data[i]:Unpack()
+		local newX = ox + cosTheta * (x-ox) - sinTheta * (y-oy)
+		local newY = oy + sinTheta * (x-ox) + cosTheta * (y-oy)
 
-		ret[i] = point
+		ret[i] = Vector2(newX, newY)
 	end
 
 	return ret
 end
 
 local PolyFuncs = {
-	[POLY_RECTANGLE] = function(self)
-		-- Our polynomial points needs to be defined in clockwise order.
-		local halfW, halfH = self.ShapeW * 0.5, self.ShapeH * 0.5
-		local points = {
-			{x = halfW, y = halfH},
-			{x = halfW, y = -halfH},
-			{x = -halfW, y = -halfH},
-			{x = -halfW, y = halfH},
-		}
-
-		local ox, oy = self:GetPos()
-		return RotateDataAroundPoint(points, ox, oy, self.Angle)
-	end,
-	[POLY_ELLIPSE] = function(self)
-		-- Defined in clockwise order?
-		local ox, oy = self:GetPos()
-		local rx, ry = self.ShapeRX, self.ShapeRY
-		local radStep = math.Rad(360 / POLY_RESOLUTION)
-		local points = {}
-		for i = 0, POLY_RESOLUTION do
-			local rad = i * radStep
-			local point = {}
-			point.x = ox + math.Cos(rad) * rx
-			point.y = oy + math.Sin(rad) * ry
-		end
-
-		return RotateDataAroundPoint(points, ox, oy, self.Angle)
-	end,
 	[POLY_CUSTOM] = function(self)
-		local ox, oy = self:GetPos()
-		return RotateDataAroundPoint(self.vectorPoints, ox, oy, self.Angle)
+		local point = self:GetVPos()
+		return RotateDataAroundPoint(self.vectorPoints, point, self.Angle)
 	end
 }
 

@@ -5,8 +5,6 @@ local math_Cos = math.Cos
 local math_Sin = math.Sin
 local math_PI = math.PI
 
-VECTOR2_ZERO = Vector2(0, 0)
-
 local function GetNormalVars(vector2)
 	local len = vector2:Length()
 	local nx = Rawget(vector2, "x") / len
@@ -15,13 +13,11 @@ local function GetNormalVars(vector2)
 	return nx, ny
 end
 
-if not vec2 then
-	vec2 = Class:Create(nil, "v2")
+if not v2 then
+	v2 = Class:Create(nil, "v2")
 end
 
-function Vector2(x, y) return v2:Create(x, y) end
-
-local meta = FindMetaTable("vec2")
+local meta = FindMetaTable("v2")
 function meta:ThrowError(msg) Error("[Vector2] - " .. msg) end
 
 function v2:__Create(x, y)
@@ -75,7 +71,7 @@ end
 -- [[ Other meta functions. ]]
 
 -- Adds vectors without making a new object.
-function meta:Add(vec)
+function meta:DoAdd(vec)
 	Rawset(self, "x", Rawget(self, "x") + Rawget(vec, "x"))
 	Rawset(self, "y", Rawget(self, "y") + Rawget(vec, "y"))
 	Rawset(self, "_length", nil)
@@ -110,7 +106,7 @@ function meta:Distance(other)
 end
 
 -- Divides, changing this vector instead of making an entirely new one.
-function meta:Div(divisor)
+function meta:DoDiv(divisor)
 	Rawset(self, "x", Rawget(self, "x") / divisor)
 	Rawset(self, "y", Rawget(self, "y") / divisor)
 
@@ -164,7 +160,7 @@ function meta:LengthSqr()
 end
 
 -- The same as Mul above, but modifies this vector.
-function meta:Mul(num)
+function meta:DoMul(num)
 	Rawset(self, "x", Rawget(self, "x") * num)
 	Rawset(self, "y", Rawget(self, "y") * num)
 
@@ -220,7 +216,7 @@ function meta:SetUnpacked(x, y)
 end
 
 -- The same as Sub above but modifies this vector.
-function meta:Sub(other)
+function meta:DoSub(other)
 	Rawset(self, "x", Rawget(self, "x") - Rawget(other, "x"))
 	Rawset(self, "y", Rawget(self, "y") - Rawget(other, "y"))
 end
@@ -244,3 +240,7 @@ function meta:Zero()
 end
 
 -- [[	]]
+
+
+function Vector2(x, y) return v2:Create(x or 0, y or 0) end
+VECTOR2_ZERO = Vector2(0, 0)

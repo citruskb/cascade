@@ -123,19 +123,19 @@ function PANEL:Init()
 		item:SetPos(bx, by)
 		item.physbox:SetSize(size, size)
 		item.physbox:AddCustomHitbox({
-			{x = 1, y = 1},
-			{x = size - 1, y = 1},
-			{x = size - 1, y = size - 1},
-			{x = 1, y = size - 1},
+			Vector2(1, 1),
+			Vector2(size - 1, 1),
+			Vector2(size - 1, size - 1),
+			Vector2(1, size - 1),
 		})
 
 		item:EnablePhysics()
-		item:SetVel(0, yvel)
+		item:SetVel(Vector2(0, yvel))
 	end
 
 	MakeBox(20, w * 0.52, h * 0.4, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
-	MakeBox(60, w * 0.42, h * 0.4, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
-	MakeBox(40, w * 0.62, h * 0.4, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
+	--MakeBox(60, w * 0.42, h * 0.4, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
+	--MakeBox(40, w * 0.62, h * 0.4, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
 
 	--MakeBox(50, w * 0.6, h * 0.35, -VGUIPHYS_TERMINAL_VELOCITY)
 

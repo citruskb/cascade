@@ -13,6 +13,7 @@ VGUIPHYS_SLOP = 1
 
 -- Amount to nudge velocity downwards every frame.
 VGUIPHYS_GRAVITY = 0.024
+VGUIPHYS_GRAVITY_VEC2 = Vector2(0, VGUIPHYS_GRAVITY)
 
 -- Stop nudging velocity downards after reaching this velocity.
 VGUIPHYS_TERMINAL_VELOCITY = 1.4
@@ -25,10 +26,13 @@ function GM:VGUIPhysThink()
 		if vphys.resting then continue end
 
 		-- Add our gravity up to our terminal velocity.
-		local _, vy = vphys:GetVel()
-		if vy and vy < VGUIPHYS_TERMINAL_VELOCITY then
-			vphys:AddVel(0, VGUIPHYS_GRAVITY)
-		end
+		local vel = vphys:GetVel()
+		if not vel then continue end
+
+		local _, vy = vel:Unpack()
+		if vy >= VGUIPHYS_TERMINAL_VELOCITY then continue end
+
+		vphys:AddVel(VGUIPHYS_GRAVITY_VEC2)
 	end
 
 	-- Resolve our collisions.

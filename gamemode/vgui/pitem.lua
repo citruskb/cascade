@@ -54,7 +54,14 @@ function PANEL:Think()
 	local t = self:GetDesiredTranslation()
 	local v = self:GetVel()
 	local mpos = self:GetMPos()
-	mpos:Add(t:Add(v))
+
+	--[[
+	print("\n")
+	print(t)
+	print(v)
+	print(mpos)
+	]]
+	mpos:DoAdd(t + v)
 	t:Zero()
 
 	local mx, my = mpos:Unpack()
@@ -64,8 +71,10 @@ function PANEL:Think()
 
 	if not delta:IsZero() then
 		local pos = self:GetVPos()
-		pos:Add(delta)
-		mpos:Sub(delta)
+		pos:DoAdd(delta)
+
+		self:SetPos(pos:Unpack())
+		mpos:DoSub(delta)
 	end
 
 	self:InvalidateLayout(true)
@@ -75,21 +84,21 @@ end
 -- [[ Define velocity ]]
 function PANEL:GetVel() return self.vel end
 function PANEL:SetVel(vec2) self.vel = vec2 end
-function PANEL:AddVel(vec2) self:GetVel():Add(vec2) end
+function PANEL:AddVel(vec2) self:GetVel():DoAdd(vec2) end
 -- [[	]]
 
 
 -- [[ Define fractional movement ]]
 function PANEL:GetMPos() return self.mpos end
 function PANEL:SetMPos(vec2) self.mpos = vec2 end
-function PANEL:AddMPos(vec2) self:GetMPos():Add(vec2) end
+function PANEL:AddMPos(vec2) self:GetMPos():DoAdd(vec2) end
 -- [[	]]
 
 
 -- [[ Define desired movement (used for collision resolution passes) ]]
 function PANEL:GetDesiredTranslation() return self.translation end
 function PANEL:SetDesiredTranslation(vec2) self.translation = vec2 end
-function PANEL:AddDesiredTranslation(vec2) self:GetDesiredTranslation():Add(vec2) end
+function PANEL:AddDesiredTranslation(vec2) self:GetDesiredTranslation():DoAdd(vec2) end
 function PANEL:HasDesiredTranslation() return not self:GetDesiredTranslation():IsZero() end
 -- [[	]]
 
@@ -97,6 +106,7 @@ function PANEL:HasDesiredTranslation() return not self:GetDesiredTranslation():I
 -- [[ Define physics enable ]]
 function PANEL:EnablePhysics()
 	self.Physics = true
+	if not self.vel then self:SetVel(Vector2()) end
 	self:GetVel():Zero()
 end
 function PANEL:DisablePhysics()

@@ -61,7 +61,10 @@ end
 
 function PANEL:TranslatePointsLocalToScreen(tab)
 	local t = self:GetDesiredTranslation()
-	local s = Vector2(self:LocalToScreen(x, y))
+
+	local x, y = self:GetVPos():Unpack()
+	local xs, xy = self:LocalToScreen(x, y)
+	local s = Vector2(xs, xy)
 
 	local trans = {}
 	for i = 1, #tab do
