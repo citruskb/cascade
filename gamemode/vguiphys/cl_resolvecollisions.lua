@@ -31,7 +31,7 @@ local function ApplyTranslations(rootA, vphysA, rootB, vphysB, translationA)
 	if IsValid(rootA) and rootA.AddDesiredTranslation then rootA:AddDesiredTranslation(translationA) end
 	if IsValid(rootB) and rootB.AddDesiredTranslation then rootB:AddDesiredTranslation(-translationA) end
 end
-local function ResolveVelocity(rootA, vphysA, rootB, vphysB, mtv)
+local function ResolveVelocity1(rootA, vphysA, rootB, vphysB, mtv)
 	-- Step 1 Determine if objects are moving away from eachother already
 	-- If so, do nothing.
 
@@ -57,6 +57,28 @@ local function ResolveVelocity(rootA, vphysA, rootB, vphysB, mtv)
 			velB:DoSub(mtv * dot)
 		end
 	end
+end
+
+local function ResolveVelocity2(rootA, vphysA, rootB, vphysB, mtv)
+	local velA = rootA.GetVel and rootA:GetVel() or Vector2()
+	local velB = rootB.GetVel and rootB:GetVel() or Vector2()
+	if velA:IsZero() and velB:IsZero() then return end
+
+	-- Get the velocity relative to each other along the normal.
+	local rv = velB - velA
+	local rnv = rv:Dot(mtv)
+	if rnv > 0 then return end -- Objects already moving apart.
+
+	-- Calculate the impulse to apply.
+	local bounce = 0.2
+	local massA, massB = rootA.mass or 1, rootB.mass or 1
+
+	local impulse = rnv * -(1 + bounce)
+	impulse = impulse / ((rootA.mass or 1) + (rootB.mass or 2))
+
+	-- Apply the impulse.
+	velA:DoSub(impulse * massA)
+	velB:DoAdd(impulse * massB)
 end
 
 local function CheckSupported(rootA, vphysA, rootB, vphysB, mtv)
@@ -95,7 +117,8 @@ function GM:ResolveVGUICollision(data)
 		ApplyTranslations(rootA, vphysA, rootB, vphysB, translationA)
 	end
 
-	ResolveVelocity(rootA, vphysA, rootB, vphysB, mtv)
+	--ResolveVelocity1(rootA, vphysA, rootB, vphysB, mtv)
+	ResolveVelocity2(rootA, vphysA, rootB, vphysB, mtv)
 
 	CheckSupported(rootA, vphysA, rootB, vphysB, mtv)
 end
