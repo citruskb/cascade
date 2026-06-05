@@ -36,8 +36,8 @@ PANEL = {}
 
 function PANEL:Init()
 	self:DisablePhysics()
-	self:SetMPos(Vector2(0, 0))
-	self:SetDesiredTranslation(Vector2(0, 0))
+	self:SetMPos(Vector2())
+	self:SetDesiredTranslation(Vector2())
 
 	local physbox = vgui.Create("DPhysbox", self)
 	self.physbox = physbox
@@ -46,7 +46,7 @@ end
 function PANEL:Paint() end
 
 function PANEL:Think()
-	if not self.Physics then return end
+	if not self.physics then return end
 
 	-- Update position based on velocity and desired translations.
 	-- The reason we use "mpos" as a medium is because panels don't track fractional position
@@ -64,10 +64,11 @@ function PANEL:Think()
 	local delta = Vector2(dx, dy)
 
 	if not delta:IsZero() then
-		local pos = self:GetVPos()
-		pos:DoAdd(delta)
+		local vpos = self:GetVPos()
+		vpos:DoAdd(delta)
 
-		self:SetPos(pos:Unpack())
+		self:SetPos(vpos:Unpack())
+
 		mpos:DoSub(delta)
 	end
 
@@ -99,12 +100,12 @@ function PANEL:HasDesiredTranslation() return not self:GetDesiredTranslation():I
 
 -- [[ Define physics enable ]]
 function PANEL:EnablePhysics()
-	self.Physics = true
+	self.physics = true
 	if not self.vel then self:SetVel(Vector2()) end
 	self:GetVel():Zero()
 end
 function PANEL:DisablePhysics()
-	self.Physics = false
+	self.physics = false
 	self.vel = nil
 end
 -- [[	]]
@@ -113,7 +114,7 @@ end
 function PANEL:GetPhysbox() return self.physbox end
 
 function PANEL:OnRemove()
-	if self.Physics then self:DisablePhysics() end
+	if self.physics then self:DisablePhysics() end
 end
 
 vgui.Register("PItem", PANEL, "DPanel")

@@ -1,45 +1,34 @@
 -- Used to determine physics collision.
--- The debug hitboxes are drawn irregularly shapped using surface.DrawPoly() since even regularly shaped objects can rotate.
+-- The debug hitboxes are drawn irregularly shapped using surface.DrawPoly() since regularly drawn shapes can't rotate.
 -- This also means we need to update the panel every frame since thats where positional and rotational calculations come into play.
 
 -- Pulls heavily from: https://gist.github.com/meepen/4b591bf1e26ec9ad97df244a6f265d29 as a concept.
 
--- Controls how many segments cicular shapes should be composed of.
-
-POLY_CUSTOM = 1
-
-if not GM.StaticHitboxes then GM.StaticHitboxes = {} end
+local math_Rad = math.Rad
+local math_Cos = math.Cos
+local math_Sin = math.Sin
 
 PANEL = {}
-
-local debugMat = surface.GetTextureID("vgui/white")
 
 local function RotateDataAroundPoint(data, point, angle)
 	if angle == 0 then return data end
 
 	local ox, oy = point:Unpack()
 
-	local radians = math.Rad(angle)
-	local cosTheta, sinTheta = math.Cos(radians), math.Sin(radians)
+	local radians = math_Rad(angle)
+	local cos, sin = math_Cos(radians), math_Sin(radians)
 
 	local ret = {}
 	for i = 1, #data do
 		local x, y = data[i]:Unpack()
-		local newX = ox + cosTheta * (x-ox) - sinTheta * (y-oy)
-		local newY = oy + sinTheta * (x-ox) + cosTheta * (y-oy)
-
-		ret[i] = Vector2(newX, newY)
+		ret[i] = Vector2(
+			ox + cos * (x - ox) - sin * (y - oy),
+			oy + sin * (x - ox) + cos * (y - oy)
+		)
 	end
 
 	return ret
 end
-
-local PolyFuncs = {
-	[POLY_CUSTOM] = function(self)
-		local point = self:GetVPos()
-		return RotateDataAroundPoint(self.vectorPoints, point, self.Angle)
-	end
-}
 
 function PANEL:Init()
 	GAMEMODE.VGUIHitboxes[self] = true
@@ -61,14 +50,15 @@ function PANEL:OnRemove()
 end
 
 function PANEL:PerformLayout(w, h)
-	local manipulated = PolyFuncs[self.Shape](self)
+	local manipulated = RotateDataAroundPoint(self.vectorPoints, self:GetVPos(), self.Angle)
 	self.manipulatedVectorData = manipulated
 
-	-- TODO: Check if this is only be necessary when drawing hitboxes? Probably moderate perf save.
+	if not GAMEMODE.Debug then return end
+
+	-- Needs to be done because surface.DrawPoly needs to be in this format to work.
 	self.polyData = {}
 	for i = 1, #manipulated do
-		local x, y = manipulated[i]:Unpack()
-		self.polyData[i] = {x = x, y = y}
+		self.polyData[i] = manipulated[i]:ToTable()
 	end
 end
 
@@ -94,12 +84,8 @@ function PANEL:Paint(w, h)
 end
 
 -- [[ Compatability with some dphysbox functions. ]]
-function PANEL:AggregateVectorData()
-	return self.manipulatedVectorData
-end
-function PANEL:GetTranslatedAggregateVectorData()
-	return self:GetParent():TranslatePointsLocalToScreen(self:AggregateVectorData())
-end
+function PANEL:AggregateVectorData() return self.manipulatedVectorData end
+function PANEL:GetTranslatedAggregateVectorData() return self:GetParent():TranslatePointsLocalToScreen(self:AggregateVectorData()) end
 function PANEL:GetAggregateCenter()
 	local ret = self.aggregateCenter
 	local data = self:AggregateVectorData()

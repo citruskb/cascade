@@ -1,7 +1,7 @@
 --[[
 A collection of "dhitbox" panels that determine if we are colliding with something or not.
 Should be a collection in order to handle concave shapes more easily.
-Also contains physics parameters such as center of mass, mass, interia, and if this hitbox is moveable or not.
+Also will eventually contain physics parameters such as center of mass, mass, interia, and if this hitbox is moveable or not.
 ]]--
 
 PANEL = {}
@@ -18,14 +18,13 @@ function PANEL:AddHitbox(w, h, offset)
 	hb:SetSize(mw, mh)
 
 	offset = offset or 0
-
-	hb.Shape = POLY_CUSTOM
 	hb.vectorPoints = {
 		Vector2(0 + offset, 0 + offset),
 		Vector2(w + offset, 0 + offset),
 		Vector2(w + offset, h + offset),
 		Vector2(0 + offset, h + offset),
 	}
+
 	hb.Angle = 0
 	hb:InvalidateLayout(true)
 
@@ -37,7 +36,6 @@ function PANEL:AddCustomHitbox(data)
 	local hb = vgui.Create("DHitbox", self)
 	hb:SetSize(w, h)
 
-	hb.Shape = POLY_CUSTOM
 	hb.vectorPoints = data
 	hb.Angle = 0
 	hb:InvalidateLayout(true)
@@ -59,7 +57,7 @@ function PANEL:AggregateVectorData()
 	return ret
 end
 
-function PANEL:TranslatePointsLocalToScreen(tab)
+function PANEL:TranslatePointsLocalToScreen(points)
 	local t = self:GetDesiredTranslation()
 
 	local x, y = self:GetVPos():Unpack()
@@ -67,9 +65,8 @@ function PANEL:TranslatePointsLocalToScreen(tab)
 	local s = Vector2(xs, xy)
 
 	local trans = {}
-	for i = 1, #tab do
-		local point = tab[i]
-		trans[i] = point + t + s
+	for i = 1, #points do
+		trans[i] = points[i] + t + s
 	end
 
 	return trans
@@ -114,11 +111,12 @@ function PANEL:Think()
 end
 
 -- This var should only be cached for single physpasses
-hook.Add("VGUIPhysPassComplete", "VGUIPhysPassComplete.dphysbox", function()
-	for physbox, v in pairs(GAMEMODE.VGUIPhysboxes) do
+local function ClearAllTransAggroCachedData()
+	for physbox, _ in pairs(GAMEMODE.VGUIPhysboxes) do
 		physbox.transAggroData = nil
 	end
-end)
+end
+hook.Add("VGUIPhysPassComplete", "VGUIPhysPassComplete.dphysbox", ClearAllTransAggroCachedData)
 
 function PANEL:OnRemove()
 	GAMEMODE.VGUIPhysboxes[self] = nil

@@ -141,12 +141,6 @@ function PANEL:Init()
 	MakeBox(50, w * 0.52, h * 0.35, -VGUIPHYS_TERMINAL_VELOCITY)
 
 	MakeBox(50, w * 0.5, h * 0.25, -VGUIPHYS_TERMINAL_VELOCITY)
-	--MakeBox(60, w * 0.42, h * 0.4, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
-	--MakeBox(40, w * 0.62, h * 0.4, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
-
-	--MakeBox(50, w * 0.6, h * 0.35, -VGUIPHYS_TERMINAL_VELOCITY)
-
-	--MakeBox(50, w * 0.6, h * 0.3, -VGUIPHYS_TERMINAL_VELOCITY)
 
 end
 
