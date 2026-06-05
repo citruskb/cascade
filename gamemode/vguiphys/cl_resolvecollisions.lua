@@ -14,13 +14,19 @@ function GM:ResolveAllVGUICollisions()
 		-- Assume no support. Support toggled in collision resolution if appropriate.
 		for vphys, _ in pairs(physboxes) do vphys.supported = false end
 
+		local collisions = {}
 		for hbA, _  in pairs(hitboxes) do
 			for hbB, _ in pairs(hitboxes) do
 				local collision = gamemode_Call("VGUISAT", hbA, hbB)
 				if not collision then continue end
 
-				gamemode_Call("ResolveVGUICollision", collision)
+				table.Insert(collisions, collision)
 			end
+		end
+
+		for k, collision in pairs(collisions) do
+			print("Collision: ", k)
+			gamemode_Call("ResolveVGUICollision", collision)
 		end
 
 		gamemode_Call("VGUIPhysPassComplete")
@@ -72,8 +78,9 @@ local function ResolveVelocity2(rootA, vphysA, rootB, vphysB, mtv)
 	local bounce = 0.2
 	local massA, massB = rootA.mass or 1, rootB.mass or 1
 
-	local impulse = rnv * -(1 + bounce)
-	impulse = impulse / ((rootA.mass or 1) + (rootB.mass or 2))
+	local j = rnv * -(1 + bounce)
+	j = j / (massA + massB)
+	local impulse = mtv * j
 
 	-- Apply the impulse.
 	velA:DoSub(impulse * massA)
@@ -105,6 +112,12 @@ function GM:ResolveVGUICollision(data)
 	local mtv = Rawget(data, "mtv")
 
 	local rootA, rootB = vphysA:GetParent(), vphysB:GetParent()
+
+	print("///")
+	print("collision!", "(#" .. vphysA.ID .. ")", vphysA, " x ", "(#" .. vphysB.ID .. ")", vphysB)
+	print("overlap", overlap)
+	print("MTV", mtv)
+	print("///")
 
 	-- We desire to apply a translation to resolve the collision.
 	-- The root might be invalid if we are a solid wall!

@@ -8,6 +8,7 @@ PANEL = {}
 
 function PANEL:Init()
 	GAMEMODE.VGUIPhysboxes[self] = true
+	self.ID = table.Count(GAMEMODE.VGUIPhysboxes)
 	self.hbs = {}
 	self.isPhysbox = true
 end

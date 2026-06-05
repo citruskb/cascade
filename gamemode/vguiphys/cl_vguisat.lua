@@ -107,16 +107,44 @@ local function GetOrCacheProjRange(hb, points, normal)
 end
 
 local function GetCachedCollision(hbA, hbB)
-	local collisions = GetCachedInfo(hbA, "collisions")
-	if not collisions then return end
+	local hbACache = Rawget(cache, hbA)
+	if not hbACache then return end
 
-	return Rawget(collisions, hbB)
+	local collisionsA = Rawget(hbACache, "collisions")
+	if not collisionsA then return end
+
+	return Rawget(collisionsA, hbB)
 end
 
 local function SetCachedCollision(hbA, hbB)
 	if GetCachedCollision(hbA, hbB) then Error("[VGUIPHYS] - Doubled up collision event!") end
-	SetCachedInfo(hbA, "collisions", {[hbB] = true})
-	SetCachedInfo(hbB, "collisions", {[hbA] = true})
+
+	local hbACache = Rawget(cache, hbA)
+	if not hbACache then
+		hbACache = {}
+		Rawset(cache, hbA, hbACache)
+	end
+
+	local collisionsA = Rawget(hbACache, "collisions")
+	if not collisionsA then
+		collisionsA = {}
+		Rawset(hbACache, "collisions", collisionsA)
+	end
+
+	local hbBCache = Rawget(cache, hbB)
+	if not hbBCache then
+		hbBCache = {}
+		Rawset(cache, hbB, hbBCache)
+	end
+
+	local collisionsB = Rawget(hbBCache, "collisions")
+	if not collisionsB then
+		collisionsB = {}
+		Rawset(hbBCache, "collisions", collisionsB)
+	end
+
+	Rawset(collisionsA, hbB, true)
+	Rawset(collisionsB, hbA, true)
 end
 
 local function GetRangeOverlap(rangeA, rangeB)
