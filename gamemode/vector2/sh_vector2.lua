@@ -3,6 +3,8 @@ local math_Atan2 = math.Atan2
 local math_Rand = math.Rand
 local math_Cos = math.Cos
 local math_Sin = math.Sin
+local math_Min = math.Min
+local math_Max = math.Max
 local math_PI = math.PI
 
 local function GetNormalVars(vector2)
@@ -29,51 +31,21 @@ function v2:__Create(x, y)
 
 	return self
 end
-
-function v2:Add(other)
-	local x = Rawget(self, "x") + Rawget(other, "x")
-	local y = Rawget(self, "y") + Rawget(other, "y")
-	return Vector2(x, y)
-end
-
-function v2:Div(other)
-	local x = Rawget(self, "x") / other
-	local y = Rawget(self, "y") / other
-	return Vector2(x, y)
-end
-
-function v2:Eq(other)
-	if not other.IsVector2 then return false end
-	return Rawget(self, "x") == Rawget(other, "x") and Rawget(self, "y") == Rawget(other, "y")
-end
-
-function v2:Mul(other)
-	local x = Rawget(self, "x") * other
-	local y = Rawget(self, "y") * other
-	return Vector2(x, y)
-end
-
-function v2:Sub(other)
-	local x = Rawget(self, "x") - Rawget(other, "x")
-	local y = Rawget(self, "y") - Rawget(other, "y")
-	return Vector2(x, y)
-end
-
-function v2:Unm()
-	return Vector2(-Rawget(self, "x"), -Rawget(self, "y"))
-end
-
-function v2:ToString()
-	return ToString(Rawget(self, "x")) .. " " .. ToString(Rawget(self, "y"))
-end
+function v2:Add(other)		return Vector2(Rawget(self, "x") + Rawget(other, "x"), Rawget(self, "y") + Rawget(other, "y")) end
+function v2:Div(other)		return Vector2(Rawget(self, "x") / other, Rawget(self, "y") / other) end
+function v2:Eq(other)		return other.IsVector2 and Rawget(self, "x") == Rawget(other, "x") and Rawget(self, "y") == Rawget(other, "y") end
+function v2:Mul(other)		return Vector2(Rawget(self, "x") * other, Rawget(self, "y") * other) end
+function v2:Sub(other)		return Vector2(Rawget(self, "x") - Rawget(other, "x"), Rawget(self, "y") - Rawget(other, "y")) end
+function v2:Unm()			return Vector2(-Rawget(self, "x"), -Rawget(self, "y")) end
+function v2:ToString()		return ToString(Rawget(self, "x")) .. " " .. ToString(Rawget(self, "y")) end
 
 
 -- [[ Other meta functions. ]]
 
--- Adds vectors without making a new object.
-function meta:DoAdd(vec)
-	Rawset(self, "x", Rawget(self, "x") + Rawget(vec, "x"))
-	Rawset(self, "y", Rawget(self, "y") + Rawget(vec, "y"))
+-- Adds vector without making a new object.
+function meta:DoAdd(other)
+	Rawset(self, "x", Rawget(self, "x") + Rawget(other, "x"))
+	Rawset(self, "y", Rawget(self, "y") + Rawget(other, "y"))
 	Rawset(self, "_length", nil)
 end
 
@@ -83,8 +55,6 @@ function meta:Angle()
 	local rad = math_Atan2(ny, nx)
 	return rad * 180 / math_PI
 end
-
--- TODO: meta:AngleEx(vec)
 
 -- Cross product of two vectors.
 function meta:Cross(other)
@@ -97,13 +67,11 @@ end
 function meta:DistanceSqr(other)
 	local dx = Rawget(self, "x") - Rawget(other, "x")
 	local dy = Rawget(self, "y") - Rawget(other, "y")
-	return dx^2 + dy^2
+	return dx ^ 2 + dy ^ 2
 end
 
 -- The distance between two vectors. Warning. This is expensive.
-function meta:Distance(other)
-	return math_Sqrt(self:DistanceSqr(other))
-end
+function meta:Distance(other) return math_Sqrt(self:DistanceSqr(other)) end
 
 -- Divides, changing this vector instead of making an entirely new one.
 function meta:DoDiv(divisor)
@@ -139,9 +107,7 @@ function meta:IsEqualTol(compare, tol)
 end
 
 -- Checks if all vector fields are zero.
-function meta:IsZero()
-	return Rawget(self, "x") == 0 and Rawget(self, "y") == 0
-end
+function meta:IsZero() return Rawget(self, "x") == 0 and Rawget(self, "y") == 0 end
 
 -- Since finding the length is such an expensive operation and it normally doesn't change we cache the result.
 function meta:Length()
@@ -155,9 +121,7 @@ function meta:Length()
 end
 
 -- Finds the square of the length.
-function meta:LengthSqr()
-	return Rawget(self, "x") ^ 2 + Rawget(self, "y") ^ 2
-end
+function meta:LengthSqr() return Rawget(self, "x") ^ 2 + Rawget(self, "y") ^ 2 end
 
 -- The same as Mul above, but modifies this vector.
 function meta:DoMul(num)
@@ -222,25 +186,30 @@ function meta:DoSub(other)
 end
 
 -- Returns this vector as a table.
-function meta:ToTable()
-	return {x = Rawget(self, "x"), y = Rawget(self, "y")}
-end
+function meta:ToTable() return {x = Rawget(self, "x"), y = Rawget(self, "y")} end
 
 -- Returns the x and y of this vector.
-function meta:Unpack()
-	return Rawget(self, "x"), Rawget(self, "y")
-end
+function meta:Unpack() return Rawget(self, "x"), Rawget(self, "y") end
 
--- TODO meta:WithinAABox
+-- Returns if this vector is inside the AABox formed by the two given vectors.
+function meta:WithinAABox(vectorB, vectorC)
+	local xA, yA = self:Unpack()
+	local xB, yB = vectorB:Unpack()
+	local xC, yC = vectorB:Unpack()
+
+	local minX = math_Min(xB, xC)
+	local maxX = math_Max(xB, xC)
+	local minY = math_Min(yB, yC)
+	local maxY = math_Max(yB, yC)
+
+	return xA >= minX and xA <= maxX and yA >= minY and yA <= maxY
+end
 
 -- Sets vector values to zero.
-function meta:Zero()
-	Rawset(self, "x", 0)
-	Rawset(self, "y", 0)
-end
+function meta:Zero() Rawset(self, "x", 0) Rawset(self, "y", 0) end
 
 -- [[	]]
 
 
 function Vector2(x, y) return v2:Create(x or 0, y or 0) end
-VECTOR2_ZERO = Vector2(0, 0)
+VECTOR2_ZERO = Vector2()

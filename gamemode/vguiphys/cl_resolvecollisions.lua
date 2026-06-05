@@ -39,7 +39,6 @@ local function ResolveVelocity1(rootA, vphysA, rootB, vphysB, mtv)
 
 	-- Step 3 Apply the impulse magnitude
 
-
 	local velA = rootA.GetVel and rootA:GetVel()
 	if velA then
 		local dot = velA:Dot(mtv)
