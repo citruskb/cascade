@@ -1,13 +1,18 @@
 GM.VGUIPhysPassCount = 0
 local gamemode_Call = gamemode.Call
+local math_Abs = math.Abs
 
 function GM:VGUIPhysPassComplete() end
 function GM:VGUIPhysCollisionsResolved() return self.VGUIPhysPassCount == VGUIPHYS_PASSES end
 
 function GM:ResolveAllVGUICollisions()
+	local physboxes = GAMEMODE.VGUIPhysboxes
 	local hitboxes = GAMEMODE.VGUIHitboxes
 	for i = 1, VGUIPHYS_PASSES do
 		GAMEMODE.VGUIPhysPassCount = i
+
+		-- Assume no support. Support toggled in collision resolution if appropriate.
+		for vphys, _ in pairs(physboxes) do vphys.supported = false end
 
 		for hbA, _  in pairs(hitboxes) do
 			for hbB, _ in pairs(hitboxes) do
@@ -27,6 +32,14 @@ local function ApplyTranslations(rootA, vphysA, rootB, vphysB, translationA)
 	if IsValid(rootB) and rootB.AddDesiredTranslation then rootB:AddDesiredTranslation(-translationA) end
 end
 local function ResolveVelocity(rootA, vphysA, rootB, vphysB, mtv)
+	-- Step 1 Determine if objects are moving away from eachother already
+	-- If so, do nothing.
+
+	-- Step 2 Find the impluse magnitude
+
+	-- Step 3 Apply the impulse magnitude
+
+
 	local velA = rootA.GetVel and rootA:GetVel()
 	if velA then
 		local dot = velA:Dot(mtv)
@@ -43,6 +56,23 @@ local function ResolveVelocity(rootA, vphysA, rootB, vphysB, mtv)
 		if dot > 0 then
 			velB:DoSub(mtv * dot)
 		end
+	end
+end
+
+local function CheckSupported(rootA, vphysA, rootB, vphysB, mtv)
+	-- Check if our collision normal is roughly vertical.
+	local _, ny = mtv:Unpack()
+	if math_Abs(ny) <= 0.7 then return end
+
+	-- Get our center points for our objects.
+	local _, cay = vphysA:GetAggregateCenter():Unpack()
+	local _, cby = vphysB:GetAggregateCenter():Unpack()
+
+	-- If one is higher than the other, the other is being supported.
+	if cay > cby then
+		rootA.supported = true
+	else
+		rootB.supported = true
 	end
 end
 
@@ -66,4 +96,6 @@ function GM:ResolveVGUICollision(data)
 	end
 
 	ResolveVelocity(rootA, vphysA, rootB, vphysB, mtv)
+
+	CheckSupported(rootA, vphysA, rootB, vphysB, mtv)
 end
