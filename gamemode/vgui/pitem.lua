@@ -92,7 +92,11 @@ function PANEL:AddMPos(vec2) self:GetMPos():DoAdd(vec2) end
 -- [[ Define desired movement (used for collision resolution passes) ]]
 function PANEL:GetDesiredTranslation() return self.translation end
 function PANEL:SetDesiredTranslation(vec2) self.translation = vec2 end
-function PANEL:AddDesiredTranslation(vec2) self:GetDesiredTranslation():DoAdd(vec2) end
+function PANEL:AddDesiredTranslation(vec2)
+	print("adding the translation:", self:GetDesiredTranslation(), vec2)
+	self:GetDesiredTranslation():DoAdd(vec2)
+	print("our translation is now:", self:GetDesiredTranslation())
+end
 function PANEL:HasDesiredTranslation() return not self:GetDesiredTranslation():IsZero() end
 -- [[	]]
 

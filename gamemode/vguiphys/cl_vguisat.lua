@@ -144,8 +144,9 @@ function GM:VGUISAT(hbA, hbB)
 	if hbA:GetParent() == hbB:GetParent() then return end
 
 	-- Check if we have checked say.. hbB vs hbA already?
-	local collision = GetCachedCollision(hbA, hbB)
-	if collision then return end
+	if GetCachedCollision(hbA, hbB) then return end
+
+	print("checking: ", hbA, hbB)
 
 	local pointsA = hbA:GetTranslatedAggregateVectorData()
 	local pointsB = hbB:GetTranslatedAggregateVectorData()
@@ -221,6 +222,8 @@ function GM:VGUISAT(hbA, hbB)
 
 	-- Finally cache that we checked our collision and return our collision information.
 	SetCachedCollision(hbA, hbB)
+
+	print("collision.")
 
 	return {hbA = hbA, hbB = hbB, vphysA = hbA:GetParent(), vphysB = hbB:GetParent(), overlap = smallestOverlap, mtv = mtv}
 end
