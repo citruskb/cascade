@@ -60,12 +60,10 @@ function GM:ResolveVGUICollision(data)
 
 	-- Only do a corrective translation if penetration is large enough.
 	if overlap > VGUIPHYS_SLOP then
-		print("applying translations...")
-		local cappedOverlap = math.Min(overlap, math.Random(1, 2))
+		local cappedOverlap = math.Min(overlap, 2)
 		local translationA = -mtv * cappedOverlap
 		ApplyTranslations(rootA, vphysA, rootB, vphysB, translationA)
 	end
 
-	print("resolving velocity...")
 	ResolveVelocity(rootA, vphysA, rootB, vphysB, mtv)
 end

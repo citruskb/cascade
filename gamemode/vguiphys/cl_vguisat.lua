@@ -146,8 +146,6 @@ function GM:VGUISAT(hbA, hbB)
 	-- Check if we have checked say.. hbB vs hbA already?
 	if GetCachedCollision(hbA, hbB) then return end
 
-	print("checking: ", hbA, hbB)
-
 	local pointsA = hbA:GetTranslatedAggregateVectorData()
 	local pointsB = hbB:GetTranslatedAggregateVectorData()
 
@@ -177,7 +175,7 @@ function GM:VGUISAT(hbA, hbB)
 		end
 
 		-- Save information regarding our collision with the MTV if it's found.
-		if smallestOverlap and overlap > smallestOverlap then continue end
+		if smallestOverlap and overlap >= smallestOverlap - VGUI_EPSILON then continue end
 
 		smallestOverlap = overlap
 		mtv = normalA
@@ -198,7 +196,7 @@ function GM:VGUISAT(hbA, hbB)
 			return
 		end
 
-		if smallestOverlap and overlap > smallestOverlap then continue end
+		if smallestOverlap and overlap >= smallestOverlap - VGUI_EPSILON then continue end
 
 		smallestOverlap = overlap
 		mtv = normalB
@@ -222,8 +220,6 @@ function GM:VGUISAT(hbA, hbB)
 
 	-- Finally cache that we checked our collision and return our collision information.
 	SetCachedCollision(hbA, hbB)
-
-	print("collision.")
 
 	return {hbA = hbA, hbB = hbB, vphysA = hbA:GetParent(), vphysB = hbB:GetParent(), overlap = smallestOverlap, mtv = mtv}
 end

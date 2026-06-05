@@ -133,8 +133,14 @@ function PANEL:Init()
 		item:SetVel(Vector2(0, yvel))
 	end
 
-	MakeBox(40, w * 0.5, h * 0.3, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
-	MakeBox(40, w * 0.5, h * 0.4, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
+	MakeBox(50, w * 0.535, h * 0.45, -VGUIPHYS_TERMINAL_VELOCITY)
+	MakeBox(50, w * 0.5, h * 0.45, -VGUIPHYS_TERMINAL_VELOCITY)
+	MakeBox(50, w * 0.465, h * 0.45, -VGUIPHYS_TERMINAL_VELOCITY)
+
+	MakeBox(50, w * 0.48, h * 0.35, -VGUIPHYS_TERMINAL_VELOCITY)
+	MakeBox(50, w * 0.52, h * 0.35, -VGUIPHYS_TERMINAL_VELOCITY)
+
+	MakeBox(50, w * 0.5, h * 0.25, -VGUIPHYS_TERMINAL_VELOCITY)
 	--MakeBox(60, w * 0.42, h * 0.4, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
 	--MakeBox(40, w * 0.62, h * 0.4, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
 
