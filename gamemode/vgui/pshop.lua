@@ -84,7 +84,7 @@ function PANEL:Init()
 	invfloor:SetSize(w * 0.25, h * 0.1)
 	invfloor:Dock(FILL)
 	invfloor:AddHitbox(w * 0.25, h * 0.1)
-	lab = EasyLabel(invfloor, "Floor (collisions)", "SFontLarger")
+	lab = EasyLabel(invfloor, "Floor (1)", "SFontLarger")
 	DockCenter(lab, invfloor)
 	--
 
@@ -141,10 +141,10 @@ function PANEL:Init()
 
 	-- four box stack
 	local size = 50
-	MakeBox(size, w * 0.5, h * 0.5)
-	MakeBox(size, w * 0.5 + math.Random(-size / 3, size / 3), h * 0.5 + size * 1.25)
-	MakeBox(size, w * 0.5 + math.Random(-size / 3, size / 3), h * 0.5 + size * 2.5)
-	MakeBox(size, w * 0.5 + math.Random(-size / 3, size / 3), h * 0.5 + size * 3.75)
+	MakeBox(size, w * 0.5, h * 0.6, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
+	MakeBox(size, w * 0.5 + math.Random(-size / 3, size / 3), h * 0.6 + size * 1.25, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
+	MakeBox(size, w * 0.5 + math.Random(-size / 3, size / 3), h * 0.6 + size * 2.5, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
+	MakeBox(size, w * 0.5 + math.Random(-size / 3, size / 3), h * 0.6 + size * 3.75, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
 
 	--[[
 	-- Three boxes fall in a pyramid shape

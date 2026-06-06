@@ -9,14 +9,17 @@ end
 VGUIPHYS_PASSES = 12
 
 -- Allow some degree of overlap between objects without taking collision corrective action.
-VGUIPHYS_SLOP = 1.2
+VGUIPHYS_SLOP = 1.5
 
 -- Make sure our new better overlap is smaller by at least this much.
-VGUI_EPSILON = 0.05
+VGUI_EPSILON_OVERLAP = 0.05
 
 -- Amount to nudge velocity downwards every frame.
 VGUIPHYS_GRAVITY = 0.024
 VGUIPHYS_GRAVITY_VEC2 = Vector2(0, VGUIPHYS_GRAVITY)
+
+-- If our x or y velocity is under this much on collision it gets zero'd out.
+--VGUI_EPSILON_VELOCITY = VGUIPHYS_GRAVITY * 2
 
 -- Stop nudging velocity downards after reaching this velocity.
 VGUIPHYS_TERMINAL_VELOCITY = 1.4
@@ -28,7 +31,10 @@ function GM:VGUIPhysThink()
 		if not IsValid(vphys) then continue end
 
 		-- Don't apply gravity to supported objects.
-		if vphys.supported then continue end
+		if vphys.supported then
+			print(vphys.ID, "detected supported!")
+			continue
+		end
 
 		-- Add our gravity up to our terminal velocity.
 		local vel = vphys:GetVel()

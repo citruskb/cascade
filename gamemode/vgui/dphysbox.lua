@@ -86,7 +86,7 @@ end
 
 function PANEL:GetAggregateCenter()
 	local ret = self.aggregateCenter
-	local data = self:AggregateVectorData()
+	local data = self:GetTranslatedAggregateVectorData()
 
 	if not ret then
 		local xsum, ysum = 0, 0

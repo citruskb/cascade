@@ -101,7 +101,7 @@ function meta:IsEqualTol(compare, tol)
 	local cx, cy = Rawget(compare, "x"), Rawget(compare, "y")
 
 	local lx, hx = x - tol, x + tol
-	local ly, hy = y - yol, y + tol
+	local ly, hy = y - tol, y + tol
 
 	return cx >= lx and cx <= hx and cy >= ly and cy <= hy
 end

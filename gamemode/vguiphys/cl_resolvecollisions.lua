@@ -36,36 +36,16 @@ local function ApplyTranslations(rootA, vphysA, rootB, vphysB, translationA)
 	if IsValid(rootA) and rootA.AddDesiredTranslation then rootA:AddDesiredTranslation(translationA) end
 	if IsValid(rootB) and rootB.AddDesiredTranslation then rootB:AddDesiredTranslation(-translationA) end
 end
-local function ResolveVelocity1(rootA, vphysA, rootB, vphysB, mtv)
-	-- Step 1 Determine if objects are moving away from eachother already
-	-- If so, do nothing.
 
-	-- Step 2 Find the impluse magnitude
-
-	-- Step 3 Apply the impulse magnitude
-
-	local velA = rootA.GetVel and rootA:GetVel()
-	if velA then
-		local dot = velA:Dot(mtv)
-
-		if dot > 0 then
-			velA:DoSub(mtv * dot)
-		end
-	end
-
-	local velB = rootB.GetVel and rootB:GetVel()
-	if velB then
-		local dot = velB:Dot(mtv)
-
-		if dot > 0 then
-			velB:DoSub(mtv * dot)
-		end
-	end
-end
-
-local function ResolveVelocity2(rootA, vphysA, rootB, vphysB, mtv)
+local function ResolveVelocity(rootA, vphysA, rootB, vphysB, mtv)
 	local velA = rootA.GetVel and rootA:GetVel() or Vector2()
 	local velB = rootB.GetVel and rootB:GetVel() or Vector2()
+
+	-- Zero out velocity on collision if it's small enough.
+	--if velA:IsEqualTol(VECTOR2_ZERO, VGUI_EPSILON_VELOCITY) then velA:Zero() end
+	--if velB:IsEqualTol(VECTOR2_ZERO, VGUI_EPSILON_VELOCITY) then velA:Zero() end
+
+	-- If velocities are zero, do nothing.
 	if velA:IsZero() and velB:IsZero() then return end
 
 	-- Get the velocity relative to each other along the normal.
@@ -96,10 +76,11 @@ local function CheckSupported(rootA, vphysA, rootB, vphysB, mtv)
 	local _, cby = vphysB:GetAggregateCenter():Unpack()
 
 	-- If one is higher than the other, the other is being supported.
-	if cay > cby then
-		rootA.supported = true
+	-- Remember, a more positive y value is actually lower.
+	if cay < cby then
+		vphysA.supported = true
 	else
-		rootB.supported = true
+		vphysB.supported = true
 	end
 end
 
@@ -117,13 +98,12 @@ function GM:ResolveVGUICollision(data)
 
 	-- Only do a corrective translation if penetration is large enough.
 	if overlap > VGUIPHYS_SLOP then
-		local cappedOverlap = math.Min(overlap, 0.1)
+		local cappedOverlap = math.Min(overlap, 1)
 		local translationA = -mtv * cappedOverlap
 		ApplyTranslations(rootA, vphysA, rootB, vphysB, translationA)
 	end
 
-	--ResolveVelocity1(rootA, vphysA, rootB, vphysB, mtv)
-	ResolveVelocity2(rootA, vphysA, rootB, vphysB, mtv)
+	ResolveVelocity(rootA, vphysA, rootB, vphysB, mtv)
 
 	CheckSupported(rootA, vphysA, rootB, vphysB, mtv)
 end

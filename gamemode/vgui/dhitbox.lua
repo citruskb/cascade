@@ -73,14 +73,28 @@ function PANEL:Paint(w, h)
 	surface.DrawPoly(data)
 
 	-- Draw the lines making up said shape
+	surface.SetDrawColor(self.lineCol)
 	for i = 1, #data do
 		local pointA = data[i]
 		local pointB = i == #data and data[1] or data[i + 1]
 
 		local xA, yA, xB, yB = pointA.x, pointA.y, pointB.x, pointB.y
-		surface.SetDrawColor(self.lineCol)
+
 		surface.DrawLine(xA, yA, xB, yB)
 	end
+
+	local x, y = self:GetPos()
+	local siz = self:GetSize()
+	local tw, th = surface.GetTextSize( self:GetID() )
+	surface.SetTextPos(x + siz / 2 - tw / 2, y + siz / 2 - th / 2)
+	surface.DrawText(self:GetID())
+end
+
+function PANEL:GetID()
+	local parent = self:GetParent()
+	if not parent then return "N/A" end
+	if not parent.ID then return "N/A" end
+	return parent.ID
 end
 
 -- [[ Compatability with some dphysbox functions. ]]

@@ -203,7 +203,7 @@ function GM:VGUISAT(hbA, hbB)
 		end
 
 		-- Save information regarding our collision with the MTV if it's found.
-		if smallestOverlap and overlap >= smallestOverlap - VGUI_EPSILON then continue end
+		if smallestOverlap and overlap >= smallestOverlap - VGUI_EPSILON_OVERLAP then continue end
 
 		smallestOverlap = overlap
 		mtv = normalA
@@ -224,7 +224,7 @@ function GM:VGUISAT(hbA, hbB)
 			return
 		end
 
-		if smallestOverlap and overlap >= smallestOverlap - VGUI_EPSILON then continue end
+		if smallestOverlap and overlap >= smallestOverlap - VGUI_EPSILON_OVERLAP then continue end
 
 		smallestOverlap = overlap
 		mtv = normalB
