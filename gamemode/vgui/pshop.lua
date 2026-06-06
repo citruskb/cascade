@@ -142,18 +142,18 @@ function PANEL:Init()
 	MakeBox(50, w * 0.5, h * 0.5, -VGUIPHYS_TERMINAL_VELOCITY)
 	]]
 
-	--[[
 	-- four box stack
 	local size = 50
 	MakeBox(size, w * 0.5, h * 0.6, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
 	MakeBox(size, w * 0.5 + math.Random(-size / 3, size / 3), h * 0.6 + size * 1.25, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
 	MakeBox(size, w * 0.5 + math.Random(-size / 3, size / 3), h * 0.6 + size * 2.5, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
 	MakeBox(size, w * 0.5 + math.Random(-size / 3, size / 3), h * 0.6 + size * 3.75, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
-	]]
 
 	-- Angled box
+	--[[
 	local size = 50
 	MakeAngledBox(size, w * 0.5, h * 0.6, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY), 90)
+	]]
 
 
 	--[[
