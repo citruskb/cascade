@@ -133,12 +133,35 @@ function PANEL:Init()
 		item:SetVel(Vector2(0, yvel))
 	end
 
+	--[[
+	-- Box falls directly on other box
+	MakeBox(50, w * 0.5, h * 0.6, -VGUIPHYS_TERMINAL_VELOCITY)
+	MakeBox(50, w * 0.5, h * 0.5, -VGUIPHYS_TERMINAL_VELOCITY)
+	]]
+
+	-- four box stack
+	local size = 50
+	MakeBox(size, w * 0.5, h * 0.5)
+	MakeBox(size, w * 0.5 + math.Random(-size / 3, size / 3), h * 0.5 + size * 1.25)
+	MakeBox(size, w * 0.5 + math.Random(-size / 3, size / 3), h * 0.5 + size * 2.5)
+	MakeBox(size, w * 0.5 + math.Random(-size / 3, size / 3), h * 0.5 + size * 3.75)
+
+	--[[
+	-- Three boxes fall in a pyramid shape
+	local size = 50
+	MakeBox(size, w * 0.5, h * 0.5, -VGUIPHYS_TERMINAL_VELOCITY)
+	MakeBox(size, w * 0.5 + size * 1.5, h * 0.5, -VGUIPHYS_TERMINAL_VELOCITY)
+	MakeBox(size, w * 0.5 + size * 0.75, h * 0.5 - size * 1.25, -VGUIPHYS_TERMINAL_VELOCITY)
+	]]
+
+	--[[
 	MakeBox(50, w * 0.535, h * 0.45, -VGUIPHYS_TERMINAL_VELOCITY)
 	MakeBox(50, w * 0.5, h * 0.45, -VGUIPHYS_TERMINAL_VELOCITY)
-	--MakeBox(50, w * 0.465, h * 0.45, -VGUIPHYS_TERMINAL_VELOCITY)
+	MakeBox(50, w * 0.465, h * 0.45, -VGUIPHYS_TERMINAL_VELOCITY)
+	]]
 
 	--MakeBox(50, w * 0.48, h * 0.35, -VGUIPHYS_TERMINAL_VELOCITY)
-	MakeBox(50, w * 0.52, h * 0.35, -VGUIPHYS_TERMINAL_VELOCITY)
+	--MakeBox(50, w * 0.52, h * 0.35, -VGUIPHYS_TERMINAL_VELOCITY)
 
 	--MakeBox(50, w * 0.5, h * 0.25, -VGUIPHYS_TERMINAL_VELOCITY)
 

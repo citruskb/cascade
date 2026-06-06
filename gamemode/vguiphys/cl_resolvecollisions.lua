@@ -25,7 +25,6 @@ function GM:ResolveAllVGUICollisions()
 		end
 
 		for k, collision in pairs(collisions) do
-			print("Collision: ", k)
 			gamemode_Call("ResolveVGUICollision", collision)
 		end
 
@@ -113,18 +112,12 @@ function GM:ResolveVGUICollision(data)
 
 	local rootA, rootB = vphysA:GetParent(), vphysB:GetParent()
 
-	print("///")
-	print("collision!", "(#" .. vphysA.ID .. ")", vphysA, " x ", "(#" .. vphysB.ID .. ")", vphysB)
-	print("overlap", overlap)
-	print("MTV", mtv)
-	print("///")
-
 	-- We desire to apply a translation to resolve the collision.
 	-- The root might be invalid if we are a solid wall!
 
 	-- Only do a corrective translation if penetration is large enough.
 	if overlap > VGUIPHYS_SLOP then
-		local cappedOverlap = math.Min(overlap, 2)
+		local cappedOverlap = math.Min(overlap, 0.1)
 		local translationA = -mtv * cappedOverlap
 		ApplyTranslations(rootA, vphysA, rootB, vphysB, translationA)
 	end

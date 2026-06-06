@@ -88,7 +88,7 @@ function PANEL:AggregateVectorData() return self.manipulatedVectorData end
 function PANEL:GetTranslatedAggregateVectorData() return self:GetParent():TranslatePointsLocalToScreen(self:AggregateVectorData()) end
 function PANEL:GetAggregateCenter()
 	local ret = self.aggregateCenter
-	local data = self:AggregateVectorData()
+	local data = self:GetTranslatedAggregateVectorData()
 
 	if not ret then
 		local xsum, ysum = 0, 0

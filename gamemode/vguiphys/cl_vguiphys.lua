@@ -6,10 +6,10 @@ if not vguiPhysLoaded then
 end
 
 -- How many loops do we make attempting to resolve collisions?
-VGUIPHYS_PASSES = 8
+VGUIPHYS_PASSES = 12
 
 -- Allow some degree of overlap between objects without taking collision corrective action.
-VGUIPHYS_SLOP = 1
+VGUIPHYS_SLOP = 1.2
 
 -- Make sure our new better overlap is smaller by at least this much.
 VGUI_EPSILON = 0.05
