@@ -117,7 +117,8 @@ function PANEL:Init()
 
 
 	-- Test items
-	local function MakeBox(size, bx, by, yvel)
+	-- Angled box
+	local function MakeAngledBox(size, bx, by, yvel, angle)
 		local item = vgui.Create("PItem", self)
 		item:SetSize(size, size)
 		item:SetPos(bx, by)
@@ -127,11 +128,13 @@ function PANEL:Init()
 			Vector2(size - 1, 1),
 			Vector2(size - 1, size - 1),
 			Vector2(1, size - 1),
-		})
+		}, angle)
 
 		item:EnablePhysics()
 		item:SetVel(Vector2(0, yvel))
 	end
+
+	local function MakeBox(size, bx, by, yvel) MakeAngledBox(size, bx, by, yvel, 0) end
 
 	--[[
 	-- Box falls directly on other box
@@ -139,12 +142,19 @@ function PANEL:Init()
 	MakeBox(50, w * 0.5, h * 0.5, -VGUIPHYS_TERMINAL_VELOCITY)
 	]]
 
+	--[[
 	-- four box stack
 	local size = 50
 	MakeBox(size, w * 0.5, h * 0.6, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
 	MakeBox(size, w * 0.5 + math.Random(-size / 3, size / 3), h * 0.6 + size * 1.25, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
 	MakeBox(size, w * 0.5 + math.Random(-size / 3, size / 3), h * 0.6 + size * 2.5, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
 	MakeBox(size, w * 0.5 + math.Random(-size / 3, size / 3), h * 0.6 + size * 3.75, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
+	]]
+
+	-- Angled box
+	local size = 50
+	MakeAngledBox(size, w * 0.5, h * 0.6, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY), 90)
+
 
 	--[[
 	-- Three boxes fall in a pyramid shape

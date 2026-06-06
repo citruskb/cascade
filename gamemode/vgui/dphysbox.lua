@@ -13,7 +13,7 @@ function PANEL:Init()
 	self.isPhysbox = true
 end
 
-function PANEL:AddHitbox(w, h, offset)
+function PANEL:AddHitbox(w, h, offset, angle)
 	local mw, mh = self:GetSize()
 	local hb = vgui.Create("DHitbox", self)
 	hb:SetSize(mw, mh)
@@ -26,20 +26,33 @@ function PANEL:AddHitbox(w, h, offset)
 		Vector2(0 + offset, h + offset),
 	}
 
-	hb.Angle = 0
+	hb.angle = angle or 0
 	hb:InvalidateLayout(true)
 
 	table.Insert(self.hbs, hb)
 end
 
-function PANEL:AddCustomHitbox(data)
+function PANEL:AddCustomHitbox(data, angle)
+	-- Set item size and physbox size to screenw / 2 and screenh / 2
+	-- This allows plenty of space for item rotation and effects to play
+
+	-- 1. Create the hitbox based on requested size. 
+	-- 2. Get all the vectors of all the hitboxes in the coordinate plane
+	-- 3. Find the center X (minx + maxx / 2) and center Y (miny + maxy / 2) of these vectors 
+	-- 4. Adjust offsets of existing hitboxes such that the centerX and centerY corresponds to the centerX and centerY of the item/physbox
+	-- 5. Reposition hitboxes inside the physbox based on this change in offset
+
+	-- This will make sure that whenever we add a hitbox to an item the item automatically resizes to fit any rotational orientation of these hitboxes.
+
 	local w, h = self:GetSize()
 	local hb = vgui.Create("DHitbox", self)
 	hb:SetSize(w, h)
 
 	hb.vectorPoints = data
-	hb.Angle = 0
+	hb.angle = angle or 0
 	hb:InvalidateLayout(true)
+
+	print("custom hitbox added!", angle, hb.angle)
 
 	table.Insert(self.hbs, hb)
 end

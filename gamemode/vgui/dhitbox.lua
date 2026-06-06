@@ -13,6 +13,8 @@ PANEL = {}
 local function RotateDataAroundPoint(data, point, angle)
 	if angle == 0 then return data end
 
+	print("rotate!")
+
 	local ox, oy = point:Unpack()
 
 	local radians = math_Rad(angle)
@@ -20,12 +22,18 @@ local function RotateDataAroundPoint(data, point, angle)
 
 	local ret = {}
 	for i = 1, #data do
+		print(data[i])
+
 		local x, y = data[i]:Unpack()
 		ret[i] = Vector2(
 			ox + cos * (x - ox) - sin * (y - oy),
 			oy + sin * (x - ox) + cos * (y - oy)
 		)
+
+		print("rotates to become..", ret[i])
+		print("///")
 	end
+	print("DONE")
 
 	return ret
 end
@@ -50,7 +58,7 @@ function PANEL:OnRemove()
 end
 
 function PANEL:PerformLayout(w, h)
-	local manipulated = RotateDataAroundPoint(self.vectorPoints, self:GetVPos(), self.Angle)
+	local manipulated = RotateDataAroundPoint(self.vectorPoints, self:GetVPos(), self.angle)
 	self.manipulatedVectorData = manipulated
 
 	if not GAMEMODE.Debug then return end

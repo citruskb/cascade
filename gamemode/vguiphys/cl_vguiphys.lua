@@ -31,10 +31,7 @@ function GM:VGUIPhysThink()
 		if not IsValid(vphys) then continue end
 
 		-- Don't apply gravity to supported objects.
-		if vphys.supported then
-			print(vphys.ID, "detected supported!")
-			continue
-		end
+		if vphys.supported then continue end
 
 		-- Add our gravity up to our terminal velocity.
 		local vel = vphys:GetVel()
