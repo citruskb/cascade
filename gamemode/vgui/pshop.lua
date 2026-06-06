@@ -118,23 +118,24 @@ function PANEL:Init()
 
 	-- Test items
 	-- Angled box
-	local function MakeAngledBox(size, bx, by, yvel, angle)
+	local function MakeAngledBox(size, origin, yvel, angle)
 		local item = vgui.Create("PItem", self)
-		item:SetSize(size, size)
-		item:SetPos(bx, by)
-		item.physbox:SetSize(size, size)
+		item:SetSize(w, h)
+		item:SetPos(0, 0)
+		item.physbox:SetSize(w, h)
+		item.physbox:SetPos(0, 0)
 		item.physbox:AddCustomHitbox(Points({
 			Vector2(1, 1),
 			Vector2(size - 1, 1),
 			Vector2(size - 1, size - 1),
 			Vector2(1, size - 1),
-		}), angle)
+		}), origin, angle)
 
 		item:EnablePhysics()
 		item:SetVel(Vector2(0, yvel))
 	end
 
-	local function MakeBox(size, bx, by, yvel) MakeAngledBox(size, bx, by, yvel, 0) end
+	local function MakeBox(size, origin, yvel) MakeAngledBox(size, origin, yvel, 0) end
 
 	--[[
 	-- Box falls directly on other box
@@ -144,10 +145,10 @@ function PANEL:Init()
 
 	-- four box stack
 	local size = 50
-	MakeBox(size, w * 0.5, h * 0.6, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
-	MakeBox(size, w * 0.5 + math.Random(-size / 3, size / 3), h * 0.6 + size * 1.25, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
-	MakeBox(size, w * 0.5 + math.Random(-size / 3, size / 3), h * 0.6 + size * 2.5, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
-	MakeBox(size, w * 0.5 + math.Random(-size / 3, size / 3), h * 0.6 + size * 3.75, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
+	MakeBox(size, Vector2(), -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
+	MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.5), size * 1.5), -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
+	MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.5), size * 3), -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
+	MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.5), size * 4.5), -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
 
 	-- Angled box
 	--[[

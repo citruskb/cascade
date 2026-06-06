@@ -38,6 +38,8 @@ function PANEL:Init()
 	self.col = Color(math.Random(50, 200), math.Random(50, 200), math.Random(50, 200), 120)
 	self.lineCol = Color(self.col.r + 50, self.col.g + 50, self.col.b + 50, 120)
 
+	self.origin = Vector2()
+
 	self.isHitbox = true
 end
 
@@ -98,7 +100,26 @@ end
 
 -- [[ Compatability with some dphysbox functions. ]]
 function PANEL:AggregateVectorData() return self.manipulatedVectorData end
-function PANEL:GetTranslatedAggregateVectorData() return self:GetParent():TranslatePointsLocalToScreen(self:AggregateVectorData()) end
+function PANEL:GetTranslatedAggregateVectorData()
+	local parent = self:GetParent()
+	local t = IsValid(parent) and parent.GetDesiredTranslation and self:GetParent():GetDesiredTranslation() or Vector2()
+
+	local x, y = self:GetPos()
+	local xs, xy = IsValid(parent) and parent:LocalToScreen(x, y) or self:LocalToScreen(x, y)
+	local s = Vector2(xs, xy)
+
+	local o = self:GetOrigin()
+
+	local trans = {}
+	local pointstab = self:AggregateVectorData():GetPoints()
+	for i = 1, #pointstab do
+		trans[i] = pointstab[i] + t + s + o
+	end
+
+	print("points for", self)
+	print(Points(trans))
+	return Points(trans)
+end
 function PANEL:GetAggregateCenter()
 	local ret = self.aggregateCenter
 	local points = self:GetTranslatedAggregateVectorData()
@@ -111,5 +132,8 @@ function PANEL:GetAggregateCenter()
 	return ret
 end
 -- [[	]]
+
+function PANEL:SetOrigin(vec2) self.origin:Set(vec2) end
+function PANEL:GetOrigin() return self.origin end
 
 vgui.Register("DHitbox", PANEL, "DPanel")

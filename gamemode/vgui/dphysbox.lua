@@ -37,23 +37,20 @@ function PANEL:CenterHitboxes()
 
 	-- Get the center of all our hitboxes.
 	-- 0, 0 here is relative to the top left corner of the parent physbox.
-	local minX, maxX, minY, maxY
-	for i = 1, #points do
-		local x, y = points[i]:Unpack()
 
-		if not minX or minX and x < minX then minX = x end
-		if not maxX or maxX and x > maxX then maxX = x end
-		if not minY or minY and y < minY then minY = y end
-		if not maxY or maxY and y > maxY then maxY = y end
+	local groupCenter = points:GetCenter()
+	local groupCenterX, groupCenterY = groupCenter:Unpack()
+	local physboxCenterX, physboxCenterY = self:GetCPos():Unpack()
+	local offsetX, offsetY = physboxCenterX - groupCenterX, physboxCenterY - groupCenterY
+
+	for _, hb in pairs(self.hbs) do
+		local ox, oy = hb:GetOrigin():Unpack()
+		hb:SetPos(ox + offsetX, oy + offsetY)
+		print("moved to new pos!", ox + offsetX, oy + offsetY)
 	end
-
-	local hbCenterX, hbCenterY = (minX + maxX) / 2, (minY + maxY) / 2
-	local physboxCenterX, physboxCenterY = self:GetCPos()
-	local offsetX, offsetY = physboxCenterX - hbCenterX, physboxCenterY - hbCenterY
-
 end
 
-function PANEL:AddCustomHitbox(points, angle)
+function PANEL:AddCustomHitbox(points, origin, angle)
 	-- Goal:
 	-- Set item size and physbox size to screenw and screenh
 	-- This allows plenty of space for item rotation and effects to play
@@ -66,15 +63,17 @@ function PANEL:AddCustomHitbox(points, angle)
 
 	-- This will make sure that whenever we add a hitbox to an item the item automatically resizes to fit any rotational orientation of these hitboxes.
 
-	local w, h = self:GetSize()
 	local hb = vgui.Create("DHitbox", self)
-	hb:SetSize(w, h)
+	hb:SetSize(points:GetMinX() + points:GetMaxX(), points:GetMinY() + points:GetMaxY())
+	hb:SetOrigin(origin)
 
 	hb.vectorPoints = points
 	hb.angle = angle or 0
+
 	hb:InvalidateLayout(true)
 
 	table.Insert(self.hbs, hb)
+	self:CenterHitboxes()
 end
 
 function PANEL:AggregateVectorData()
