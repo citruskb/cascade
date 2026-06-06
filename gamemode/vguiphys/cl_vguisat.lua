@@ -53,12 +53,12 @@ local function SetCachedInfo(obj, id, val)
 	Rawset(data, id, val)
 end
 
-local function GetOrCacheNormal(hb, points, i)
+local function GetOrCacheNormal(hb, pointstab, i)
 	local normal = GetCachedInfo(hb, "normal" .. i)
 
 	if not normal then
-		local vec1 = Rawget(points, i)
-		local vec2 = Rawget(points, i == #points and 1 or i + 1)
+		local vec1 = Rawget(pointstab, i)
+		local vec2 = Rawget(pointstab, i == #pointstab and 1 or i + 1)
 		normal = Vector2(Rawget(vec1, "y") - Rawget(vec2, "y"), Rawget(vec2, "x") - Rawget(vec1, "x"))
 		normal:Normalize()
 
@@ -71,7 +71,7 @@ end
 
 -- We know that for any given normal, an array of points will always project the same way.
 -- We can leverage this for caching.
-local function GetOrCacheProjRange(hb, points, normal)
+local function GetOrCacheProjRange(hb, pointstab, normal)
 	local projRangeData = GetCachedInfo(hb, "projRange")
 	local projRange
 	local nx, ny = normal:Unpack()
@@ -82,8 +82,8 @@ local function GetOrCacheProjRange(hb, points, normal)
 
 	if not projRange then
 		local min, max
-		for j = 1, #points do
-			local point = Rawget(points, j)
+		for j = 1, #pointstab do
+			local point = Rawget(pointstab, j)
 			local x, y = point:Unpack()
 			local proj = x * nx + y * ny
 
@@ -174,24 +174,24 @@ function GM:VGUISAT(hbA, hbB)
 	-- Check if we have checked say.. hbB vs hbA already?
 	if GetCachedCollision(hbA, hbB) then return end
 
-	local pointsA = hbA:GetTranslatedAggregateVectorData()
-	local pointsB = hbB:GetTranslatedAggregateVectorData()
+	local pointsA, pointsB = hbA:GetTranslatedAggregateVectorData(), hbB:GetTranslatedAggregateVectorData()
+	local pointsTabA, pointsTabB = pointsA:GetPoints(), pointsB:GetPoints()
 
 	local smallestOverlap, mtv, relativeTo
 
 	-- Assuming there's at least one new line for each point that exists...
 	-- TODO: this is a bad assumption for how we are aggregating our poly data above.
 	-- Will deal with when it comes to it. Only affects items with 1 or more hitbox.
-	for i = 1, #pointsA do
+	for i = 1, #pointsTabA do
 
 		-- We get our normal for the given points.
-		local normalA = GetOrCacheNormal(hbA, pointsA, i)
+		local normalA = GetOrCacheNormal(hbA, pointsTabA, i)
 
 		-- Next, we get the projection of hbA vs that normal.
-		local projRangeA = GetOrCacheProjRange(hbA, pointsA, normalA)
+		local projRangeA = GetOrCacheProjRange(hbA, pointsTabA, normalA)
 
 		-- We do the same for hbB.
-		local projRangeB = GetOrCacheProjRange(hbB, pointsB, normalA)
+		local projRangeB = GetOrCacheProjRange(hbB, pointsTabB, normalA)
 
 		-- Get our overlap!
 		local overlap = GetRangeOverlap(projRangeA, projRangeB)
@@ -212,11 +212,11 @@ function GM:VGUISAT(hbA, hbB)
 	end
 
 	-- Now we need to repeat the same process, but for hbB!
-	for i = 1, #pointsB do
+	for i = 1, #pointsTabB do
 
-		local normalB = GetOrCacheNormal(hbB, pointsB, i)
-		local projRangeB = GetOrCacheProjRange(hbB, pointsB, normalB)
-		local projRangeA = GetOrCacheProjRange(hbB, pointsA, normalB)
+		local normalB = GetOrCacheNormal(hbB, pointsTabB, i)
+		local projRangeB = GetOrCacheProjRange(hbB, pointsTabB, normalB)
+		local projRangeA = GetOrCacheProjRange(hbB, pointsTabA, normalB)
 		local overlap = GetRangeOverlap(projRangeB, projRangeA)
 
 		if overlap <= 0 then

@@ -10,10 +10,8 @@ local math_Sin = math.Sin
 
 PANEL = {}
 
-local function RotateDataAroundPoint(data, point, angle)
-	if angle == 0 then return data end
-
-	print("rotate!")
+local function RotateDataAroundPoint(pointdata, point, angle)
+	if angle == 0 then return pointdata end
 
 	local ox, oy = point:Unpack()
 
@@ -21,21 +19,17 @@ local function RotateDataAroundPoint(data, point, angle)
 	local cos, sin = math_Cos(radians), math_Sin(radians)
 
 	local ret = {}
-	for i = 1, #data do
-		print(data[i])
-
-		local x, y = data[i]:Unpack()
+	local pointtab = pointdata:GetPoints()
+	for i = 1, #pointtab do
+		local x, y = pointtab[i]:Unpack()
 		ret[i] = Vector2(
 			ox + cos * (x - ox) - sin * (y - oy),
 			oy + sin * (x - ox) + cos * (y - oy)
 		)
 
-		print("rotates to become..", ret[i])
-		print("///")
 	end
-	print("DONE")
 
-	return ret
+	return Points(ret)
 end
 
 function PANEL:Init()
@@ -64,10 +58,7 @@ function PANEL:PerformLayout(w, h)
 	if not GAMEMODE.Debug then return end
 
 	-- Needs to be done because surface.DrawPoly needs to be in this format to work.
-	self.polyData = {}
-	for i = 1, #manipulated do
-		self.polyData[i] = manipulated[i]:ToTable()
-	end
+	self.polyData = manipulated:ToTable()
 end
 
 function PANEL:Paint(w, h)
@@ -110,17 +101,10 @@ function PANEL:AggregateVectorData() return self.manipulatedVectorData end
 function PANEL:GetTranslatedAggregateVectorData() return self:GetParent():TranslatePointsLocalToScreen(self:AggregateVectorData()) end
 function PANEL:GetAggregateCenter()
 	local ret = self.aggregateCenter
-	local data = self:GetTranslatedAggregateVectorData()
+	local points = self:GetTranslatedAggregateVectorData()
 
 	if not ret then
-		local xsum, ysum = 0, 0
-		for _, point in pairs(data) do
-			local x, y = point:Unpack()
-
-			xsum = xsum + x
-			ysum = ysum + y
-		end
-		ret = Vector2(xsum / #data, ysum / #data)
+		ret = points:GetCenter()
 		self.aggregateCenter = ret
 	end
 

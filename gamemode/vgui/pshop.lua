@@ -123,12 +123,12 @@ function PANEL:Init()
 		item:SetSize(size, size)
 		item:SetPos(bx, by)
 		item.physbox:SetSize(size, size)
-		item.physbox:AddCustomHitbox({
+		item.physbox:AddCustomHitbox(Points({
 			Vector2(1, 1),
 			Vector2(size - 1, 1),
 			Vector2(size - 1, size - 1),
 			Vector2(1, size - 1),
-		}, angle)
+		}), angle)
 
 		item:EnablePhysics()
 		item:SetVel(Vector2(0, yvel))

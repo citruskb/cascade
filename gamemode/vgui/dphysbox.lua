@@ -19,12 +19,12 @@ function PANEL:AddHitbox(w, h, offset, angle)
 	hb:SetSize(mw, mh)
 
 	offset = offset or 0
-	hb.vectorPoints = {
-		Vector2(0 + offset, 0 + offset),
-		Vector2(w + offset, 0 + offset),
-		Vector2(w + offset, h + offset),
-		Vector2(0 + offset, h + offset),
-	}
+	hb.vectorPoints = Points({
+			Vector2(0 + offset, 0 + offset),
+			Vector2(w + offset, 0 + offset),
+			Vector2(w + offset, h + offset),
+			Vector2(0 + offset, h + offset),
+		})
 
 	hb.angle = angle or 0
 	hb:InvalidateLayout(true)
@@ -32,11 +32,33 @@ function PANEL:AddHitbox(w, h, offset, angle)
 	table.Insert(self.hbs, hb)
 end
 
-function PANEL:AddCustomHitbox(data, angle)
-	-- Set item size and physbox size to screenw / 2 and screenh / 2
+function PANEL:CenterHitboxes()
+	local points = self:AggregateVectorData()
+
+	-- Get the center of all our hitboxes.
+	-- 0, 0 here is relative to the top left corner of the parent physbox.
+	local minX, maxX, minY, maxY
+	for i = 1, #points do
+		local x, y = points[i]:Unpack()
+
+		if not minX or minX and x < minX then minX = x end
+		if not maxX or maxX and x > maxX then maxX = x end
+		if not minY or minY and y < minY then minY = y end
+		if not maxY or maxY and y > maxY then maxY = y end
+	end
+
+	local hbCenterX, hbCenterY = (minX + maxX) / 2, (minY + maxY) / 2
+	local physboxCenterX, physboxCenterY = self:GetCPos()
+	local offsetX, offsetY = physboxCenterX - hbCenterX, physboxCenterY - hbCenterY
+
+end
+
+function PANEL:AddCustomHitbox(points, angle)
+	-- Goal:
+	-- Set item size and physbox size to screenw and screenh
 	-- This allows plenty of space for item rotation and effects to play
 
-	-- 1. Create the hitbox based on requested size. 
+	-- 1. Create the hitbox. Insert vectors.
 	-- 2. Get all the vectors of all the hitboxes in the coordinate plane
 	-- 3. Find the center X (minx + maxx / 2) and center Y (miny + maxy / 2) of these vectors 
 	-- 4. Adjust offsets of existing hitboxes such that the centerX and centerY corresponds to the centerX and centerY of the item/physbox
@@ -48,11 +70,9 @@ function PANEL:AddCustomHitbox(data, angle)
 	local hb = vgui.Create("DHitbox", self)
 	hb:SetSize(w, h)
 
-	hb.vectorPoints = data
+	hb.vectorPoints = points
 	hb.angle = angle or 0
 	hb:InvalidateLayout(true)
-
-	print("custom hitbox added!", angle, hb.angle)
 
 	table.Insert(self.hbs, hb)
 end
@@ -61,9 +81,13 @@ function PANEL:AggregateVectorData()
 	local ret = self.aggregateVectorData
 
 	if not ret then
-		ret = {}
 		for k, hb in pairs(self.hbs) do
-			table.Add(ret, hb.manipulatedVectorData)
+			if not ret then
+				ret = hb.manipulatedVectorData
+				continue
+			end
+
+			ret = ret + hb.manipulatedVectorData
 		end
 		self.aggregateVectorData = ret
 	end
@@ -79,11 +103,12 @@ function PANEL:TranslatePointsLocalToScreen(points)
 	local s = Vector2(xs, xy)
 
 	local trans = {}
-	for i = 1, #points do
-		trans[i] = points[i] + t + s
+	local pointstab = points:GetPoints()
+	for i = 1, #pointstab do
+		trans[i] = pointstab[i] + t + s
 	end
 
-	return trans
+	return Points(trans)
 end
 
 function PANEL:GetTranslatedAggregateVectorData()
@@ -99,16 +124,17 @@ end
 
 function PANEL:GetAggregateCenter()
 	local ret = self.aggregateCenter
-	local data = self:GetTranslatedAggregateVectorData()
+	local pointdata = self:GetTranslatedAggregateVectorData()
+	local points = pointdata:GetPoints()
 
 	if not ret then
 		local xsum, ysum = 0, 0
-		for _, point in pairs(data) do
+		for _, point in pairs(points) do
 			local x, y = point:Unpack()
 			xsum = xsum + x
 			ysum = ysum + y
 		end
-		ret = Vector2(xsum / #data, ysum / #data)
+		ret = Vector2(xsum / #points, ysum / #points)
 		self.aggregateCenter = ret
 	end
 
