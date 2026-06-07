@@ -105,19 +105,20 @@ function PANEL:GetTranslatedAggregateVectorData()
 	local t = IsValid(parent) and parent.GetDesiredTranslation and self:GetParent():GetDesiredTranslation() or Vector2()
 
 	local x, y = self:GetPos()
-	local xs, xy = IsValid(parent) and parent:LocalToScreen(x, y) or self:LocalToScreen(x, y)
-	local s = Vector2(xs, xy)
-
-	local o = self:GetOrigin()
+	local sx, sy
+	if IsValid(parent) then
+		sx, sy = parent:LocalToScreen(x, y)
+	else
+		sx, sy = self:LocalToScreen(x, y)
+	end
+	local s = Vector2(sx, sy)
 
 	local trans = {}
 	local pointstab = self:AggregateVectorData():GetPoints()
 	for i = 1, #pointstab do
-		trans[i] = pointstab[i] + t + s + o
+		trans[i] = pointstab[i] + t + s
 	end
 
-	print("points for", self)
-	print(Points(trans))
 	return Points(trans)
 end
 function PANEL:GetAggregateCenter()

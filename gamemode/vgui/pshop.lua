@@ -145,10 +145,10 @@ function PANEL:Init()
 
 	-- four box stack
 	local size = 50
-	MakeBox(size, Vector2(0, -40), 0)
-	--MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.5), size * 1.5))
-	--MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.5), -size * 3))
-	--MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.5), -size * 4.5))
+	MakeBox(size, Vector2(), math.Random(-VGUIPHYS_TERMINAL_VELOCITY, 0))
+	MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.2), -size * 2), math.Random(-VGUIPHYS_TERMINAL_VELOCITY, 0))
+	MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.2), -size * 4), math.Random(-VGUIPHYS_TERMINAL_VELOCITY, 0))
+	MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.2), -size * 6), math.Random(-VGUIPHYS_TERMINAL_VELOCITY, 0))
 
 	-- Angled box
 	--[[
