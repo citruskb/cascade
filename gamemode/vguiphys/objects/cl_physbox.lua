@@ -16,11 +16,28 @@ function meta:AddPartialPos(vec2) Rawget(self, "_partialpos"):DoAdd(vec2) end
 
 function meta:GetVel() return Rawget(self, "_vel") end
 function meta:SetVel(vec2) Rawget(self, "_vel"):Set(vec2) end
-function meta:AddVel(vec2) Rawget(self, "_vel"):DoAdd(vec2) end
+function meta:AddVel(vec2)
+	if not Rawget(self, "_physics") then return end
+	Rawget(self, "_vel"):DoAdd(vec2)
+end
+
+function meta:GetAng() return Rawget(self, "_ang") end
+function meta:SetAng(num) Rawset(self, "_ang", num) end
+function meta:AddAng(num) Rawset(self, "_ang", Rawget(self, "_ang") + num) end
 
 function meta:GetDesiredTrans() return Rawget(self, "_desiredtrans") end
-function meta:SetDesiredTrans(vec2) Rawget(self, "_desiredtrans"):Set(vec2) end
-function meta:AddDesiredTrans(vec2) Rawget(self, "_desiredtrans"):DoAdd(vec2) end
+function meta:SetDesiredTrans(vec2)
+	Rawget(self, "_desiredtrans"):Set(vec2)
+	self:MarkPhysicsPassPointsOriginDirty()
+end
+function meta:AddDesiredTrans(vec2)
+	if not Rawget(self, "_physics") then return end
+	Rawget(self, "_desiredtrans"):DoAdd(vec2)
+	self:MarkPhysicsPassPointsOriginDirty()
+end
+
+function meta:IsSupported() return Rawget(self, "_supported") end
+function meta:SetSupported(bool) Rawset(self, "_supported", bool) end
 
 function meta:IsPhysicsEnabled() return Rawget(self, "_physics") end
 function meta:EnablePhysics()
@@ -58,6 +75,15 @@ function meta:SetPointsOrigin(vec2)
 	self:MarkPointsOriginUpdated()
 end
 
+function meta:GetPhysicsPassPointsOrigin()
+	if Rawget(self, "_physicspasspointsorigindirty") then self:RecachePhysicsPassPointsOrigin() end
+	return Rawget(self, "_physicspasspointsorigin")
+end
+function meta:SetPhysicsPassPointsOrigin(vec2)
+	Rawset(self, "_physicspasspointsorigin", vec2)
+	self:MarkPhysicsPassPointsOriginUpdated()
+end
+
 function meta:GetAllHitboxPointsDirty() return Rawget(self, "_allhitboxpointsdirty") end
 function meta:MarkAllHitboxPointsDirty() Rawset(self, "_allhitboxpointsdirty", true) end
 function meta:MarkAllHitboxPointsUpdated() Rawset(self, "_allhitboxpointsdirty", false) end
@@ -66,13 +92,21 @@ function meta:GetPointsOriginDirty() return Rawget(self, "_pointsorigindirty") e
 function meta:MarkPointsOriginDirty() Rawset(self, "_pointsorigindirty", true) end
 function meta:MarkPointsOriginUpdated() Rawset(self, "_pointsorigindirty", false) end
 
+function meta:GetPhysicsPassPointsOriginDirty() return Rawget(self, "_physicspasspointsorigindirty") end
+function meta:MarkPhysicsPassPointsOriginDirty() Rawset(self, "_physicspasspointsorigindirty", true) end
+function meta:MarkPhysicsPassPointsOriginUpdated() Rawset(self, "_physicspasspointsorigindirty", false) end
+
+
 function meta:MarkAllDirty()
 	self:MarkAllHitboxPointsDirty()
 	self:MarkPointsOriginDirty()
+	self:MarkPhysicsPassPointsOriginDirty()
 end
 
 function VGUIPhysbox:__Create(parentPan)
 	Rawset(self, "_parent", parentPan)
+	Rawset(self, "_supported", false)
+	Rawset(self, "_ang", 0)
 	Rawset(self, "_hitboxes", {})
 	Rawset(self, "_origincenteroffset", Vector2())
 	self:MarkAllDirty()
@@ -80,14 +114,37 @@ function VGUIPhysbox:__Create(parentPan)
 	self:DisablePhysics()
 
 	GAMEMODE.VGUIPhysboxes[self] = true
+	self.IsVGUIPhysbox = true
 
 	return self
+end
+
+function VGUIPhysbox:ToString()
+	local parent = Rawget(self, "_parent")
+	local id = parent.ID
+
+	if id then
+		return "[VGUIPhysbox] #" .. id
+	else
+		return "[VGUIPhysbox] associated with " .. ToString(parent)
+	end
+end
+
+function VGUIPhysbox:Eq(other)
+	if not IsTable(other) then return false end
+	if not other.VGUIPhysbox then return false end
+
+	local parent = Rawget(self, "_parent")
+	local otherParent = Rawget(other, "_parent")
+
+	return parent == otherParent
 end
 
 function meta:AddHitbox(points, noResize)
 	local hitbox = VGUIHitbox:Create(self, points)
 	local hitboxes = Rawget(self, "_hitboxes")
-	table.Insert(hitboxes, hitbox)
+	local idx = table.Insert(hitboxes, hitbox)
+	hitbox:SetID(idx)
 	self:MarkAllHitboxPointsDirty()
 
 	GAMEMODE.DebugObjects[Rawget(self, "_parent")] = true
@@ -127,6 +184,13 @@ function meta:AddHitbox(points, noResize)
 	self:SetOriginCenterOffset(Vector2(-allpoints:GetMaxX() * 0.5, -allpoints:GetMaxY() * 0.5))
 end
 
+-- This seems like a lot of extra effort to cache, but could potentially be called thousands of times per second.
+function meta:RecachePhysicsPassPointsOrigin()
+	local pointsOrigin = self:GetPointsOrigin()
+	local desiredTranslation = self:GetDesiredTrans()
+	self:SetPhysicsPassPointsOrigin(pointsOrigin + desiredTranslation)
+end
+
 function meta:RecachePointsOrigin()
 	-- If our parent isn't an item just assume our hitboxes originate from the item's top left corner.
 	local parent = Rawget(self, "_parent")
@@ -162,6 +226,8 @@ function meta:Remove()
 
 	local hitboxes = Rawget(self, "_hitboxes")
 	for k, hitbox in pairs(hitboxes) do hitbox:Remove() end
+
+	table.Empty(self)
 end
 
 -- Determine where we need to move our parent based on physics parameters.
@@ -199,4 +265,5 @@ function meta:DoPhysicsThink()
 	partial:DoSub(delta)
 
 	self:MarkPointsOriginDirty()
+	self:MarkPhysicsPassPointsOriginDirty()
 end

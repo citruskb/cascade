@@ -26,25 +26,30 @@ VGUIPHYS_TERMINAL_VELOCITY = 1.4
 
 function GM:VGUIPhysicsThink()
 
-	-- Handle gravity.
-	for vphys, _ in pairs(self.VGUIPhysboxes) do
+	-- Handle gravity. Remove physboxes with an invalid parent.
+	for physbox, _ in pairs(self.VGUIPhysboxes) do
+		local parent = physbox:GetParent()
+		if not IsValid(parent) then
+			physbox:Remove()
+			continue
+		end
+
 		-- Don't apply gravity to supported objects.
-		if vphys.supported then continue end
+		if physbox.supported then continue end
 
 		-- Add our gravity up to our terminal velocity.
-		local vel = vphys:GetVel()
+		local vel = physbox:GetVel()
 		if not vel then continue end
 
 		local _, vy = vel:Unpack()
 		if vy >= VGUIPHYS_TERMINAL_VELOCITY then continue end
 
-		vphys:AddVel(VGUIPHYS_GRAVITY_VEC2)
+		physbox:AddVel(VGUIPHYS_GRAVITY_VEC2)
 	end
 
 	-- Resolve our collisions.
-	--gamemode.Call("ResolveAllVGUICollisions")
+	gamemode.Call("ResolveAllVGUICollisions")
 
-	-- Set objects resting if doing so makes sense.
 end
 
 function GM:VGUIPhysboxThink()

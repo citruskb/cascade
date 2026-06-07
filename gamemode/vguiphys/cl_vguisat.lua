@@ -151,8 +151,8 @@ local function GetRangeOverlap(rangeA, rangeB)
 	return math_Min(Rawget(rangeA, "max"), Rawget(rangeB, "max")) - math_Max(Rawget(rangeA, "min"), Rawget(rangeB, "min"))
 end
 
-local function OrientMTV(hbA, hbB, normalA)
-	local centerA, centerB = hbA:GetAggregateCenter(), hbB:GetAggregateCenter()
+local function OrientMTV(pointsA, pointsB, normalA)
+	local centerA, centerB = pointsA:GetCenter(), pointsB:GetCenter()
 
 	-- Find the direction pointing from the center of hbB towards the center of hbA.
 	local centerDir = centerB - centerA
@@ -169,12 +169,14 @@ function GM:VGUISAT(hbA, hbB)
 	if hbA == hbB then return end
 
 	-- A hitbox part of the same object can't collide with itself either.
-	if hbA:GetParent() == hbB:GetParent() then return end
+	-- This shouldn't ever happen unless laziness with making hitboxes. 
+	local physboxA, physboxB = Rawget(hbA, "_physbox"), Rawget(hbB, "_physbox")
+	if physboxA == physboxB then return end
 
 	-- Check if we have checked say.. hbB vs hbA already?
 	if GetCachedCollision(hbA, hbB) then return end
 
-	local pointsA, pointsB = hbA:GetTranslatedRotatedAggregateVectorData(), hbB:GetTranslatedRotatedAggregateVectorData()
+	local pointsA, pointsB = hbA:GetPhysicsPassScreenPoints(), hbB:GetPhysicsPassScreenPoints()
 	local pointsTabA, pointsTabB = pointsA:GetPoints(), pointsB:GetPoints()
 
 	local smallestOverlap, mtv, relativeTo
@@ -244,10 +246,10 @@ function GM:VGUISAT(hbA, hbB)
 	end
 
 	-- Orient our MTV correctly.
-	mtv = OrientMTV(hbA, hbB, mtv)
+	mtv = OrientMTV(pointsA, pointsB, mtv)
 
 	-- Finally cache that we checked our collision and return our collision information.
 	SetCachedCollision(hbA, hbB)
 
-	return {hbA = hbA, hbB = hbB, vphysA = hbA:GetParent(), vphysB = hbB:GetParent(), overlap = smallestOverlap, mtv = mtv}
+	return {hbA = hbA, hbB = hbB, physboxA = physboxA, physboxB = physboxB, overlap = smallestOverlap, mtv = mtv}
 end

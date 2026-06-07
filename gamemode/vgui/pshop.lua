@@ -129,36 +129,31 @@ function PANEL:Init()
 
 	-- Test items
 	-- Angled box
-	local function MakeAngledBox(size, origin, yvel, angle)
-		local item = vgui.Create("PItem1", self)
-		item:SetSize(w, h)
-		item:SetPos(0, 0)
-		item.physbox:SetSize(w, h)
-		item.physbox:SetPos(0, 0)
-		item.physbox:AddCustomHitbox(Points({
-			Vector2(1, 1),
-			Vector2(size - 1, 1),
-			Vector2(size - 1, size - 1),
-			Vector2(1, size - 1),
-		}), origin, angle)
-
-		item:EnablePhysics()
-		item:SetVel(Vector2(0, yvel or 0))
+	local function MakeAngledBox(size, origin, vel, angle)
+		local item = vgui.Create("PItem2", self)
+		item:SetSize(0, 0)
+		item:SetPos(origin:Unpack())
+		item.Physbox:AddHitbox(Points({
+			Vector2(0, 0),
+			Vector2(size, 0),
+			Vector2(size, size),
+			Vector2(0, size),
+		}))
+		if vel then item.Physbox:SetVel(vel) end
+		if angle then item.Physbox:SetAng(angle) end
 	end
 
-	local function MakeBox(size, origin, yvel) MakeAngledBox(size, origin, yvel, 0) end
+
+	local function MakeBox(size, origin, yvel)
+		MakeAngledBox(size, origin, yvel, 0)
+	end
 
 
-	local item = vgui.Create("PItem2", self)
-	local size = 40
-	item:SetSize(size, size)
-	item:SetPos(w / 2, h / 2)
-	item.Physbox:AddHitbox(Points({
-		Vector2(0, 0),
-		Vector2(size, 0),
-		Vector2(size, size),
-		Vector2(0, size),
-	}))
+	MakeBox(40, Vector2(w * 0.5, h * 0.5), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	MakeBox(40, Vector2(w * 0.5, h * 0.6), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	MakeBox(40, Vector2(w * 0.5, h * 0.7), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	MakeBox(40, Vector2(w * 0.5, h * 0.8), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+
 
 	--[[ Irregular shape
 	item.Physbox:AddHitbox(Points({

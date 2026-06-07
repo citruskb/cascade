@@ -1,4 +1,8 @@
+DEBUG_MODE_MINIMAL = 1
+DEBUG_MODE_DETAILED = 2
+
 GM.Debug = true -- TODO move to a convar.
+GM.DebugMode = DEBUG_MODE_MINIMAL
 
 local itemCol = Color(255, 255, 0, 60)
 local itemTxtCol = Color(
@@ -112,15 +116,19 @@ local function DrawPhysboxDebug(physbox)
 end
 
 local function DrawHitboxDebug(hitbox)
-	local physbox = hitbox:GetPhysbox()
-	local points = hitbox:GetPoints()
-	local origin = physbox:GetPointsOrigin()
+	local screenpoints = hitbox:GetScreenPoints()
 
-	local screenpoints = points:Translate(origin)
-
+	local poly = screenpoints:ToTable()
 	surface.SetDrawColor(hitboxCol)
 	draw.NoTexture()
-	surface.DrawPoly(screenpoints:ToTable())
+	surface.DrawPoly(poly)
+
+	if GAMEMODE.DebugMode == DEBUG_MODE_DETAILED then return end
+	surface.SetDrawColor(COLOR_BLACK)
+	local x, y = poly[1].x, poly[1].y
+	local w = screenpoints:GetMaxX() - screenpoints:GetMinX()
+	local h = screenpoints:GetMaxY() - screenpoints:GetMinY()
+	DrawOutlinedBox(x, y, w, h, 4)
 end
 
 local function DrawAux(pan, physbox, hitbox)
@@ -142,20 +150,22 @@ end
 local function DrawDebug()
 	if not GAMEMODE.Debug then return end
 
+	local detailed = GAMEMODE.DebugMode == DEBUG_MODE_DETAILED
+
 	local temp = {}
 	for pan, _ in pairs(GAMEMODE.DebugObjects) do
 		if not IsValid(pan) then continue end
 
-		DrawItemDebug(pan)
+		if detailed then DrawItemDebug(pan) end
 
 		local physbox = pan.Physbox
-		DrawPhysboxDebug(physbox)
+		if detailed then DrawPhysboxDebug(physbox) end
 
 		for _, hitbox in pairs(physbox:GetHitboxes()) do
 			DrawHitboxDebug(hitbox)
 		end
 
-		DrawAux(pan, physbox, hitbox)
+		if detailed then DrawAux(pan, physbox, hitbox) end
 
 		temp[pan] = true
 	end
