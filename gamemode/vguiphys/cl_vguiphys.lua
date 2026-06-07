@@ -35,7 +35,7 @@ function GM:VGUIPhysicsThink()
 		end
 
 		-- Don't apply gravity to supported objects.
-		if physbox.supported then continue end
+		if physbox:IsSupported() then continue end
 
 		-- Add our gravity up to our terminal velocity.
 		local vel = physbox:GetVel()

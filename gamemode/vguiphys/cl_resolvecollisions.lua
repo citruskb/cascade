@@ -75,9 +75,9 @@ local function CheckSupported(physboxA, physboxB, mtv)
 	-- If one is higher than the other, the other is being supported.
 	-- Remember, a more positive y value is actually lower.
 	if cay < cby then
-		--vphysA.supported = true
+		physboxA:SetSupported(true)
 	else
-		--vphysB.supported = true
+		physboxB:SetSupported(true)
 	end
 end
 
@@ -95,7 +95,7 @@ function GM:ResolveVGUICollision(data)
 
 	-- Only do a corrective translation if penetration is large enough.
 	if overlap > VGUIPHYS_SLOP then
-		local cappedOverlap = math.Min(overlap, 1)
+		local cappedOverlap = math.Min(overlap, 0.1)
 		local translationA = -mtv * cappedOverlap
 		ApplyTranslations(physboxA, physboxB, translationA)
 	end
