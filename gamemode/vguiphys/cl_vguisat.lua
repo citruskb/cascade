@@ -174,7 +174,7 @@ function GM:VGUISAT(hbA, hbB)
 	-- Check if we have checked say.. hbB vs hbA already?
 	if GetCachedCollision(hbA, hbB) then return end
 
-	local pointsA, pointsB = hbA:GetTranslatedAggregateVectorData(), hbB:GetTranslatedAggregateVectorData()
+	local pointsA, pointsB = hbA:GetTranslatedRotatedAggregateVectorData(), hbB:GetTranslatedRotatedAggregateVectorData()
 	local pointsTabA, pointsTabB = pointsA:GetPoints(), pointsB:GetPoints()
 
 	local smallestOverlap, mtv, relativeTo

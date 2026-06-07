@@ -28,9 +28,8 @@ function PANEL:AddHitbox(w, h, origin, angle)
 	hb.vectorPoints = points
 	hb.angle = angle or 0
 
-	hb:InvalidateLayout(true)
-
 	table.Insert(self.hbs, hb)
+	hb:InvalidateLayout(true)
 	self:CenterHitboxes()
 
 	--[[
@@ -94,14 +93,34 @@ function PANEL:AddCustomHitbox(points, origin, angle)
 	hb.vectorPoints = points
 	hb.angle = angle or 0
 
-	hb:InvalidateLayout(true)
-
 	table.Insert(self.hbs, hb)
+	hb:InvalidateLayout(true)
 	self:CenterHitboxes()
 end
 
 function PANEL:AggregateVectorData()
 	local ret = self.aggregateVectorData
+
+	if not ret then
+		for k, hb in pairs(self.hbs) do
+			if not ret then
+				ret = hb.vectorPoints
+				continue
+			end
+
+			ret = ret + hb.vectorPoints
+		end
+		self.aggregateVectorData = ret
+	end
+
+	print("aggregate vector data")
+	PrintTable(self.hbs)
+
+	return ret
+end
+
+function PANEL:RotatedAggregateVectorData()
+	local ret = self.rotatedAggregateVectorData
 
 	if not ret then
 		for k, hb in pairs(self.hbs) do
@@ -112,7 +131,8 @@ function PANEL:AggregateVectorData()
 
 			ret = ret + hb.manipulatedVectorData
 		end
-		self.aggregateVectorData = ret
+
+		self.roatatedAggregrateVectorData = ret
 	end
 
 	return ret
@@ -145,6 +165,17 @@ function PANEL:GetTranslatedAggregateVectorData()
 	return ret
 end
 
+function PANEL:GetTranslatedRotatedAggregateVectorData()
+	local ret = self.transAggroData
+
+	if not ret then
+		ret = self:TranslatePointsLocalToScreen(self:RotatedAggregateVectorData())
+		self.transAggroData = ret
+	end
+
+	return ret
+end
+
 function PANEL:GetAggregateCenter()
 	local ret = self.aggregateCenter
 	local pointdata = self:GetTranslatedAggregateVectorData()
@@ -170,6 +201,7 @@ end
 
 function PANEL:Think()
 	self.aggregateVectorData = nil
+	self.rotatedAggregateVectorData = nil
 	self.aggregateCenter = nil
 end
 
@@ -223,4 +255,4 @@ function PANEL:HasDesiredTranslation()
 end
 -- [[	]]
 
-vgui.Register("DPhysbox", PANEL, "DPanel")
+vgui.Register("DPhysbox1", PANEL, "DPanel")

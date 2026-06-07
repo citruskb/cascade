@@ -117,4 +117,4 @@ function PANEL:OnRemove()
 	if self.physics then self:DisablePhysics() end
 end
 
-vgui.Register("PItem", PANEL, "DPanel")
+vgui.Register("PItem1", PANEL, "DPanel")

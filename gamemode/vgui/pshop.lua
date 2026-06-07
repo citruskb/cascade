@@ -80,12 +80,14 @@ function PANEL:Init()
 	floorcontainer:SetBackgroundColor(Color(0, 0, 0, 0))
 	floorcontainer:Dock(TOP)
 
-	local invfloor = vgui.Create("DPhysbox", floorcontainer)
+	--[[
+	local invfloor = vgui.Create("DPhysbox1", floorcontainer)
 	invfloor:SetSize(w * 0.25, h * 0.1)
 	invfloor:Dock(FILL)
 	invfloor:AddHitbox(w * 0.25, h * 0.1, Vector2())
 	lab = EasyLabel(invfloor, "Floor (1)", "SFontLarger")
 	DockCenter(lab, invfloor)
+	]]
 	--
 
 
@@ -119,7 +121,7 @@ function PANEL:Init()
 	-- Test items
 	-- Angled box
 	local function MakeAngledBox(size, origin, yvel, angle)
-		local item = vgui.Create("PItem", self)
+		local item = vgui.Create("PItem1", self)
 		item:SetSize(w, h)
 		item:SetPos(0, 0)
 		item.physbox:SetSize(w, h)
@@ -137,6 +139,11 @@ function PANEL:Init()
 
 	local function MakeBox(size, origin, yvel) MakeAngledBox(size, origin, yvel, 0) end
 
+
+	local item = vgui.Create("PItem2", self)
+	item:SetSize(50, 50)
+	item:SetPos(w / 2, h / 2)
+
 	--[[
 	-- Box falls directly on other box
 	MakeBox(50, w * 0.5, h * 0.6, -VGUIPHYS_TERMINAL_VELOCITY)
@@ -144,17 +151,15 @@ function PANEL:Init()
 	]]
 
 	-- four box stack
-	local size = 50
-	MakeBox(size, Vector2(), math.Random(-VGUIPHYS_TERMINAL_VELOCITY, 0))
-	MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.2), -size * 2), math.Random(-VGUIPHYS_TERMINAL_VELOCITY, 0))
-	MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.2), -size * 4), math.Random(-VGUIPHYS_TERMINAL_VELOCITY, 0))
-	MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.2), -size * 6), math.Random(-VGUIPHYS_TERMINAL_VELOCITY, 0))
+	--local size = 50
+	--MakeBox(size, Vector2(), math.Random(-VGUIPHYS_TERMINAL_VELOCITY, 0))
+	--MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.2), -size * 2), math.Random(-VGUIPHYS_TERMINAL_VELOCITY, 0))
+	--MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.2), -size * 4), math.Random(-VGUIPHYS_TERMINAL_VELOCITY, 0))
+	--MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.2), -size * 6), math.Random(-VGUIPHYS_TERMINAL_VELOCITY, 0))
 
 	-- Angled box
-	--[[
-	local size = 50
-	MakeAngledBox(size, w * 0.5, h * 0.6, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY), 90)
-	]]
+	--size = 50
+	--MakeAngledBox(size, Vector2(0, 200), 0, 25)
 
 
 	--[[

@@ -54,7 +54,19 @@ function PANEL:OnRemove()
 end
 
 function PANEL:PerformLayout(w, h)
-	local manipulated = RotateDataAroundPoint(self.vectorPoints, self:GetVPos(), self.angle)
+	print("vector points")
+	print(self.vectorPoints)
+
+	local parent = self:GetParent()
+	local manipulated
+	if IsValid(parent) and parent.GetAggregateCenter then
+		local ox, oy = self:ScreenToLocal(parent:GetAggregateCenter():Unpack())
+		local origin = Vector2(ox, oy)
+		manipulated = RotateDataAroundPoint(self.vectorPoints, origin, self.angle)
+	else
+		manipulated = RotateDataAroundPoint(self.vectorPoints, self:GetVPos(), self.angle)
+	end
+
 	self.manipulatedVectorData = manipulated
 
 	if not GAMEMODE.Debug then return end
@@ -99,7 +111,8 @@ function PANEL:GetID()
 end
 
 -- [[ Compatability with some dphysbox functions. ]]
-function PANEL:AggregateVectorData() return self.manipulatedVectorData end
+function PANEL:AggregateVectorData() return self.vectorPoints end
+function PANEL:RotatedAggregateVectorData() return self.manipulatedVectorData end
 function PANEL:GetTranslatedAggregateVectorData()
 	local parent = self:GetParent()
 	local t = IsValid(parent) and parent.GetDesiredTranslation and self:GetParent():GetDesiredTranslation() or Vector2()
@@ -115,6 +128,27 @@ function PANEL:GetTranslatedAggregateVectorData()
 
 	local trans = {}
 	local pointstab = self:AggregateVectorData():GetPoints()
+	for i = 1, #pointstab do
+		trans[i] = pointstab[i] + t + s
+	end
+
+	return Points(trans)
+end
+function PANEL:GetTranslatedRotatedAggregateVectorData()
+	local parent = self:GetParent()
+	local t = IsValid(parent) and parent.GetDesiredTranslation and self:GetParent():GetDesiredTranslation() or Vector2()
+
+	local x, y = self:GetPos()
+	local sx, sy
+	if IsValid(parent) then
+		sx, sy = parent:LocalToScreen(x, y)
+	else
+		sx, sy = self:LocalToScreen(x, y)
+	end
+	local s = Vector2(sx, sy)
+
+	local trans = {}
+	local pointstab = self:RotatedAggregateVectorData():GetPoints()
 	for i = 1, #pointstab do
 		trans[i] = pointstab[i] + t + s
 	end
@@ -137,4 +171,4 @@ end
 function PANEL:SetOrigin(vec2) self.origin:Set(vec2) end
 function PANEL:GetOrigin() return self.origin end
 
-vgui.Register("DHitbox", PANEL, "DPanel")
+vgui.Register("DHitbox1", PANEL, "DPanel")
