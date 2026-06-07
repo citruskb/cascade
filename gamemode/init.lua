@@ -7,7 +7,6 @@ AddCSLuaFile("vgui/dhitbox1.lua")
 AddCSLuaFile("vgui/dphysbox1.lua")
 AddCSLuaFile("vgui/pitem1.lua")
 AddCSLuaFile("vgui/pitem2.lua")
-AddCSLuaFile("vgui/dphysbox2.lua")
 AddCSLuaFile("vgui/pshop.lua")
 
 include("shared.lua")

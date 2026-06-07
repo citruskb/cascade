@@ -8,8 +8,8 @@ local itemCount = 1
 function PANEL:Init()
 	GAMEMODE.VGUIItems[self] = true
 
-	local physbox = vgui.Create("DPhysbox2", self)
-	physbox.Item = self
+	local physbox = VGUIPhysbox:Create(self)
+	physbox:EnablePhysics()
 	self.Physbox = physbox
 
 	self.IsItem = true
@@ -25,10 +25,17 @@ function PANEL:SetSize(w, h)
 	if IsValid(self.Physbox) then self.Physbox:SetSize(w, h) end
 end
 
+function PANEL:GetCenterPos()
+	local x, y = self:GetPos()
+	local w, h = self:GetSize()
+	return Vector2(x + w * 0.5, y + h * 0.5)
+end
+
 function PANEL:Paint() end
 
 function PANEL:OnRemove()
 	GAMEMODE.VGUIItems[self] = nil
+	self.Physbox:Remove()
 end
 
 vgui.Register("PItem2", PANEL, "DPanel")

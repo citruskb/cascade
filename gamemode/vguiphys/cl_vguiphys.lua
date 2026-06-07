@@ -24,12 +24,10 @@ VGUIPHYS_GRAVITY_VEC2 = Vector2(0, VGUIPHYS_GRAVITY)
 -- Stop nudging velocity downards after reaching this velocity.
 VGUIPHYS_TERMINAL_VELOCITY = 1.4
 
-function GM:VGUIPhysThink()
+function GM:VGUIPhysicsThink()
 
 	-- Handle gravity.
 	for vphys, _ in pairs(self.VGUIPhysboxes) do
-		if not IsValid(vphys) then continue end
-
 		-- Don't apply gravity to supported objects.
 		if vphys.supported then continue end
 
@@ -44,7 +42,11 @@ function GM:VGUIPhysThink()
 	end
 
 	-- Resolve our collisions.
-	gamemode.Call("ResolveAllVGUICollisions")
+	--gamemode.Call("ResolveAllVGUICollisions")
 
 	-- Set objects resting if doing so makes sense.
+end
+
+function GM:VGUIPhysboxThink()
+	for vphys, _ in pairs(self.VGUIPhysboxes) do vphys:DoPhysicsThink() end
 end

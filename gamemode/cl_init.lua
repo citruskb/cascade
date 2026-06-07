@@ -6,7 +6,6 @@ include("vgui/dhitbox1.lua")
 include("vgui/dphysbox1.lua")
 include("vgui/pitem1.lua")
 include("vgui/pitem2.lua")
-include("vgui/dphysbox2.lua")
 include("vgui/pshop.lua")
 
 MySelf = MySelf or NULL
@@ -100,13 +99,16 @@ function GM:_Think()
 	local ct = CurTime()
 
 	-- Update item physics if it makes sense to.
+	local physboxes = table.Count(self.VGUIPhysboxes)
 	if nextVGUIPhysUpdate <= ct
-		and (table.Count(self.VGUIPhysboxes) > 0 or table.Count(self.VGUIHitboxes) > 0) then
-			gamemode.Call("VGUIPhysThink")
+		and (physboxes > 0 or table.Count(self.VGUIHitboxes) > 0) then
+			gamemode.Call("VGUIPhysicsThink")
 
 			engineTick = engineTick or engine.TickInterval()
 			nextVGUIPhysUpdate = ct + engineTick
 	end
+
+	if physboxes > 0 then gamemode.Call("VGUIPhysboxThink") end
 
 	if nextTick > ct then return end
 	nextTick = ct + 1

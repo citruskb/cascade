@@ -141,8 +141,24 @@ function PANEL:Init()
 
 
 	local item = vgui.Create("PItem2", self)
-	item:SetSize(50, 50)
+	local size = 50
+	item:SetSize(size, size)
 	item:SetPos(w / 2, h / 2)
+	item.Physbox:AddHitbox(Points({
+		Vector2(0, 0),
+		Vector2(size, 0),
+		Vector2(size, size),
+		Vector2(0, size),
+	}))
+	--[[
+	item.Physbox:AddHitbox(Points({
+		Vector2(size, size),
+		Vector2(size * 2, size),
+		Vector2(size * 2, size * 2),
+		Vector2(size, size * 2),
+	}))
+	]]
+	--item.Physbox:EnablePhysics()
 
 	--[[
 	-- Box falls directly on other box

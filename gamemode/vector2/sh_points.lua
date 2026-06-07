@@ -141,7 +141,7 @@ function __points:Add(other)
 		local otherPointstab = Rawget(other, "_points")
 		table.Add(ret, otherPointstab)
 
-		return ret
+		return Points(ret)
 	end
 end
 
@@ -228,13 +228,21 @@ function meta:Copy()
 	local points = self:GetPoints()
 	local tab = {}
 	for i = 1, #points do
-		local newVec = Vector2()
-		tab[i] = newVec:Set(points[i])
+		tab[i] = Vector2(points[i]:Unpack())
 	end
 
 	return Points(tab)
 end
 
+function meta:Translate(vec2)
+	local copy = self:Copy()
+	local points = copy:GetPoints()
+	for i = 1, #points do
+		points[i]:DoAdd(vec2)
+	end
+
+	return copy
+end
 
 
 function Points(tab) return __points:Create(tab) end
