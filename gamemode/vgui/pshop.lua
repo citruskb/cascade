@@ -75,10 +75,19 @@ function PANEL:Init()
 	lab = EasyLabel(inventory, "Storage Inventory", "SFontLarger")
 	DockCenter(lab, inventory)
 
-	local floorcontainer = vgui.Create("DPanel", middle)
+	local floorcontainer = vgui.Create("DPanel", self)
 	floorcontainer:SetSize(w * 0.25, h * 0.1)
+	floorcontainer:SetPos(w * 0.4, h * 0.9)
 	floorcontainer:SetBackgroundColor(Color(0, 0, 0, 0))
-	floorcontainer:Dock(TOP)
+
+	local physbox = VGUIPhysbox:Create(floorcontainer)
+	physbox:AddHitbox(Points({
+		Vector2(0, 0),
+		Vector2(w * 0.25, 0),
+		Vector2(w * 0.25, h * 0.1),
+		Vector2(0, h * 0.1),
+	}), true)
+	floorcontainer.Physbox = physbox
 
 	--[[
 	local invfloor = vgui.Create("DPhysbox1", floorcontainer)
@@ -141,7 +150,7 @@ function PANEL:Init()
 
 
 	local item = vgui.Create("PItem2", self)
-	local size = 50
+	local size = 40
 	item:SetSize(size, size)
 	item:SetPos(w / 2, h / 2)
 	item.Physbox:AddHitbox(Points({
@@ -150,14 +159,32 @@ function PANEL:Init()
 		Vector2(size, size),
 		Vector2(0, size),
 	}))
-	--[[
+
+	--[[ Irregular shape
 	item.Physbox:AddHitbox(Points({
-		Vector2(size, size),
-		Vector2(size * 2, size),
-		Vector2(size * 2, size * 2),
-		Vector2(size, size * 2),
+		Vector2(0, 0),
+		Vector2(size * 2, size * 1),
+		Vector2(size * 3, size * 2),
+		Vector2(size * 2, size * 3),
+		Vector2(size * 1, size * 4),
 	}))
 	]]
+
+	--[[ Make a circle
+	local points = {}
+	local radius = 24
+	for i = 1, 16 do
+		local angle = math.rad((i / 16) * 360)
+		local x = math.cos(angle) * radius
+		local y = math.sin(angle) * radius
+		points[i] = Vector2(x, y)
+	end
+	local offset = Vector2(radius, radius)
+	points = Points(points):Translate(offset)
+	item.Physbox:AddHitbox(points)
+	]]
+
+
 	--item.Physbox:EnablePhysics()
 
 	--[[

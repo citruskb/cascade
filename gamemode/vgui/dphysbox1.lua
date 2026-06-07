@@ -69,7 +69,6 @@ function PANEL:CenterHitboxes()
 		local x, y = parent:GetPos()
 		parent:SetPos(x + ox, y + oy)
 		hb:SetPos(offsetX, offsetY)
-		print("moved to new pos!", ox + offsetX, oy + offsetY)
 	end
 end
 
@@ -112,9 +111,6 @@ function PANEL:AggregateVectorData()
 		end
 		self.aggregateVectorData = ret
 	end
-
-	print("aggregate vector data")
-	PrintTable(self.hbs)
 
 	return ret
 end

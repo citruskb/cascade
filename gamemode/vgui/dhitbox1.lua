@@ -54,9 +54,6 @@ function PANEL:OnRemove()
 end
 
 function PANEL:PerformLayout(w, h)
-	print("vector points")
-	print(self.vectorPoints)
-
 	local parent = self:GetParent()
 	local manipulated
 	if IsValid(parent) and parent.GetAggregateCenter then

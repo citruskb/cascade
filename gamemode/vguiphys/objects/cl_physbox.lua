@@ -1,4 +1,5 @@
 GM.VGUIPhysboxes = {}
+GM.DebugObjects = {}
 
 if not VGUIPhysbox then
 	VGUIPhysbox = Class:Create(nil, "VGUIPhysbox")
@@ -83,11 +84,15 @@ function VGUIPhysbox:__Create(parentPan)
 	return self
 end
 
-function meta:AddHitbox(points)
+function meta:AddHitbox(points, noResize)
 	local hitbox = VGUIHitbox:Create(self, points)
 	local hitboxes = Rawget(self, "_hitboxes")
 	table.Insert(hitboxes, hitbox)
 	self:MarkAllHitboxPointsDirty()
+
+	GAMEMODE.DebugObjects[Rawget(self, "_parent")] = true
+
+	if noResize then return end
 
 	-- Adjust the parent size to accomodate rotation of our hitboxes around their center point.
 	-- But only if our parent is an item.
@@ -123,9 +128,13 @@ function meta:AddHitbox(points)
 end
 
 function meta:RecachePointsOrigin()
-	-- If our parent isn't an item just assume our hitboxes originate from the item's top right corner.
+	-- If our parent isn't an item just assume our hitboxes originate from the item's top left corner.
 	local parent = Rawget(self, "_parent")
-	if not parent.GetCenterPos then return parent:GetVPos() end
+	if not parent.GetCenterPos then
+		local origin = Vector2(parent:GetVPos():Unpack())
+		self:SetPointsOrigin(origin)
+		return
+	end
 
 	local centerOffset = Rawget(self, "_origincenteroffset")
 	local pcenter = parent.GetCenterPos and parent:GetCenterPos()

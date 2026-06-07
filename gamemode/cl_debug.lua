@@ -51,6 +51,10 @@ local function DrawItemDebug(pan)
 	local x, y = pan:GetPos()
 	local w, h = pan:GetSize()
 
+	if not pan.IsItem then
+		x, y = pan:LocalToScreen(x, y)
+	end
+
 	-- Draw box around object
 	surface.SetDrawColor(itemCol)
 	draw.NoTexture()
@@ -60,7 +64,7 @@ local function DrawItemDebug(pan)
 	surface.SetTextColor(itemTxtCol)
 	surface.SetFont("DFontTinier")
 
-	local txt1 = "Item #" .. pan.ID
+	local txt1 = "Item " .. (pan.ID or "??")
 	local _, th = surface.GetTextSize(txt1)
 	surface.SetTextPos(x, y + h)
 	surface.DrawText(txt1)
@@ -88,7 +92,7 @@ local function DrawPhysboxDebug(physbox)
 	surface.SetTextColor(physboxTxtCol)
 	surface.SetFont("DFontTinier")
 
-	local txt1 = "VPhys #" .. parent.ID
+	local txt1 = "VPhys #" .. (parent.ID or "??")
 	local _, th = surface.GetTextSize(txt1)
 	local txtx = x + w + 6
 	surface.SetTextPos(txtx, y)
@@ -109,9 +113,9 @@ end
 
 local function DrawHitboxDebug(hitbox)
 	local physbox = hitbox:GetPhysbox()
-
 	local points = hitbox:GetPoints()
 	local origin = physbox:GetPointsOrigin()
+
 	local screenpoints = points:Translate(origin)
 
 	surface.SetDrawColor(hitboxCol)
@@ -120,6 +124,8 @@ local function DrawHitboxDebug(hitbox)
 end
 
 local function DrawAux(pan, physbox, hitbox)
+	if not pan.GetCenterPos then return end
+
 	-- Box at the center
 	surface.SetDrawColor(COLOR_BLACK)
 	local xp, yp = pan:GetCenterPos():Unpack()
@@ -136,7 +142,10 @@ end
 local function DrawDebug()
 	if not GAMEMODE.Debug then return end
 
-	for pan, _ in pairs(GAMEMODE.VGUIItems) do
+	local temp = {}
+	for pan, _ in pairs(GAMEMODE.DebugObjects) do
+		if not IsValid(pan) then continue end
+
 		DrawItemDebug(pan)
 
 		local physbox = pan.Physbox
@@ -147,7 +156,12 @@ local function DrawDebug()
 		end
 
 		DrawAux(pan, physbox, hitbox)
+
+		temp[pan] = true
 	end
+
+	-- Done to clear invalid panels.
+	GAMEMODE.DebugObjects = temp
 end
 
 hook.Add("DrawOverlay", "DrawOverlay.Debug", DrawDebug)
