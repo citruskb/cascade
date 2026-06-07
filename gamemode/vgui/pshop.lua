@@ -83,7 +83,7 @@ function PANEL:Init()
 	local invfloor = vgui.Create("DPhysbox", floorcontainer)
 	invfloor:SetSize(w * 0.25, h * 0.1)
 	invfloor:Dock(FILL)
-	invfloor:AddHitbox(w * 0.25, h * 0.1)
+	invfloor:AddHitbox(w * 0.25, h * 0.1, Vector2())
 	lab = EasyLabel(invfloor, "Floor (1)", "SFontLarger")
 	DockCenter(lab, invfloor)
 	--
@@ -132,7 +132,7 @@ function PANEL:Init()
 		}), origin, angle)
 
 		item:EnablePhysics()
-		item:SetVel(Vector2(0, yvel))
+		item:SetVel(Vector2(0, yvel or 0))
 	end
 
 	local function MakeBox(size, origin, yvel) MakeAngledBox(size, origin, yvel, 0) end
@@ -145,10 +145,10 @@ function PANEL:Init()
 
 	-- four box stack
 	local size = 50
-	MakeBox(size, Vector2(), -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
-	MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.5), size * 1.5), -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
-	MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.5), size * 3), -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
-	MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.5), size * 4.5), -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
+	MakeBox(size, Vector2(0, -40), 0)
+	--MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.5), size * 1.5))
+	--MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.5), -size * 3))
+	--MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.5), -size * 4.5))
 
 	-- Angled box
 	--[[

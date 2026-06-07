@@ -13,7 +13,27 @@ function PANEL:Init()
 	self.isPhysbox = true
 end
 
-function PANEL:AddHitbox(w, h, offset, angle)
+function PANEL:AddHitbox(w, h, origin, angle)
+	local hb = vgui.Create("DHitbox", self)
+	local points = Points({
+		Vector2(0, 0),
+		Vector2(w, 0),
+		Vector2(w, h),
+		Vector2(0, h),
+	})
+
+	hb:SetSize(points:GetMinX() + points:GetMaxX(), points:GetMinY() + points:GetMaxY())
+	hb:SetOrigin(origin)
+
+	hb.vectorPoints = points
+	hb.angle = angle or 0
+
+	hb:InvalidateLayout(true)
+
+	table.Insert(self.hbs, hb)
+	self:CenterHitboxes()
+
+	--[[
 	local mw, mh = self:GetSize()
 	local hb = vgui.Create("DHitbox", self)
 	hb:SetSize(mw, mh)
@@ -30,6 +50,7 @@ function PANEL:AddHitbox(w, h, offset, angle)
 	hb:InvalidateLayout(true)
 
 	table.Insert(self.hbs, hb)
+	]]
 end
 
 function PANEL:CenterHitboxes()
@@ -43,9 +64,12 @@ function PANEL:CenterHitboxes()
 	local physboxCenterX, physboxCenterY = self:GetCPos():Unpack()
 	local offsetX, offsetY = physboxCenterX - groupCenterX, physboxCenterY - groupCenterY
 
+	local parent = self:GetParent()
 	for _, hb in pairs(self.hbs) do
 		local ox, oy = hb:GetOrigin():Unpack()
-		hb:SetPos(ox + offsetX, oy + offsetY)
+		local x, y = parent:GetPos()
+		parent:SetPos(x + ox, y + oy)
+		hb:SetPos(offsetX, offsetY)
 		print("moved to new pos!", ox + offsetX, oy + offsetY)
 	end
 end
