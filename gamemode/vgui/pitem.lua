@@ -38,4 +38,4 @@ function PANEL:OnRemove()
 	self.Physbox:Remove()
 end
 
-vgui.Register("PItem2", PANEL, "DPanel")
+vgui.Register("PItem", PANEL, "DPanel")

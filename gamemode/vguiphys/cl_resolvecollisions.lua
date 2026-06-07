@@ -95,7 +95,7 @@ function GM:ResolveVGUICollision(data)
 
 	-- Only do a corrective translation if penetration is large enough.
 	if overlap > VGUIPHYS_SLOP then
-		local cappedOverlap = math.Min(overlap, 0.1)
+		local cappedOverlap = math.Min(overlap, 1)
 		local translationA = -mtv * cappedOverlap
 		ApplyTranslations(physboxA, physboxB, translationA)
 	end

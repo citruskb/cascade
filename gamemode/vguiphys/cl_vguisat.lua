@@ -151,14 +151,14 @@ local function GetRangeOverlap(rangeA, rangeB)
 	return math_Min(Rawget(rangeA, "max"), Rawget(rangeB, "max")) - math_Max(Rawget(rangeA, "min"), Rawget(rangeB, "min"))
 end
 
-local function OrientMTV(pointsA, pointsB, normalA)
+local function OrientMTV(pointsA, pointsB, mtv)
 	local centerA, centerB = pointsA:GetCenter(), pointsB:GetCenter()
 
 	-- Find the direction pointing from the center of hbB towards the center of hbA.
 	local centerDir = centerB - centerA
 
-	-- If the dot product is negative, it means we need to flip our MTV. Otherwise, the normal is the MTV.
-	return centerDir:Dot(normalA) < 0 and -normalA or normalA
+	-- If the dot product is negative, it means we need to flip our MTV. Otherwise, do nothing.
+	return centerDir:Dot(mtv) < 0 and -mtv or mtv
 end
 
 
@@ -208,7 +208,7 @@ function GM:VGUISAT(hbA, hbB)
 		if smallestOverlap and overlap >= smallestOverlap - VGUI_EPSILON_OVERLAP then continue end
 
 		smallestOverlap = overlap
-		mtv = normalA
+		mtv = Vector2(normalA:Unpack())
 		relativeTo = hbA
 
 	end
@@ -229,7 +229,7 @@ function GM:VGUISAT(hbA, hbB)
 		if smallestOverlap and overlap >= smallestOverlap - VGUI_EPSILON_OVERLAP then continue end
 
 		smallestOverlap = overlap
-		mtv = normalB
+		mtv = Vector2(normalB:Unpack())
 		relativeTo = hbB
 
 	end
@@ -238,8 +238,16 @@ function GM:VGUISAT(hbA, hbB)
 	-- But we need to make sure we are pointing our MTV the correct direction.
 	-- And relative to the right object.
 
-	-- If our mtv is relative to hbA instead of hbB then simply swap the two.
+	-- If our mtv is relative to hbB instead of hbA then simply swap the two.
 	if relativeTo == hbB then
+		local ref_pointsA, ref_pointsB = pointsA, pointsB
+		pointsA, pointsB = ref_pointsB, ref_pointsA
+		ref_pointsA, ref_pointsB = nil, nil
+
+		local ref_physboxA, ref_physboxB = physboxA, physboxB
+		physboxA, physboxB = ref_physboxB, ref_physboxA
+		ref_physboxA, ref_physboxB = nil, nil
+
 		local ref_hbA, ref_hbB = hbA, hbB
 		hbA, hbB = ref_hbB, ref_hbA
 		ref_hbA, ref_hbB = nil, nil

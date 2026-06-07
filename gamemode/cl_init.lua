@@ -2,10 +2,7 @@ include("shared.lua")
 
 include("cl_debug.lua")
 
-include("vgui/dhitbox1.lua")
-include("vgui/dphysbox1.lua")
-include("vgui/pitem1.lua")
-include("vgui/pitem2.lua")
+include("vgui/pitem.lua")
 include("vgui/pshop.lua")
 
 MySelf = MySelf or NULL

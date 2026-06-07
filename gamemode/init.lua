@@ -3,10 +3,7 @@ AddCSLuaFile("cl_init.lua")
 
 AddCSLuaFile("cl_debug.lua")
 
-AddCSLuaFile("vgui/dhitbox1.lua")
-AddCSLuaFile("vgui/dphysbox1.lua")
-AddCSLuaFile("vgui/pitem1.lua")
-AddCSLuaFile("vgui/pitem2.lua")
+AddCSLuaFile("vgui/pitem.lua")
 AddCSLuaFile("vgui/pshop.lua")
 
 include("shared.lua")

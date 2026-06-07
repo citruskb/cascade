@@ -86,7 +86,7 @@ function meta:TransformPointsAroundOrigin(inputPoints, origin)
 		end
 	end
 
-	ret:MarkTableDirty()
+	ret:MarkAllDirty()
 
 	return ret
 end
