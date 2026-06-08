@@ -87,6 +87,7 @@ function GM:ResolveVGUICollision(data)
 	local physboxB = Rawget(data, "physboxB")
 	local overlap = Rawget(data, "overlap")
 	local mtv = Rawget(data, "mtv")
+	local contactPoints = Rawget(data, "contactPoints")
 
 	local rootA, rootB = physboxA:GetParent(), physboxB:GetParent()
 
@@ -103,4 +104,5 @@ function GM:ResolveVGUICollision(data)
 	ResolveVelocity(physboxA, physboxB, mtv)
 
 	CheckSupported(physboxA, physboxB, mtv)
+
 end

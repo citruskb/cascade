@@ -29,6 +29,8 @@ when looping through all vphys elements checking for collisions.
 WARNING. Need to make sure this area is highly optimized. It could pontentially be running many thousands of times per second!
 ]]--
 
+local gamemode_Call = gamemode.Call
+
 local math_Max = math.Max
 local math_Min = math.Min
 
@@ -162,6 +164,28 @@ local function OrientMTV(pointsA, pointsB, mtv)
 end
 
 
+local function GetReferenceLine(pointsTabA, bestEdgeIndex)
+	local p1 = pointsTabA[bestEdgeIndex]
+	local p2 = pointsTabA[(bestEdgeIndex % #pointsTabA) + 1]
+	return Points({p1, p2})
+end
+
+local function GetIncidentLine(hbB, pointsTabB, mtv)
+	local bestP1, bestP2
+	local bestAlignment
+	for i = 1, #pointsTabB do
+		local p1 = pointsTabB[i]
+		local p2 = pointsTabB[(i % #pointsTabB) + 1]
+		local normal = GetOrCacheNormal(hbB, pointsTabB, i)
+		local alignment = normal:Dot(mtv)
+
+		if bestAlignment and alignment >= bestAlignment then continue end
+		bestAlignment = alignment
+		bestP1 = p1
+		bestP2 = p2
+	end
+	return Points({bestP1, bestP2})
+end
 
 
 function GM:VGUISAT(hbA, hbB)
@@ -179,7 +203,7 @@ function GM:VGUISAT(hbA, hbB)
 	local pointsA, pointsB = hbA:GetPhysicsPassScreenPoints(), hbB:GetPhysicsPassScreenPoints()
 	local pointsTabA, pointsTabB = pointsA:GetPoints(), pointsB:GetPoints()
 
-	local smallestOverlap, mtv, relativeTo
+	local smallestOverlap, mtv, relativeTo, bestEdgeA, bestEdgeB
 
 	-- Assuming there's at least one new line for each point that exists...
 	-- TODO: this is a bad assumption for how we are aggregating our poly data above.
@@ -209,6 +233,7 @@ function GM:VGUISAT(hbA, hbB)
 
 		smallestOverlap = overlap
 		mtv = Vector2(normalA:Unpack())
+		bestEdgeA = i
 		relativeTo = hbA
 
 	end
@@ -230,6 +255,7 @@ function GM:VGUISAT(hbA, hbB)
 
 		smallestOverlap = overlap
 		mtv = Vector2(normalB:Unpack())
+		bestEdgeB = i
 		relativeTo = hbB
 
 	end
@@ -239,6 +265,7 @@ function GM:VGUISAT(hbA, hbB)
 	-- And relative to the right object.
 
 	-- If our mtv is relative to hbB instead of hbA then simply swap the two.
+	local bestEdgeIndex = bestEdgeA
 	if relativeTo == hbB then
 		local ref_pointsA, ref_pointsB = pointsA, pointsB
 		pointsA, pointsB = ref_pointsB, ref_pointsA
@@ -248,16 +275,27 @@ function GM:VGUISAT(hbA, hbB)
 		physboxA, physboxB = ref_physboxB, ref_physboxA
 		ref_physboxA, ref_physboxB = nil, nil
 
+		local ref_pointsTabA, ref_pointsTabB = pointsTabA, pointsTabB
+		pointsTabA, pointsTabB = ref_pointsTabB, ref_pointsTabA
+		ref_pointsTabA, ref_pointsTabB = nil, nil
+
 		local ref_hbA, ref_hbB = hbA, hbB
 		hbA, hbB = ref_hbB, ref_hbA
 		ref_hbA, ref_hbB = nil, nil
+
+		bestEdgeIndex = bestEdgeB
 	end
 
-	-- Orient our MTV correctly.
+	-- Orient our MTV correctly so that it points from A -----> B
 	mtv = OrientMTV(pointsA, pointsB, mtv)
+
+	-- A little messy. But we do this here since we have our normals cached in this file.
+	local referenceLine = GetReferenceLine(pointsTabA, bestEdgeIndex)
+	local incidentLine = GetIncidentLine(hbB, pointsTabB, mtv)
+	local contactPoints = gamemode_Call("VGUIGetContactPoints", referenceLine, incidentLine)
 
 	-- Finally cache that we checked our collision and return our collision information.
 	SetCachedCollision(hbA, hbB)
 
-	return {hbA = hbA, hbB = hbB, physboxA = physboxA, physboxB = physboxB, overlap = smallestOverlap, mtv = mtv}
+	return {hbA = hbA, hbB = hbB, physboxA = physboxA, physboxB = physboxB, overlap = smallestOverlap, mtv = mtv, contactPoints = contactPoints}
 end
