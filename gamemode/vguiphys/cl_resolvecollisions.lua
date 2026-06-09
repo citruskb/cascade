@@ -29,6 +29,7 @@ function GM:ResolveAllVGUICollisions()
 		end
 
 		gamemode_Call("VGUIPhysPassComplete")
+		gamemode_Call("VGUIPhysboxPhysPassThink")
 		GAMEMODE.VGUIPhysPassCount = i
 	end
 end

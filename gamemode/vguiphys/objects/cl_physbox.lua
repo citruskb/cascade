@@ -314,7 +314,10 @@ function meta:DoPhysicsThink()
 	partial:DoSub(delta)
 
 	self:MarkPointsCenterDirty()
-	self:MarkPhysicsPassPointsCenterDirty()
 	self:MarkPointsOriginDirty()
+end
+
+function meta:DoPhysicsPassThink()
+	self:MarkPhysicsPassPointsCenterDirty()
 	self:MarkPhysicsPassPointsOriginDirty()
 end

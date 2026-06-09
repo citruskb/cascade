@@ -64,3 +64,6 @@ end
 function GM:VGUIPhysboxThink()
 	for vphys, _ in pairs(self.VGUIPhysboxes) do vphys:DoPhysicsThink() end
 end
+function GM:VGUIPhysboxPhysPassThink()
+	for vphys, _ in pairs(self.VGUIPhysboxes) do vphys:DoPhysicsPassThink() end
+end
