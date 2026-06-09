@@ -313,6 +313,8 @@ function meta:DoPhysicsThink()
 	-- Therefore, subtract our movement from our partial pos.
 	partial:DoSub(delta)
 
+	self:MarkPointsCenterDirty()
+	self:MarkPhysicsPassPointsCenterDirty()
 	self:MarkPointsOriginDirty()
 	self:MarkPhysicsPassPointsOriginDirty()
 end

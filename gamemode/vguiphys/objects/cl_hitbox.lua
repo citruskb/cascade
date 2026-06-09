@@ -80,9 +80,11 @@ function meta:TransformPointsAroundOrigin(inputPoints, origin, pivot)
 		if angle == 0 then
 			inputPoint:SetUnpacked(tx, ty)
 		else
+			local rx = tx - pivx
+			local ry = ty - pivy
 			inputPoint:SetUnpacked(
-				pivx + cos * (tx - pivx) - sin * (ty - pivy),
-				pivy + sin * (tx - pivx) + cos * (ty - pivy)
+				pivx + cos * rx - sin * ry,
+				pivy + sin * rx + cos * ry
 			)
 		end
 	end
