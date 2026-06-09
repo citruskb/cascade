@@ -21,9 +21,9 @@ function meta:AddVel(vec2)
 	Rawget(self, "_vel"):DoAdd(vec2)
 end
 
-function meta:GetAng() return Rawget(self, "_ang") end
-function meta:SetAng(num) Rawset(self, "_ang", num) end
-function meta:AddAng(num) Rawset(self, "_ang", Rawget(self, "_ang") + num) end
+function meta:GetRad() return Rawget(self, "_rad") end
+function meta:SetRad(num) Rawset(self, "_rad", num) end
+function meta:AddRad(num) Rawset(self, "_rad", Rawget(self, "_rad") + num) end
 
 function meta:GetDesiredTrans() return Rawget(self, "_desiredtrans") end
 function meta:SetDesiredTrans(vec2)
@@ -134,7 +134,7 @@ end
 function VGUIPhysbox:__Create(parentPan)
 	Rawset(self, "_parent", parentPan)
 	Rawset(self, "_supported", false)
-	Rawset(self, "_ang", 0)
+	Rawset(self, "_rad", 0)
 	Rawset(self, "_hitboxes", {})
 	Rawset(self, "_origincenteroffset", Vector2())
 	Rawset(self, "_center", Vector2())

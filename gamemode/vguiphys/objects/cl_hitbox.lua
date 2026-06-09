@@ -1,6 +1,8 @@
+local math_Ang = math.Ang
 local math_Rad = math.Rad
 local math_Cos = math.Cos
 local math_Sin = math.Sin
+local math_IsNearlyEqual = math.IsNearlyEqual
 
 GM.VGUIHitboxes = {}
 
@@ -63,11 +65,12 @@ function meta:TransformPointsAroundOrigin(inputPoints, origin, pivot)
 	local physbox = Rawget(self, "_physbox")
 
 	-- Used for rotation
-	local angle = Rawget(physbox, "_ang")
-	local radians, cos, sin
-	if angle ~= 0 then
-		radians = math_Rad(angle)
-		cos, sin = math_Cos(radians), math_Sin(radians)
+	local rad = Rawget(physbox, "_rad")
+	local ang = math_Ang(rad)
+	local cos, sin
+	local angZero = math_IsNearlyEqual(ang, 0)
+	if not angZero then
+		cos, sin = math_Cos(rad), math_Sin(rad)
 	end
 
 	local ox, oy = origin:Unpack()
@@ -77,7 +80,7 @@ function meta:TransformPointsAroundOrigin(inputPoints, origin, pivot)
 		local px, py = points[i]:Unpack()
 		local tx, ty = px + ox, py + oy
 
-		if angle == 0 then
+		if angZero then
 			inputPoint:SetUnpacked(tx, ty)
 		else
 			local rx = tx - pivx
