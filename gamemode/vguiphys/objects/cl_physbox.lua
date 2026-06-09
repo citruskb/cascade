@@ -66,6 +66,24 @@ function meta:SetAllHitboxPoints(points)
 	self:MarkAllHitboxPointsUpdated()
 end
 
+function meta:GetPointsCenter()
+	if Rawget(self, "_pointscenterdirty") then self:RecachePointsCenter() end
+	return Rawget(self, "_pointscenter")
+end
+function meta:SetPointsCenter(vec2)
+	Rawset(self, "_pointscenter", vec2)
+	self:MarkPointsCenterUpdated()
+end
+
+function meta:GetPhysicsPassPointsCenter()
+	if Rawget(self, "_physicspasspointscenterdirty") then self:RecachePhysicsPassPointsCenter() end
+	return Rawget(self, "_physicspasspointscenter")
+end
+function meta:SetPhysicsPassPointsCenter(vec2)
+	Rawset(self, "_physicspasspointscenter", vec2)
+	self:MarkPhysicsPassPointsCenterUpdated()
+end
+
 function meta:GetPointsOrigin()
 	if Rawget(self, "_pointsorigindirty") then self:RecachePointsOrigin() end
 	return Rawget(self, "_pointsorigin")
@@ -88,6 +106,14 @@ function meta:GetAllHitboxPointsDirty() return Rawget(self, "_allhitboxpointsdir
 function meta:MarkAllHitboxPointsDirty() Rawset(self, "_allhitboxpointsdirty", true) end
 function meta:MarkAllHitboxPointsUpdated() Rawset(self, "_allhitboxpointsdirty", false) end
 
+function meta:GetPointsCenterDirty() return Rawget(self, "_pointscenterdirty") end
+function meta:MarkPointsCenterDirty() Rawset(self, "_pointscenterdirty", true) end
+function meta:MarkPointsCenterUpdated() Rawset(self, "_pointscenterdirty", false) end
+
+function meta:GetPhysicsPassPointsCenterDirty() return Rawget(self, "_physicspasspointscenterdirty") end
+function meta:MarkPhysicsPassPointsCenterDirty() Rawset(self, "_physicspasspointscenterdirty", true) end
+function meta:MarkPhysicsPassPointsCenterUpdated() Rawset(self, "_physicspasspointscenterdirty", false) end
+
 function meta:GetPointsOriginDirty() return Rawget(self, "_pointsorigindirty") end
 function meta:MarkPointsOriginDirty() Rawset(self, "_pointsorigindirty", true) end
 function meta:MarkPointsOriginUpdated() Rawset(self, "_pointsorigindirty", false) end
@@ -99,6 +125,8 @@ function meta:MarkPhysicsPassPointsOriginUpdated() Rawset(self, "_physicspasspoi
 
 function meta:MarkAllDirty()
 	self:MarkAllHitboxPointsDirty()
+	self:MarkPointsCenterDirty()
+	self:MarkPhysicsPassPointsCenterDirty()
 	self:MarkPointsOriginDirty()
 	self:MarkPhysicsPassPointsOriginDirty()
 end
@@ -109,6 +137,7 @@ function VGUIPhysbox:__Create(parentPan)
 	Rawset(self, "_ang", 0)
 	Rawset(self, "_hitboxes", {})
 	Rawset(self, "_origincenteroffset", Vector2())
+	Rawset(self, "_center", Vector2())
 	self:MarkAllDirty()
 
 	self:DisablePhysics()
@@ -204,6 +233,26 @@ function meta:RecachePointsOrigin()
 	local pcenter = parent.GetCenterPos and parent:GetCenterPos()
 
 	self:SetPointsOrigin(pcenter + centerOffset)
+end
+
+function meta:RecachePhysicsPassPointsCenter()
+	local pointsCenter = self:GetPointsCenter()
+	local desiredTranslation = self:GetDesiredTrans()
+	self:SetPhysicsPassPointsCenter(pointsCenter + desiredTranslation)
+end
+
+function meta:RecachePointsCenter()
+	-- If our parent isn't an item just assume our center is the calculated center.
+	local parent = Rawget(self, "_parent")
+	if not parent.GetCenterPos then
+		local w, h = parent:GetSize()
+		local x, y = parent:GetVPos():Unpack()
+		local center = Vector2(x + w / 2, y + h / 2)
+		self:SetPointsCenter(center)
+		return
+	end
+
+	self:SetPointsCenter(parent:GetCenterPos())
 end
 
 function meta:RecacheAllHitboxPoints()

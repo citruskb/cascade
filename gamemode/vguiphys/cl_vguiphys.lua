@@ -24,6 +24,9 @@ VGUIPHYS_GRAVITY_VEC2 = Vector2(0, VGUIPHYS_GRAVITY)
 -- Stop nudging velocity downards after reaching this velocity.
 VGUIPHYS_TERMINAL_VELOCITY = 1.4
 
+local SPIN = 0.2
+
+
 function GM:VGUIPhysicsThink()
 
 	-- Handle gravity. Remove physboxes with an invalid parent.
@@ -32,6 +35,12 @@ function GM:VGUIPhysicsThink()
 		if not IsValid(parent) then
 			physbox:Remove()
 			continue
+		else
+			--[[
+			if parent.IsItem then
+				physbox:AddAng(SPIN)
+			end
+			]]
 		end
 
 		-- Don't apply gravity to supported objects.

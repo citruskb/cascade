@@ -55,7 +55,7 @@ end
 
 function meta:GetScreenOriginPoint() return Rawget(self, "_physbox"):GetPointsOrigin() end
 
-function meta:TransformPointsAroundOrigin(inputPoints, origin)
+function meta:TransformPointsAroundOrigin(inputPoints, origin, pivot)
 	local ret = inputPoints
 
 	inputPoints = inputPoints:GetPoints()
@@ -70,18 +70,19 @@ function meta:TransformPointsAroundOrigin(inputPoints, origin)
 		cos, sin = math_Cos(radians), math_Sin(radians)
 	end
 
+	local ox, oy = origin:Unpack()
+	local pivx, pivy = pivot:Unpack()
 	for i = 1, #inputPoints do
 		local inputPoint = inputPoints[i]
 		local px, py = points[i]:Unpack()
-		local ox, oy = origin:Unpack()
 		local tx, ty = px + ox, py + oy
 
 		if angle == 0 then
 			inputPoint:SetUnpacked(tx, ty)
 		else
 			inputPoint:SetUnpacked(
-				ox + cos * (tx - ox) - sin * (ty- oy),
-				oy + sin * (tx - ox) + cos * (ty - oy)
+				pivx + cos * (tx - pivx) - sin * (ty - pivy),
+				pivy + sin * (tx - pivx) + cos * (ty - pivy)
 			)
 		end
 	end
@@ -97,8 +98,9 @@ function meta:GetScreenPoints()
 	local screenpoints = Rawget(self, "_screenpoints")
 	local physbox = Rawget(self, "_physbox")
 	local origin = physbox:GetPointsOrigin()
+	local pivot = physbox:GetPointsCenter()
 
-	return self:TransformPointsAroundOrigin(screenpoints, origin)
+	return self:TransformPointsAroundOrigin(screenpoints, origin, pivot)
 end
 
 -- TODO: Maybe this is worth caching?
@@ -107,8 +109,9 @@ function meta:GetPhysicsPassScreenPoints()
 	local physpassScreenpoints = Rawget(self, "_physicspassscreenpoints")
 	local physbox = Rawget(self, "_physbox")
 	local physpassOrigin = physbox:GetPhysicsPassPointsOrigin()
+	local physpassPivot = physbox:GetPhysicsPassPointsCenter()
 
-	return self:TransformPointsAroundOrigin(physpassScreenpoints, physpassOrigin)
+	return self:TransformPointsAroundOrigin(physpassScreenpoints, physpassOrigin, physpassPivot)
 end
 
 function meta:Remove()
