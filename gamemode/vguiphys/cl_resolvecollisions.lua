@@ -9,8 +9,6 @@ function GM:ResolveAllVGUICollisions()
 	local physboxes = GAMEMODE.VGUIPhysboxes
 	local hitboxes = GAMEMODE.VGUIHitboxes
 	for i = 1, VGUIPHYS_PASSES do
-		GAMEMODE.VGUIPhysPassCount = i
-
 		-- Assume no support. Support toggled in collision resolution if appropriate.
 		for physbox, _ in pairs(physboxes) do physbox:SetSupported(false) end
 
@@ -31,6 +29,7 @@ function GM:ResolveAllVGUICollisions()
 		end
 
 		gamemode_Call("VGUIPhysPassComplete")
+		GAMEMODE.VGUIPhysPassCount = i
 	end
 end
 

@@ -1,3 +1,5 @@
+local collisions = {}
+
 DEBUG_MODE_MINIMAL = 1
 DEBUG_MODE_DETAILED = 2
 
@@ -131,6 +133,16 @@ local function DrawHitboxDebug(hitbox)
 	DrawOutlinedBox(x, y, w, h, 4)
 end
 
+local function DrawCollisionPoint(cpoint)
+	print("drawing point!")
+	local s = 4
+	local cx, cy = cpoint:Unpack()
+
+	surface.SetDrawColor(COLOR_BLUE)
+	draw.NoTexture()
+	surface.DrawRect(cx - s * 0.5, cy - s * 0.5, s, s)
+end
+
 local function DrawAux(pan, physbox, hitbox)
 	if not pan.GetCenterPos then return end
 
@@ -165,13 +177,29 @@ local function DrawDebug()
 			DrawHitboxDebug(hitbox)
 		end
 
+		for k, cpoint in pairs(collisions) do
+			DrawCollisionPoint(cpoint)
+		end
+
 		if detailed then DrawAux(pan, physbox, hitbox) end
 
 		temp[pan] = true
 	end
 
-	-- Done to clear invalid panels.
+	-- Done to clear invalid panelsw.
 	GAMEMODE.DebugObjects = temp
 end
 
 hook.Add("DrawOverlay", "DrawOverlay.Debug", DrawDebug)
+
+hook.Add("ResolveVGUICollision", "ResolveVGUICollision.Debug", function(data)
+	if not GAMEMODE.Debug then return end
+	if GAMEMODE.VGUIPhysPassCount ~= VGUIPHYS_PASSES - 1 then return end
+
+	local contactPoints = Rawget(data, "contactPoints")
+	table.Add(collisions, contactPoints)
+end)
+
+hook.Add("VGUIPhysicsThink", "VGUIPhysicsThink.debug", function()
+	collisions = {}
+end)
