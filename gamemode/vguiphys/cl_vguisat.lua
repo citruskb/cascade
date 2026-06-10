@@ -292,7 +292,7 @@ function GM:VGUISAT(hbA, hbB)
 	-- A little messy. But we do this here since we have our normals cached in this file.
 	local referenceLine = GetReferenceLine(pointsTabA, bestEdgeIndex)
 	local incidentLine = GetIncidentLine(hbB, pointsTabB, -mtv) -- TODO: mtv shouldn't need to be flipped... Find out why?
-	local contactPoints = gamemode_Call("VGUIGetContactPoints", referenceLine, incidentLine)
+	local contactPoints = gamemode_Call("VGUIGetContactPoints", referenceLine, incidentLine, mtv)
 
 	-- Finally cache that we checked our collision and return our collision information.
 	SetCachedCollision(hbA, hbB)

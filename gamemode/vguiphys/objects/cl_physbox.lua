@@ -1,7 +1,7 @@
-GM.VGUIPhysboxes = {}
-GM.DebugObjects = {}
 
 if not VGUIPhysbox then
+	GM.VGUIPhysboxes = {}
+	GM.DebugObjects = {}
 	VGUIPhysbox = Class:Create(nil, "VGUIPhysbox")
 end
 

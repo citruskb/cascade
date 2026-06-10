@@ -3,17 +3,8 @@
 local function ClipSegmentToPlane(p1, p2, planeNormal, planeOffset)
 	local points = {}
 
-	local d1 = planeNormal:Dot(p1) - planeOffset
-	local d2 = planeNormal:Dot(p2) - planeOffset
-
-	--[[
-	print("p1, p2")
-	print(p1, p2)
-	print("planeNormal, planeOffset")
-	print(planeNormal, planeOffset)
-	print("d1, d2")
-	print(d1, d2)
-	]]
+	local d1 = planeNormal:Dot(p1 - planeOffset)
+	local d2 = planeNormal:Dot(p2 - planeOffset)
 
 	if d1 <= 0 then table.Insert(points, p1) end
 	if d2 <= 0 then table.Insert(points, p2) end
@@ -28,7 +19,7 @@ local function ClipSegmentToPlane(p1, p2, planeNormal, planeOffset)
 end
 
 -- Returns either 1 or 2 points of contact.
-function GM:VGUIGetContactPoints(referenceLine, incidentLine)
+function GM:VGUIGetContactPoints(referenceLine, incidentLine, mtv)
 
 	--Step 1: Get the reference line and incident line. This was done and passed to us in GM:VGUISAT().
 	local refPoints, incPoints = referenceLine:GetPoints(), incidentLine:GetPoints()
@@ -48,7 +39,7 @@ function GM:VGUIGetContactPoints(referenceLine, incidentLine)
 
 	-- Step 3: Get info on plane 1
 	local plane1Normal = -refDir
-	local plane1Offset = plane1Normal:Dot(r1)
+	local plane1Offset = r1
 
 	-- Step 4: Clip the incident against plane 1
 	local p1, p2 = Vector2(i1:Unpack()), Vector2(i2:Unpack())
@@ -57,20 +48,24 @@ function GM:VGUIGetContactPoints(referenceLine, incidentLine)
 	-- if we have no clipped points then something went wrong with SAT.
 	if #clippedPoints == 0 then Error("No collision point found.") end
 
-	-- If we have only one clipped point we've found our singular contact point.
-	if #clippedPoints == 1 then return clippedPoints end
-
 	-- Step 5: Get info on plane 2
 	local plane2Normal = refDir
-	local plane2Offset = plane2Normal:Dot(r2)
+	local plane2Offset = r2
 
 	-- Step 6: Clip the new points against plane 2
-	p1, p2 = clippedPoints[1], clippedPoints[2]
-	clippedPoints = ClipSegmentToPlane(p1, p2, plane2Normal, plane2Offset)
+	clippedPoints = ClipSegmentToPlane(clippedPoints[1], clippedPoints[2], plane2Normal, plane2Offset)
 
 	-- Same deal as above.
 	if #clippedPoints == 0 then Error("No collision point found.") end
 
-	return clippedPoints
+	-- Step 7: Keep only the points behind the reference face, plus some slop.
+	local collisionPoints = {}
+	for i = 1, #clippedPoints do
+		local point = clippedPoints[i]
+		if mtv:Dot(point - r1) > VGUIPHYS_SLOP_COL_POINT then continue end
+		table.Insert(collisionPoints, point)
+	end
+
+	return collisionPoints
 
 end

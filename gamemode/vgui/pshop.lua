@@ -129,7 +129,7 @@ function PANEL:Init()
 
 	-- Test items
 	-- Angled box
-	local function MakeAngledBox(size, origin, vel, angle)
+	local function MakeAngledBox(size, origin, vel, rad)
 		local item = vgui.Create("PItem", self)
 		item:SetSize(0, 0)
 		item:SetPos(origin:Unpack())
@@ -140,7 +140,7 @@ function PANEL:Init()
 			Vector2(0, size),
 		}))
 		if vel then item.Physbox:SetVel(vel) end
-		if angle then item.Physbox:SetAng(angle) end
+		if rad then item.Physbox:SetRad(rad) end
 	end
 
 
@@ -150,10 +150,11 @@ function PANEL:Init()
 
 
 	local size = 40
-	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 4, size / 4), h * 0.5), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
-	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 4, size / 4), h * 0.6), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
-	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 4, size / 4), h * 0.7), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
-	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 4, size / 4), h * 0.8), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	MakeBox(size, Vector2(w * 0.5, h * 0.5))
+	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 4, size / 4), h * 0.5), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 4, size / 4), h * 0.6), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 4, size / 4), h * 0.7), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 4, size / 4), h * 0.8), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
 
 
 	--[[ Irregular shape

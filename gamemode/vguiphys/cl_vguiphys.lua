@@ -11,6 +11,9 @@ VGUIPHYS_PASSES = 12
 -- Allow some degree of overlap between objects without taking collision corrective action.
 VGUIPHYS_SLOP = 1.5
 
+-- A bit of leniency determining if a collision point is behind a face or not.
+VGUIPHYS_SLOP_COL_POINT = 0.001
+
 -- Make sure our new better overlap is smaller by at least this much.
 VGUI_EPSILON_OVERLAP = 0.05
 
@@ -24,7 +27,7 @@ VGUIPHYS_GRAVITY_VEC2 = Vector2(0, VGUIPHYS_GRAVITY)
 -- Stop nudging velocity downards after reaching this velocity.
 VGUIPHYS_TERMINAL_VELOCITY = 1.4
 
-local SPIN = 0.2
+local SPIN = 0.02
 
 
 function GM:VGUIPhysicsThink()
@@ -36,12 +39,12 @@ function GM:VGUIPhysicsThink()
 			physbox:Remove()
 			continue
 		else
-			--[[
 			if parent.IsItem then
-				physbox:AddAng(SPIN)
+				physbox:AddRad(SPIN)
 			end
-			]]
 		end
+
+		-- Disable gravity for now
 
 		-- Don't apply gravity to supported objects.
 		if physbox:IsSupported() then continue end

@@ -4,7 +4,7 @@ DEBUG_MODE_MINIMAL = 1
 DEBUG_MODE_DETAILED = 2
 
 GM.Debug = true -- TODO move to a convar.
-GM.DebugMode = DEBUG_MODE_DETAILED
+GM.DebugMode = DEBUG_MODE_MINIMAL
 
 local itemCol = Color(255, 255, 0, 60)
 local itemTxtCol = Color(
@@ -124,19 +124,9 @@ local function DrawHitboxDebug(hitbox)
 	surface.SetDrawColor(hitboxCol)
 	draw.NoTexture()
 	surface.DrawPoly(poly)
-
-	if GAMEMODE.DebugMode == DEBUG_MODE_DETAILED then return end
-	--[[
-	surface.SetDrawColor(COLOR_BLACK)
-	local x, y = poly[1].x, poly[1].y
-	local w = screenpoints:GetMaxX() - screenpoints:GetMinX()
-	local h = screenpoints:GetMaxY() - screenpoints:GetMinY()
-	DrawOutlinedBox(x, y, w, h, 4)
-	]]
 end
 
 local function DrawCollisionPoint(cpoint)
-	print("drawing point!")
 	local s = 4
 	local cx, cy = cpoint:Unpack()
 
