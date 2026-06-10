@@ -206,8 +206,6 @@ function GM:VGUISAT(hbA, hbB)
 	local smallestOverlap, mtv, relativeTo, bestEdgeA, bestEdgeB
 
 	-- Assuming there's at least one new line for each point that exists...
-	-- TODO: this is a bad assumption for how we are aggregating our poly data above.
-	-- Will deal with when it comes to it. Only affects items with 1 or more hitbox.
 	for i = 1, #pointsTabA do
 
 		-- We get our normal for the given points.
@@ -243,7 +241,7 @@ function GM:VGUISAT(hbA, hbB)
 
 		local normalB = GetOrCacheNormal(hbB, pointsTabB, i)
 		local projRangeB = GetOrCacheProjRange(hbB, pointsTabB, normalB)
-		local projRangeA = GetOrCacheProjRange(hbB, pointsTabA, normalB)
+		local projRangeA = GetOrCacheProjRange(hbA, pointsTabA, normalB)
 		local overlap = GetRangeOverlap(projRangeB, projRangeA)
 
 		if overlap <= 0 then
