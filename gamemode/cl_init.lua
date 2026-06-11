@@ -2,6 +2,7 @@ include("shared.lua")
 
 include("cl_debug.lua")
 
+include("vgui/ditemmodel.lua")
 include("vgui/pitem.lua")
 include("vgui/pshop.lua")
 

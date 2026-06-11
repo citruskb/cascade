@@ -28,8 +28,7 @@ function PANEL:Paint()
 	cam.IgnoreZ(true)
 
 	local mins, maxs = ent:OBBMins(), ent:OBBMaxs()
-	maxs.z = maxs.x * 4.5
-	local campos = mins:Distance(maxs) * Vector(0, -0.9, 0.4)
+	local campos = mins:Distance(maxs) * Vector(1, 0, 0)
 	local lookat = (mins + maxs) / 2
 	local ang = (lookat - campos):Angle()
 

@@ -3,6 +3,7 @@ AddCSLuaFile("cl_init.lua")
 
 AddCSLuaFile("cl_debug.lua")
 
+AddCSLuaFile("vgui/ditemmodel.lua")
 AddCSLuaFile("vgui/pitem.lua")
 AddCSLuaFile("vgui/pshop.lua")
 

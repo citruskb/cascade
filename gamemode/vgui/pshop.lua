@@ -78,7 +78,7 @@ function PANEL:Init()
 	local floorcontainer = vgui.Create("DPanel", self)
 	floorcontainer:SetSize(w * 0.25, h * 0.1)
 	floorcontainer:SetPos(w * 0.4, h * 0.9)
-	floorcontainer:SetBackgroundColor(Color(0, 0, 0, 0))
+	floorcontainer:SetBackgroundColor(Color(0, 67, 167, GAMEMODE.Debug and 0 or 200))
 
 	local physbox = VGUIPhysbox:Create(floorcontainer)
 	physbox:AddHitbox(Points({
@@ -141,6 +141,8 @@ function PANEL:Init()
 		}))
 		if vel then item.Physbox:SetVel(vel) end
 		if rad then item.Physbox:SetRad(rad) end
+
+		--item:SetupModel("models/props_junk/wood_crate001a.mdl")
 	end
 
 

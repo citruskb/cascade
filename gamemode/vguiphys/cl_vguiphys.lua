@@ -12,7 +12,7 @@ VGUIPHYS_PASSES = 12
 VGUIPHYS_SLOP = 1.5
 
 -- A bit of leniency determining if a collision point is behind a face or not.
-VGUIPHYS_SLOP_COL_POINT = 0.001
+VGUIPHYS_SLOP_COL_POINT = 2 --VGUIPHYS_SLOP
 
 -- Make sure our new better overlap is smaller by at least this much.
 VGUI_EPSILON_OVERLAP = 0.05
@@ -40,11 +40,9 @@ function GM:VGUIPhysicsThink()
 			continue
 		else
 			if parent.IsItem then
-				physbox:AddRad(SPIN)
+				--physbox:AddRad(SPIN)
 			end
 		end
-
-		-- Disable gravity for now
 
 		-- Don't apply gravity to supported objects.
 		if physbox:IsSupported() then continue end

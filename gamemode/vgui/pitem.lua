@@ -32,12 +32,10 @@ function PANEL:GetCenterPos()
 end
 
 function PANEL:SetupModel(modelPath)
-	local modpan = vgui.Create("DModelPanel", self)
+	local modpan = vgui.Create("DItemModel", self)
 	local w, h = self:GetSize()
 	modpan:SetSize(w, h)
 	modpan:SetModel(modelPath)
-
-	
 
 	self.ModPan = modpan
 end
