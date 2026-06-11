@@ -1,4 +1,8 @@
-local collisions = {}
+local cps = {}
+--local refLines = {}
+--local incLines = {}
+--mtvsA = {}
+--mtvsB = {}
 
 DEBUG_MODE_MINIMAL = 1
 DEBUG_MODE_DETAILED = 2
@@ -135,6 +139,49 @@ local function DrawCollisionPoint(cpoint)
 	surface.DrawRect(cx - s * 0.5, cy - s * 0.5, s, s)
 end
 
+--[[
+local function DrawReferenceLines(points)
+	local pointsTab = points:GetPoints()
+	local x1, y1 = pointsTab[1]:Unpack()
+	local x2, y2 = pointsTab[2]:Unpack()
+
+	surface.SetDrawColor(COLOR_PURPLE)
+	draw.NoTexture()
+	surface.DrawLine(x1, y1, x2, y2)
+end
+
+local function DrawIncidentLines(points)
+	local pointsTab = points:GetPoints()
+	local x1, y1 = pointsTab[1]:Unpack()
+	local x2, y2 = pointsTab[2]:Unpack()
+
+	surface.SetDrawColor(COLOR_YELLOW)
+	draw.NoTexture()
+	surface.DrawLine(x1, y1, x2, y2)
+end
+]]
+
+--[[
+local function DrawNormal(data, col)
+	local p1, p2 = data.p1, data.p2
+	local normal = data.normal
+
+	local between = p2 - p1
+	local dir = between:GetNormalized()
+
+	local startP =  p1 + dir * p1:Distance(p2) * 0.5
+	local endP = startP + normal * 16
+
+	local x1, y1 = startP:Unpack()
+	local x2, y2 = endP:Unpack()
+
+	surface.SetDrawColor(col or COLOR_RED)
+	draw.NoTexture()
+	surface.DrawLine(x1, y1, x2, y2)
+end
+]]
+
+
 local function DrawAux(pan, physbox, hitbox)
 	if not pan.GetCenterPos then return end
 
@@ -169,9 +216,7 @@ local function DrawDebug()
 			DrawHitboxDebug(hitbox)
 		end
 
-		for k, cpoint in pairs(collisions) do
-			DrawCollisionPoint(cpoint)
-		end
+		for k, cpoint in pairs(cps) do DrawCollisionPoint(cpoint) end
 
 		if detailed then DrawAux(pan, physbox, hitbox) end
 
@@ -189,9 +234,25 @@ hook.Add("ResolveVGUICollision", "ResolveVGUICollision.Debug", function(data)
 	if GAMEMODE.VGUIPhysPassCount ~= VGUIPHYS_PASSES - 1 then return end
 
 	local contactPoints = Rawget(data, "contactPoints")
-	table.Add(collisions, contactPoints)
+	table.Add(cps, contactPoints)
 end)
 
+
+--[[
+hook.Add("VGUIGetContactPoints", "VGUIGetContactPoints.debug", function(referenceLine, incidentLine, mtv)
+	if not GAMEMODE.Debug then return end
+	if GAMEMODE.VGUIPhysPassCount ~= VGUIPHYS_PASSES - 1 then return end
+
+	table.Insert(refLines, referenceLine)
+	table.Insert(incLines, incidentLine)
+	--table.Insert(mtvs, mtv)
+end)
+]]
+
 hook.Add("VGUIPhysicsThink", "VGUIPhysicsThink.debug", function()
-	collisions = {}
+	cps = {}
+	--mtvsA = {}
+	--mtvsB = {}
+	--refLines = {}
+	--incLines = {}
 end)

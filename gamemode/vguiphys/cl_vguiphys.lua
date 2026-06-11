@@ -12,7 +12,7 @@ VGUIPHYS_PASSES = 12
 VGUIPHYS_SLOP = 1.5
 
 -- A bit of leniency determining if a collision point is behind a face or not.
-VGUIPHYS_SLOP_COL_POINT = 2 --VGUIPHYS_SLOP
+VGUIPHYS_SLOP_COL_POINT = 0.01 --VGUIPHYS_SLOP
 
 -- Make sure our new better overlap is smaller by at least this much.
 VGUI_EPSILON_OVERLAP = 0.05

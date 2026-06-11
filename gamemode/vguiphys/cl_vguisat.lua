@@ -61,7 +61,7 @@ local function GetOrCacheNormal(hb, pointstab, i)
 	if not normal then
 		local vec1 = Rawget(pointstab, i)
 		local vec2 = Rawget(pointstab, i == #pointstab and 1 or i + 1)
-		normal = Vector2(Rawget(vec1, "y") - Rawget(vec2, "y"), Rawget(vec2, "x") - Rawget(vec1, "x"))
+		normal = Vector2(Rawget(vec2, "y") - Rawget(vec1, "y"), Rawget(vec1, "x") - Rawget(vec2, "x"))
 		normal:Normalize()
 
 		SetCachedInfo(hb, "normal" .. i, normal)
@@ -164,20 +164,15 @@ local function OrientMTV(pointsA, pointsB, mtv)
 end
 
 
-local function GetReferenceLine(pointsTabA, bestEdgeIndex)
-	local p1 = pointsTabA[bestEdgeIndex]
-	local p2 = pointsTabA[(bestEdgeIndex % #pointsTabA) + 1]
-	return Points({p1, p2})
-end
 
-local function GetIncidentLine(hbB, pointsTabB, mtv)
+local function GetBestAlignment(hb, pointsTab, alignTo)
 	local bestP1, bestP2
 	local bestAlignment
-	for i = 1, #pointsTabB do
-		local p1 = pointsTabB[i]
-		local p2 = pointsTabB[(i % #pointsTabB) + 1]
-		local normal = GetOrCacheNormal(hbB, pointsTabB, i)
-		local alignment = normal:Dot(mtv)
+	for i = 1, #pointsTab do
+		local p1 = pointsTab[i]
+		local p2 = pointsTab[(i % #pointsTab) + 1]
+		local normal = GetOrCacheNormal(hb, pointsTab, i)
+		local alignment = normal:Dot(alignTo)
 
 		if bestAlignment and alignment >= bestAlignment then continue end
 		bestAlignment = alignment
@@ -186,7 +181,6 @@ local function GetIncidentLine(hbB, pointsTabB, mtv)
 	end
 	return Points({bestP1, bestP2})
 end
-
 
 function GM:VGUISAT(hbA, hbB)
 	-- A hitbox can't collide with itself.
@@ -203,7 +197,7 @@ function GM:VGUISAT(hbA, hbB)
 	local pointsA, pointsB = hbA:GetPhysicsPassScreenPoints(), hbB:GetPhysicsPassScreenPoints()
 	local pointsTabA, pointsTabB = pointsA:GetPoints(), pointsB:GetPoints()
 
-	local smallestOverlap, mtv, relativeTo, bestEdgeA, bestEdgeB
+	local smallestOverlap, mtv, relativeTo
 
 	-- Assuming there's at least one new line for each point that exists...
 	for i = 1, #pointsTabA do
@@ -220,6 +214,13 @@ function GM:VGUISAT(hbA, hbB)
 		-- Get our overlap!
 		local overlap = GetRangeOverlap(projRangeA, projRangeB)
 
+		--[[
+		if GAMEMODE.Debug and GAMEMODE.VGUIPhysPassCount == VGUIPHYS_PASSES - 1 then
+			local tab = {p1 = pointsTabA[i], p2 = pointsTabA[(i % #pointsTabA) + 1], normal = normalA}
+			table.Insert(mtvsA, tab)
+		end
+		]]
+
 		-- No collision.
 		if overlap <= 0 then
 			SetCachedCollision(hbA, hbB)
@@ -230,8 +231,7 @@ function GM:VGUISAT(hbA, hbB)
 		if smallestOverlap and overlap >= smallestOverlap - VGUI_EPSILON_OVERLAP then continue end
 
 		smallestOverlap = overlap
-		mtv = Vector2(normalA:Unpack())
-		bestEdgeA = i
+		mtv = Vector2(normalA:Unpack()) -- A new Vector2 because we cache the normal above, but also manipulate this later on.
 		relativeTo = hbA
 
 	end
@@ -244,6 +244,13 @@ function GM:VGUISAT(hbA, hbB)
 		local projRangeA = GetOrCacheProjRange(hbA, pointsTabA, normalB)
 		local overlap = GetRangeOverlap(projRangeB, projRangeA)
 
+		--[[
+		if GAMEMODE.Debug and GAMEMODE.VGUIPhysPassCount == VGUIPHYS_PASSES - 1 then
+			local tab = {p1 = pointsTabB[i], p2 = pointsTabB[(i % #pointsTabB) + 1], normal = normalB}
+			table.Insert(mtvsB, tab)
+		end
+		]]
+
 		if overlap <= 0 then
 			SetCachedCollision(hbA, hbB)
 			return
@@ -253,7 +260,6 @@ function GM:VGUISAT(hbA, hbB)
 
 		smallestOverlap = overlap
 		mtv = Vector2(normalB:Unpack())
-		bestEdgeB = i
 		relativeTo = hbB
 
 	end
@@ -263,7 +269,6 @@ function GM:VGUISAT(hbA, hbB)
 	-- And relative to the right object.
 
 	-- If our mtv is relative to hbB instead of hbA then simply swap the two.
-	local bestEdgeIndex = bestEdgeA
 	if relativeTo == hbB then
 		local ref_pointsA, ref_pointsB = pointsA, pointsB
 		pointsA, pointsB = ref_pointsB, ref_pointsA
@@ -280,16 +285,14 @@ function GM:VGUISAT(hbA, hbB)
 		local ref_hbA, ref_hbB = hbA, hbB
 		hbA, hbB = ref_hbB, ref_hbA
 		ref_hbA, ref_hbB = nil, nil
-
-		bestEdgeIndex = bestEdgeB
 	end
 
 	-- Orient our MTV correctly so that it points from A -----> B
 	mtv = OrientMTV(pointsA, pointsB, mtv)
 
 	-- A little messy. But we do this here since we have our normals cached in this file.
-	local referenceLine = GetReferenceLine(pointsTabA, bestEdgeIndex)
-	local incidentLine = GetIncidentLine(hbB, pointsTabB, -mtv) -- TODO: mtv shouldn't need to be flipped... Find out why?
+	local referenceLine = GetBestAlignment(hbA, pointsTabA, -mtv)
+	local incidentLine = GetBestAlignment(hbB, pointsTabB, mtv)
 	local contactPoints = gamemode_Call("VGUIGetContactPoints", referenceLine, incidentLine, mtv)
 
 	-- Finally cache that we checked our collision and return our collision information.
