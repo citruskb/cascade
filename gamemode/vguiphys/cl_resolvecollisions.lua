@@ -98,7 +98,7 @@ local function ResolveVelocity(physboxA, physboxB, mtv, contactPoint, div, pen)
 	-- Apply angular impulse.
 	print("before (A):", physboxA:GetRad())
 	print("before (B):", physboxB:GetRad())
-	physboxA:AddRadVel(-rA:Cross(impulse) * invInertiaA)
+	physboxA:AddRadVel(rA:Cross(impulse) * -invInertiaA)
 	physboxB:AddRadVel(rB:Cross(impulse) * invInertiaB)
 end
 
