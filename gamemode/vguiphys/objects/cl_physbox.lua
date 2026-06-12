@@ -150,8 +150,8 @@ function VGUIPhysbox:__Create(parentPan)
 	Rawset(self, "_parent", parentPan)
 	Rawset(self, "_supported", false)
 	Rawset(self, "_rad", 0)
-	Rawset(self, "_mass", 100)
-	Rawset(self, "_inertia", 100)
+	Rawset(self, "_mass", 1)
+	Rawset(self, "_inertia", 1)
 	Rawset(self, "_hitboxes", {})
 	Rawset(self, "_origincenteroffset", Vector2())
 	Rawset(self, "_center", Vector2())
@@ -340,10 +340,12 @@ function meta:AngularIntegration()
 
 	self:AddRad(Rawget(self, "_radvel"))
 
-	print("@@@@")
-	print("AFTER:", self, self:GetRad())
-	print("Radvel", self:GetRadVel())
-	print("@@@@")
+	--[[
+	("@@@@")
+	("AFTER:", self, self:GetRad())
+	("Radvel", self:GetRadVel())
+	("@@@@")
+	]]
 end
 
 -- Determine where we need to move our parent based on physics parameters.

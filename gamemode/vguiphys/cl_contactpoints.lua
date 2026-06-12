@@ -26,13 +26,6 @@ function GM:VGUIGetContactPoints(referenceLine, incidentLine, mtv)
 	r1, r2 = refPoints[1], refPoints[2]
 	i1, i2 = incPoints[1], incPoints[2]
 
-	--[[
-	print("r1, r2")
-	print(r1, r2)
-	print("i1, i2")
-	print(i1, i2)
-	]]
-
 	-- Step 2: We need the reference edge direction.
 	local refDir = r2 - r1
 	refDir:Normalize()

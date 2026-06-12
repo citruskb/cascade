@@ -54,59 +54,62 @@ local function OldResolveVelocity(physboxA, physboxB, mtv)
 	j = j / (massA + massB)
 
 	local impulse = mtv * j
-
-	--[[
-	print("///")
-	print("old linear impulse A", -impulse * massA)
-	print("old linear impulse B", impulse * massB)
-	]]
 end
 
-local function ResolveVelocity(physboxA, physboxB, mtv, contactPoint, div, liA, liB, riA, riB)
+local function ResolveVelocity(physboxA, physboxB, mtv, contactPoint, div)
 	-- First, get our lever points.
 	local centerA, centerB = physboxA:GetPhysicsPassPointsCenter(), physboxB:GetPhysicsPassPointsCenter()
+
 	local rA = contactPoint - centerA
+	local xa, ya = rA:Unpack()
 	local rB = contactPoint - centerB
+	local xb, yb = rB:Unpack()
+
+	local rAP = Vector2(-ya, xa)
+	local rBP = Vector2(-yb, xb)
 
 	-- We need our velocity at these points.
-	local vA = Rawget(physboxA, "_vel") + rA:CrossS(Rawget(physboxA, "_radvel"))
-	local vB = Rawget(physboxB, "_vel") + rB:CrossS(Rawget(physboxB, "_radvel"))
+	local vA = Rawget(physboxA, "_vel") + rAP * Rawget(physboxA, "_radvel")
+	local vB = Rawget(physboxB, "_vel") + rBP * Rawget(physboxB, "_radvel")
 
 	-- If velocities are zero, do nothing.
-	if vA:IsZero() and vB:IsZero() then return end
+	--if vA:IsZero() and vB:IsZero() then return liA, liB, riA, riB end
 
 	-- Get the velocity relative to each other along the normal.
 	local rv = vB - vA
 	local rnv = rv:Dot(mtv)
-	if rnv > 0 then return end -- Objects already moving apart.
+	if rnv > 0 then return liA, liB, riA, riB end -- Objects already moving apart.
 
 	-- Calculate the impulse to apply.
-	local raCrossmtv, rbCrossmtv = rA:Cross(mtv), rB:Cross(mtv)
+	local rAPDotMTV, rBPDotMTV = rAP:Dot(mtv), rBP:Dot(mtv)
 	local invMassA, invMassB = physboxA:GetInvMass(), physboxB:GetInvMass()
 	local invInertiaA, invInertiaB = physboxA:GetInvInertia(), physboxB:GetInvInertia()
-	local effMass = invMassA + invMassB + raCrossmtv^2 * invInertiaA + rbCrossmtv^2 * invInertiaB
+	local denom = invMassA + invMassB + rAPDotMTV^2 * invInertiaA + rBPDotMTV^2 * invInertiaB
 
 	local bounce = 0.2
 	local j = rnv * -(1 + bounce)
-	j = j / effMass
-	local impulse = mtv * j / div
+	j = j / denom
+	j = j / div
+	local impulse = j * mtv
 
 	-- Add linear impulse.
-	liA = liA:AddVel(-impulse * invMassA)
-	liB = liB:AddVel(impulse * invMassB)
+	--[[
+	liA = liA + (-impulse * invMassA)
+	liB = liB + (impulse * invMassB)
 
 	-- Add angular impulse.
 	riA = riA + (rA:Cross(impulse) * -invInertiaA)
 	riB = riB + (rB:Cross(impulse) * invInertiaB)
+	]]
 
-	return liA, liB, riA, riB
+	return impulse, rA, rB
 end
 
-local function ApplyImpulses(physboxA, physboxB, liA, liB, riA, riB)
-	physboxA:AddVel(liA)
-	physboxB:AddVel(liB)
-	physboxA:AddRadVel(riA)
-	physboxB:AddRadVel(riB)
+local function ApplyImpulse(physboxA, physboxB, impulse, rA, rB)
+	physboxA:AddVel(-impulse * physboxA:GetInvMass())
+	physboxB:AddVel(impulse * physboxB:GetInvMass())
+	physboxA:AddRadVel(-rA:Cross(impulse) * physboxA:GetInvInertia())
+	physboxB:AddRadVel(rB:Cross(impulse) * physboxB:GetInvInertia())
 end
 
 local function CheckSupported(physboxA, physboxB, mtv)
@@ -146,12 +149,31 @@ function GM:ResolveVGUICollision(data)
 
 	--OldResolveVelocity(physboxA, physboxB, mtv)
 
-	-- We sum up all our impulses over the contact points and apply them once at the end.
+	--[[ Try using the averaged contact as the only contact point
+	local points = Points(contactPoints)
+	local cp = points:GetCenter()
 	local liA, liB, riA, riB = Vector2(), Vector2(), 0, 0
-	for i = 1, #contactPoints do
-		liA, liB, riA, riB = ResolveVelocity(physboxA, physboxB, mtv, contactPoints[i], #contactPoints, liA, liB, riA, riB)
-	end
+	liA, liB, riA, riB = ResolveVelocity(physboxA, physboxB, mtv, cp, #contactPoints, liA, liB, riA, riB)
 	ApplyImpulses(physboxA, physboxB, liA, liB, riA, riB)
+	]]
+
+	-- We sum up all our impulses over the contact points and apply them once at the end.
+	local impulses = {}
+	local rAs = {}
+	local rBs = {}
+	for i = 1, #contactPoints do
+		local impulse, rA, rB = ResolveVelocity(physboxA, physboxB, mtv, contactPoints[i], #contactPoints)
+		if not impulse then continue end
+
+		impulses[i] = impulse
+		rAs[i] = rA
+		rBs[i] = rB
+	end
+
+	for i = 1, #contactPoints do
+		if not impulses[i] then continue end
+		ApplyImpulse(physboxA, physboxB, impulses[i], rAs[i], rBs[i])
+	end
 
 	CheckSupported(physboxA, physboxB, mtv)
 
