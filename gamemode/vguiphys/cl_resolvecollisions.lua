@@ -62,7 +62,7 @@ local function OldResolveVelocity(physboxA, physboxB, mtv)
 	]]
 end
 
-local function ResolveVelocity(physboxA, physboxB, mtv, contactPoint, div, pen)
+local function ResolveVelocity(physboxA, physboxB, mtv, contactPoint, div, liA, liB, riA, riB)
 	-- First, get our lever points.
 	local centerA, centerB = physboxA:GetPhysicsPassPointsCenter(), physboxB:GetPhysicsPassPointsCenter()
 	local rA = contactPoint - centerA
@@ -91,15 +91,22 @@ local function ResolveVelocity(physboxA, physboxB, mtv, contactPoint, div, pen)
 	j = j / effMass
 	local impulse = mtv * j / div
 
-	-- Apply linear impulse.
-	physboxA:AddVel(-impulse * invMassA)
-	physboxB:AddVel(impulse * invMassB)
+	-- Add linear impulse.
+	liA = liA:AddVel(-impulse * invMassA)
+	liB = liB:AddVel(impulse * invMassB)
 
-	-- Apply angular impulse.
-	print("before (A):", physboxA:GetRad())
-	print("before (B):", physboxB:GetRad())
-	physboxA:AddRadVel(rA:Cross(impulse) * -invInertiaA)
-	physboxB:AddRadVel(rB:Cross(impulse) * invInertiaB)
+	-- Add angular impulse.
+	riA = riA + (rA:Cross(impulse) * -invInertiaA)
+	riB = riB + (rB:Cross(impulse) * invInertiaB)
+
+	return liA, liB, riA, riB
+end
+
+local function ApplyImpulses(physboxA, physboxB, liA, liB, riA, riB)
+	physboxA:AddVel(liA)
+	physboxB:AddVel(liB)
+	physboxA:AddRadVel(riA)
+	physboxB:AddRadVel(riB)
 end
 
 local function CheckSupported(physboxA, physboxB, mtv)
@@ -137,10 +144,14 @@ function GM:ResolveVGUICollision(data)
 		ApplyTranslations(physboxA, physboxB, translationA)
 	end
 
-	OldResolveVelocity(physboxA, physboxB, mtv)
+	--OldResolveVelocity(physboxA, physboxB, mtv)
+
+	-- We sum up all our impulses over the contact points and apply them once at the end.
+	local liA, liB, riA, riB = Vector2(), Vector2(), 0, 0
 	for i = 1, #contactPoints do
-		ResolveVelocity(physboxA, physboxB, mtv, contactPoints[i], #contactPoints, overlap)
+		liA, liB, riA, riB = ResolveVelocity(physboxA, physboxB, mtv, contactPoints[i], #contactPoints, liA, liB, riA, riB)
 	end
+	ApplyImpulses(physboxA, physboxB, liA, liB, riA, riB)
 
 	CheckSupported(physboxA, physboxB, mtv)
 
