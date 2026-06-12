@@ -63,6 +63,11 @@ function meta:Cross(other)
 	return x * oy - y * ox
 end
 
+-- Cross product of vector and a scalar
+function meta:CrossS(scalar)
+	return Vector2(-scalar * Rawget(self, "y"), scalar * Rawget(self, "x"))
+end
+
 -- The squared distance between two vectors.
 function meta:DistanceSqr(other)
 	local dx = Rawget(self, "x") - Rawget(other, "x")

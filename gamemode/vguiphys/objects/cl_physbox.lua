@@ -25,6 +25,13 @@ function meta:GetRad() return Rawget(self, "_rad") end
 function meta:SetRad(num) Rawset(self, "_rad", num) end
 function meta:AddRad(num) Rawset(self, "_rad", Rawget(self, "_rad") + num) end
 
+function meta:GetRadVel() return Rawget(self, "_radvel") end
+function meta:SetRadVel(num) Rawset(self, "_radvel", num) end
+function meta:AddRadVel(num)
+	if not Rawget(self, "_physics") then return end
+	Rawset(self, "_radvel", Rawget(self, "_radvel") + num)
+end
+
 function meta:GetDesiredTrans() return Rawget(self, "_desiredtrans") end
 function meta:SetDesiredTrans(vec2)
 	Rawget(self, "_desiredtrans"):Set(vec2)
@@ -48,8 +55,16 @@ function meta:DisablePhysics()
 	Rawset(self, "_vel", Vector2())
 	Rawset(self, "_desiredtrans", Vector2())
 
+	Rawset(self, "_radvel", 0)
+
 	Rawset(self, "_physics", false)
 end
+
+function meta:GetMass() return Rawget(self, "_mass") end
+function meta:SetMass(num) Rawset(self, "_mass", num) end
+
+function meta:GetInertia() return Rawget(self, "_inertia") end
+function meta:SetInertia(num) Rawset(self, "_inertia", num) end
 
 function meta:GetHitboxes() return Rawget(self, "_hitboxes") end
 function meta:SetHitboxes(tab) Rawset(self, "_hitboxes", tab) end
@@ -135,6 +150,8 @@ function VGUIPhysbox:__Create(parentPan)
 	Rawset(self, "_parent", parentPan)
 	Rawset(self, "_supported", false)
 	Rawset(self, "_rad", 0)
+	Rawset(self, "_mass", 100)
+	Rawset(self, "_inertia", 100)
 	Rawset(self, "_hitboxes", {})
 	Rawset(self, "_origincenteroffset", Vector2())
 	Rawset(self, "_center", Vector2())
@@ -270,6 +287,10 @@ function meta:RecacheAllHitboxPoints()
 	self:SetAllHitboxPoints(allpoints)
 end
 
+-- TODO is this worth caching?
+function meta:GetInvMass() return 1 / Rawget(self, "_mass") end
+function meta:GetInvInertia() return 1 / Rawget(self, "_inertia") end
+
 function meta:Remove()
 	GAMEMODE.VGUIPhysboxes[self] = nil
 
@@ -279,10 +300,8 @@ function meta:Remove()
 	table.Empty(self)
 end
 
--- Determine where we need to move our parent based on physics parameters.
--- This runs for every physbox for every frame after we handle collisions, gravity etc.
-function meta:DoPhysicsThink()
-	if not Rawget(self, "_physics") then return end
+function meta:LinearIntegration()
+	-- pos = pos + vel
 
 	local parent = Rawget(self, "_parent")
 
@@ -312,6 +331,28 @@ function meta:DoPhysicsThink()
 	-- The movement has been applied.
 	-- Therefore, subtract our movement from our partial pos.
 	partial:DoSub(delta)
+end
+
+function meta:AngularIntegration()
+	-- ang = ang + angvel
+	-- Unlike our linear integration we don't need to track potential translations
+	-- We also dont need to track partial positions.
+
+	self:AddRad(Rawget(self, "_radvel"))
+
+	print("@@@@")
+	print("AFTER:", self, self:GetRad())
+	print("Radvel", self:GetRadVel())
+	print("@@@@")
+end
+
+-- Determine where we need to move our parent based on physics parameters.
+-- This runs for every physbox for every frame after we handle collisions, gravity etc.
+function meta:DoPhysicsThink()
+	if not Rawget(self, "_physics") then return end
+
+	self:LinearIntegration()
+	self:AngularIntegration()
 
 	self:MarkPointsCenterDirty()
 	self:MarkPointsOriginDirty()
