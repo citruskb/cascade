@@ -87,6 +87,7 @@ function PANEL:Init()
 		Vector2(w * 0.25, h * 0.1),
 		Vector2(0, h * 0.1),
 	}), true)
+	physbox:SetStatic(true)
 	floorcontainer.Physbox = physbox
 
 	--[[

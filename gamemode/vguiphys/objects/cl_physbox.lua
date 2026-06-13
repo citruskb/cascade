@@ -39,8 +39,21 @@ function meta:AddDesiredTrans(vec2)
 	Rawget(self, "_desiredtrans"):DoAdd(vec2)
 end
 
-function meta:IsSupported() return Rawget(self, "_supported") end
-function meta:SetSupported(bool) Rawset(self, "_supported", bool) end
+--function meta:IsSupported() return Rawget(self, "_supported") end
+--function meta:SetSupported(bool) Rawset(self, "_supported", bool) end
+
+function meta:IsSupporting() return table.Count(Rawget(self, "_supporting")) > 0 end
+function meta:GetSupporting() return Rawget(self, "_supporting") end
+function meta:ClearSupporting() table.Empty(Rawget(self, "_supporting")) end
+function meta:SetSupporting(physbox) Rawget(self, "_supporting")[physbox] = true end
+function meta:AmSupporting(physbox) return Rawget(self, "_supporting")[physbox] end
+
+function meta:GetSleeping() return Rawget(self, "_sleeping") end
+function meta:SetSleeping(bool) Rawset(self, "_sleeping", bool) end
+function meta:Wake() self:SetSleeping(false) end
+
+function meta:IsStatic() return Rawget(self, "_static") end
+function meta:SetStatic(bool) Rawset(self, "_static", bool) end
 
 function meta:IsPhysicsEnabled() return Rawget(self, "_physics") end
 function meta:EnablePhysics()
@@ -53,7 +66,9 @@ function meta:DisablePhysics()
 
 	Rawset(self, "_radvel", 0)
 
+	Rawset(self, "_sleeping", false)
 	Rawset(self, "_physics", false)
+	Rawset(self, "_static", false)
 end
 
 function meta:GetMass() return Rawget(self, "_mass") end
@@ -69,6 +84,7 @@ function meta:SetOriginCenterOffset(vec2) Rawset(self, "_origincenteroffset", ve
 function VGUIPhysbox:__Create(parentPan)
 	Rawset(self, "_parent", parentPan)
 	Rawset(self, "_supported", false)
+	Rawset(self, "_supporting", {})
 	Rawset(self, "_rad", 0)
 	Rawset(self, "_mass", 1)
 	Rawset(self, "_inertia", 200)
@@ -204,8 +220,14 @@ function meta:GetAllHitboxPoints()
 end
 
 -- TODO is this worth caching?
-function meta:GetInvMass() return 1 / Rawget(self, "_mass") end
-function meta:GetInvInertia() return 1 / Rawget(self, "_inertia") end
+function meta:GetInvMass()
+	if Rawget(self, "_static") then return 0 end
+	return 1 / Rawget(self, "_mass")
+end
+function meta:GetInvInertia()
+	if Rawget(self, "_static") then return 0 end
+	return 1 / Rawget(self, "_inertia")
+end
 
 function meta:Remove()
 	GAMEMODE.VGUIPhysboxes[self] = nil
@@ -218,26 +240,52 @@ end
 
 function meta:Step(tim, iterations)
 	if not Rawget(self, "_physics") then return end
+	if Rawget(self, "_sleeping") then return end
 
 	tim = tim / iterations
 
 	local vel = Rawget(self, "_vel")
 
 	-- Gravity.
-	if not self:IsSupported() then
+	--if not self:IsSupported() then
 		local _, vy = Rawget(self, "_vel"):Unpack()
 		if vy < VGUIPHYS_TERMINAL_VELOCITY then
 			self:AddVel(VGUIPHYS_GRAVITY_VEC2 * tim)
 		end
-	end
+	--end
 
 	-- Move our position.
 	self:AddPartialPos(vel * tim)
-
-	-- Add rotation.
 	self:AddRad(Rawget(self, "_radvel") * tim)
 
-	print("vel:", vel)
+	
+
+	--[[
+	local supported = Rawget(self, "_supported")
+	if not supported then
+		self:SetSleeping(false)
+		return
+	end
+
+	-- If we havent moved much, and we are supported, mark asleep.
+	local rad = Rawget(self, "_rad")
+	local lastRad = Rawget(self, "_lastrad")
+	local deltaRad = lastRad - rad
+	if deltaRad >= VGUIPHYS_RAD_SLEEP_THRESHOLD then
+		self:SetSleeping(false)
+		return
+	end
+
+	local partialPos = Rawget(self, "_partialpos")
+	local lastPartialPos = Rawget(self, "_lastpartialpos")
+	local deltaPos = (lastPartialPos - partialPos):Length()
+	if deltaPos >= VGUIPHYS_POS_SLEEP_THRESHOLD then
+		self:SetSleeping(false)
+		return
+	end
+
+	self:SetSleeping(true)
+	]]
 end
 
 function meta:UpdateParentVars()
@@ -257,3 +305,39 @@ function meta:UpdateParentVars()
 		partial:DoSub(delta)
 	end
 end
+
+--[[
+function meta:EvaluateSupport()
+	if not Rawget(self, "_supported") then return end
+
+	local tab = {}
+	local physbox = self
+	local supportedBy = Rawget(self, "_supportedby")
+	local staticSupport = Rawget(supportedBy, "_static")
+	table.Insert(tab, supportedBy)
+
+	-- We don't know how many supporting elements we have.
+	while supportedBy and not staticSupport do
+		physbox = supportedBy
+		supportedBy = Rawget(physbox, "_supportedby")
+		staticSupport = Rawget(supportedBy, "_static")
+		table.Insert(tab, supportedBy)
+	end
+
+	if staticSupport then return end
+
+	-- Uh oh. Not supported.
+	self:SetSupported(false)
+
+	for i = 1, #tab do
+		local phys = tab[i]
+		if Rawget(phys, "_static") then break end
+		tab[i]:SetSupported(false)
+	end
+end
+
+function meta:SetSupported(bool, physbox)
+	Rawset(self, "_supported", bool)
+	Rawset(self, "_supportedby", physbox)
+end
+]]

@@ -99,10 +99,6 @@ local function ResolveVelocity(physboxA, physboxB, mtv, contactPoint, div)
 	local rv = vB - vA
 	local rnv = rv:Dot(mtv)
 
-	print("vA", vA)
-	print("vB", vB)
-	print("relative vel!", rv)
-	print("rnv", rnv)
 	if rnv > 0 then return liA, liB, riA, riB end -- Objects already moving apart.
 
 	-- Calculate the impulse to apply.
@@ -110,13 +106,6 @@ local function ResolveVelocity(physboxA, physboxB, mtv, contactPoint, div)
 	local invMassA, invMassB = physboxA:GetInvMass(), physboxB:GetInvMass()
 	local invInertiaA, invInertiaB = physboxA:GetInvInertia(), physboxB:GetInvInertia()
 	local denom = invMassA + invMassB + rAPDotMTV * rAPDotMTV * invInertiaA + rBPDotMTV * rBPDotMTV * invInertiaB
-
-	print("invMassA", invMassA)
-	print("invMassB", invMassB)
-	print("rAPDotMTV", rAPDotMTV)
-	print("rBPDotMTV", rBPDotMTV)
-	print("rAPDotMTV^2 * invInertiaA", rAPDotMTV^2 * invInertiaA)
-	print("rBPDotMTV^2 * invInertiaB", rBPDotMTV^2 * invInertiaB)
 
 	local bounce = 0.2
 	local j = rnv * -(1 + bounce)
@@ -128,15 +117,12 @@ local function ResolveVelocity(physboxA, physboxB, mtv, contactPoint, div)
 end
 
 local function ApplyImpulse(physboxA, physboxB, impulse, rA, rB)
-	--print("PhysboxA impulse", -impulse * physboxA:GetInvMass())
-	--print("PhysboxB impulse", impulse * physboxB:GetInvMass())
 	physboxA:AddVel(-impulse * physboxA:GetInvMass())
 	physboxB:AddVel(impulse * physboxB:GetInvMass())
 	physboxA:AddRadVel(-rA:Cross(impulse) * physboxA:GetInvInertia())
 	physboxB:AddRadVel(rB:Cross(impulse) * physboxB:GetInvInertia())
 end
 
---[[
 local function CheckSupported(physboxA, physboxB, mtv)
 	-- Check if our collision normal is roughly vertical.
 	local _, ny = mtv:Unpack()
@@ -149,12 +135,11 @@ local function CheckSupported(physboxA, physboxB, mtv)
 	-- If one is higher than the other, the other is being supported.
 	-- Remember, a more positive y value is actually lower.
 	if cay < cby then
-		physboxA:SetSupported(true)
+		--physboxA:SetSupported(true, physboxB)
 	else
-		physboxB:SetSupported(true)
+		--physboxB:SetSupported(true, physboxA)
 	end
 end
-]]
 
 local function ResolveFriction(physboxA, physboxB, mtv, contactPoint, div, j)
 	-- First, get our lever points.
@@ -214,10 +199,6 @@ function GM:ResolveCollision(manifold)
 	local mtv = Rawget(manifold, "mtv")
 	local contactPoints = Rawget(manifold, "contactPoints")
 
-	--CheckSupported(physboxA, physboxB, mtv)
-
-	--SimpleResolution(physboxA, physboxB, mtv)
-
 	-- We sum up all our impulses over the contact points and apply them once at the end.
 	local impulses = {}
 	local rAs = {}
@@ -256,4 +237,6 @@ function GM:ResolveCollision(manifold)
 		if not frictionImpulses[i] then continue end
 		ApplyImpulse(physboxA, physboxB, frictionImpulses[i], rAs[i], rBs[i])
 	end
+
+	CheckSupported(physboxA, physboxB, mtv)
 end

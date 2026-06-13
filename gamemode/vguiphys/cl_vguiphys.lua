@@ -13,7 +13,7 @@ VGUIPHYS_PASSES = 8
 VGUIPHYS_SLOP = 1.5
 
 -- A bit of leniency determining if a collision point is behind a face or not.
-VGUIPHYS_SLOP_COL_POINT = 0.05
+VGUIPHYS_SLOP_COL_POINT = 0.005
 
 -- Make sure our new better overlap is smaller by at least this much.
 VGUI_EPSILON_OVERLAP = 0.05
@@ -24,6 +24,13 @@ VGUIPHYS_GRAVITY_VEC2 = Vector2(0, VGUIPHYS_GRAVITY)
 
 VGUI_STATIC_FRICTION = 1
 VGUI_DYNAMIC_FRICTION = 1
+
+-- Checks delta in position and rotation for sleeping.
+VGUIPHYS_POS_SLEEP_THRESHOLD = 1
+VGUIPHYS_RAD_SLEEP_THRESHOLD = 0.01
+
+-- If rotation is less than this we set our rotational velocity to zero.
+VGUI_ROTATION_THRESHOLD = 0.001
 
 -- If our x or y velocity is under this much on collision it gets zero'd out.
 --VGUI_EPSILON_VELOCITY = VGUIPHYS_GRAVITY * 2
@@ -58,7 +65,7 @@ function GM:VGUIStepPhysboxes(tim, iterations)
 		end
 
 		physbox:Step(tim, iterations)
-		physbox:SetSupported(false)
+		--physbox:EvaluateSupport()
 	end
 end
 
