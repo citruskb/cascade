@@ -55,6 +55,7 @@ function GM:VGUIStepPhysboxes(tim, iterations)
 		end
 
 		physbox:Step(tim, iterations)
+		physbox:SetSupported(false)
 	end
 end
 

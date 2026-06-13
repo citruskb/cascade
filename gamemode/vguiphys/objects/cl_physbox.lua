@@ -223,11 +223,14 @@ function meta:Step(tim, iterations)
 
 	tim = tim / iterations
 
-	-- Gravity.
 	local vel = Rawget(self, "_vel")
-	local _, vy = Rawget(self, "_vel"):Unpack()
-	if vy < VGUIPHYS_TERMINAL_VELOCITY then
-		self:AddVel(VGUIPHYS_GRAVITY_VEC2 * tim)
+
+	-- Gravity.
+	if not self:IsSupported() then
+		local _, vy = Rawget(self, "_vel"):Unpack()
+		if vy < VGUIPHYS_TERMINAL_VELOCITY then
+			self:AddVel(VGUIPHYS_GRAVITY_VEC2 * tim)
+		end
 	end
 
 	-- Move our position.

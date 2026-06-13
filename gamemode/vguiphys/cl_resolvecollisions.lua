@@ -1,3 +1,4 @@
+local math_Abs = math.Abs
 local gamemode_Call = gamemode.Call
 
 function GM:SeparatePhysboxes(data)
@@ -75,6 +76,24 @@ local function SimpleResolution(physboxA, physboxB, mtv)
 	physboxB:AddVel(impulse * physboxB:GetInvMass())
 end
 
+local function CheckSupported(physboxA, physboxB, mtv)
+	-- Check if our collision normal is roughly vertical.
+	local _, ny = mtv:Unpack()
+	if math_Abs(ny) <= 0.7 then return end
+
+	-- Get our center points for our objects.
+	local _, cay = physboxA:GetPointsOrigin():Unpack()
+	local _, cby = physboxB:GetPointsOrigin():Unpack()
+
+	-- If one is higher than the other, the other is being supported.
+	-- Remember, a more positive y value is actually lower.
+	if cay < cby then
+		physboxA:SetSupported(true)
+	else
+		physboxB:SetSupported(true)
+	end
+end
+
 function GM:ResolveCollision(manifold)
 	local physboxA = Rawget(manifold, "physboxA")
 	local physboxB = Rawget(manifold, "physboxB")
@@ -82,6 +101,7 @@ function GM:ResolveCollision(manifold)
 	local contactPoints = Rawget(manifold, "contactPoints")
 
 	SimpleResolution(physboxA, physboxB, mtv)
+	CheckSupported(physboxA, physboxB, mtv)
 
 	--[[
 
