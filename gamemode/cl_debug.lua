@@ -248,7 +248,7 @@ hook.Add("VGUIGetContactPoints", "VGUIGetContactPoints.debug", function(referenc
 end)
 ]]
 
-hook.Add("VGUIPhysicsStep", "VGUIPhysicsStep.debug", function()
+hook.Add("VGUIStepPhysboxes", "VGUIPhysicsStep.debug", function()
 	cps = {}
 	--mtvsA = {}
 	--mtvsB = {}

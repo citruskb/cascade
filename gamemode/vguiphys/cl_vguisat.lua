@@ -107,10 +107,7 @@ function GM:VGUISAT(hbA, hbB)
 		]]
 
 		-- No collision.
-		if overlap <= 0 then
-			SetCachedCollision(hbA, hbB)
-			return
-		end
+		if overlap <= 0 then return end
 
 		-- Save information regarding our collision with the MTV if it's found.
 		if smallestOverlap and overlap >= smallestOverlap - VGUI_EPSILON_OVERLAP then continue end
@@ -136,11 +133,7 @@ function GM:VGUISAT(hbA, hbB)
 		end
 		]]
 
-		if overlap <= 0 then
-			SetCachedCollision(hbA, hbB)
-			return
-		end
-
+		if overlap <= 0 then return end
 		if smallestOverlap and overlap >= smallestOverlap - VGUI_EPSILON_OVERLAP then continue end
 
 		smallestOverlap = overlap

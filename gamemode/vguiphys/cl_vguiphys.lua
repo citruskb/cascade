@@ -26,51 +26,15 @@ VGUIPHYS_GRAVITY_VEC2 = Vector2(0, VGUIPHYS_GRAVITY)
 --VGUI_EPSILON_VELOCITY = VGUIPHYS_GRAVITY * 2
 
 -- Stop nudging velocity downards after reaching this velocity.
-VGUIPHYS_TERMINAL_VELOCITY = 10400 --1.4
+VGUIPHYS_TERMINAL_VELOCITY = 240 --1.4
 
 local SPIN = 0.02
 
-
-function GM:VGUIPhysicsThink()
-
-	-- Handle gravity. Remove physboxes with an invalid parent.
+function GM:VGUIUpdateParentVars()
 	for physbox, _ in pairs(self.VGUIPhysboxes) do
-		local parent = physbox:GetParent()
-		if not IsValid(parent) then
-			physbox:Remove()
-			continue
-		else
-			if parent.IsItem then
-				--physbox:AddRad(SPIN)
-			end
-		end
-
-		-- Don't apply gravity to supported objects.
-		if physbox:IsSupported() then continue end
-
-		-- Add our gravity up to our terminal velocity.
-		local vel = physbox:GetVel()
-		if not vel then continue end
-
-		local _, vy = vel:Unpack()
-		if vy >= VGUIPHYS_TERMINAL_VELOCITY then continue end
-
-		physbox:AddVel(VGUIPHYS_GRAVITY_VEC2)
+		physbox:UpdateParentVars()
 	end
-
-	-- Resolve our collisions.
-	gamemode.Call("ResolveAllVGUICollisions")
-
 end
-
-function GM:VGUIPhysboxThink()
-	for vphys, _ in pairs(self.VGUIPhysboxes) do vphys:DoPhysicsThink() end
-end
---[[
-function GM:VGUIPhysboxPhysPassThink()
-	for vphys, _ in pairs(self.VGUIPhysboxes) do vphys:DoPhysicsPassThink() end
-end
-]]
 
 function GM:VGUIPhysicsStep(tim, iterations)
 	for i = 1, iterations do
@@ -82,7 +46,16 @@ function GM:VGUIPhysicsStep(tim, iterations)
 end
 
 function GM:VGUIStepPhysboxes(tim, iterations)
-	for physbox, _ in pairs(self.VGUIPhysboxes) do physbox:Step(tim, iterations) end
+	for physbox, _ in pairs(self.VGUIPhysboxes) do
+		-- Remove invalid physboxes.
+		local parent = physbox:GetParent()
+		if not IsValid(parent) then
+			physbox:Remove()
+			continue
+		end
+
+		physbox:Step(tim, iterations)
+	end
 end
 
 function GM:VGUIBroadPhase()

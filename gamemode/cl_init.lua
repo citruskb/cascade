@@ -92,7 +92,7 @@ hook.Add("OnReloaded", "OnReloaded.LocalPlayerFound", LocalPlayerFound)
 -- The following functions should be set up as is with the underscore. No need to check if the local player is valid or not.
 local nextTick = 0
 local nextVGUIPhysUpdate = 0
-local engineTick
+local VGUItick = 0.030303030303030 -- Make sure that this runs the same regardless of server tick rate
 function GM:_Think()
 	local ct = CurTime()
 
@@ -100,16 +100,12 @@ function GM:_Think()
 	local physboxes = table.Count(self.VGUIPhysboxes)
 	if nextVGUIPhysUpdate <= ct
 		and (physboxes > 0 or table.Count(self.VGUIHitboxes) > 0) then
-			--gamemode.Call("VGUIPhysicsThink")
-
-			engineTick = engineTick or engine.TickInterval()
-
-			gamemode.Call("VGUIPhysicsStep", engineTick, VGUIPHYS_PASSES)
-
-			nextVGUIPhysUpdate = ct + engineTick
+			gamemode.Call("VGUIPhysicsStep", VGUItick, VGUIPHYS_PASSES)
+			nextVGUIPhysUpdate = ct + VGUItick
 	end
 
-	if physboxes > 0 then gamemode.Call("VGUIPhysboxThink") end
+	-- We do this separate so that perceived motion is updated whenever client redraws the screen. Looks less choppy.
+	gamemode.Call("VGUIUpdateParentVars")
 
 	if nextTick > ct then return end
 	nextTick = ct + 1
