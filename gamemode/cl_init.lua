@@ -100,9 +100,12 @@ function GM:_Think()
 	local physboxes = table.Count(self.VGUIPhysboxes)
 	if nextVGUIPhysUpdate <= ct
 		and (physboxes > 0 or table.Count(self.VGUIHitboxes) > 0) then
-			gamemode.Call("VGUIPhysicsThink")
+			--gamemode.Call("VGUIPhysicsThink")
 
 			engineTick = engineTick or engine.TickInterval()
+
+			gamemode.Call("VGUIPhysicsStep", 2, VGUIPHYS_PASSES)
+
 			nextVGUIPhysUpdate = ct + engineTick
 	end
 

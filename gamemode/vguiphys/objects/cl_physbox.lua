@@ -18,6 +18,7 @@ function meta:GetVel() return Rawget(self, "_vel") end
 function meta:SetVel(vec2) Rawget(self, "_vel"):Set(vec2) end
 function meta:AddVel(vec2)
 	if not Rawget(self, "_physics") then return end
+	print(Rawget(self, "_vel"), vec2)
 	Rawget(self, "_vel"):DoAdd(vec2)
 end
 
@@ -234,7 +235,8 @@ end
 function meta:RecachePhysicsPassPointsOrigin()
 	local pointsOrigin = self:GetPointsOrigin()
 	local desiredTranslation = self:GetDesiredTrans()
-	self:SetPhysicsPassPointsOrigin(pointsOrigin + desiredTranslation)
+	local partial = self:GetPartialPos()
+	self:SetPhysicsPassPointsOrigin(pointsOrigin + desiredTranslation + partial)
 end
 
 function meta:RecachePointsOrigin()
@@ -255,7 +257,8 @@ end
 function meta:RecachePhysicsPassPointsCenter()
 	local pointsCenter = self:GetPointsCenter()
 	local desiredTranslation = self:GetDesiredTrans()
-	self:SetPhysicsPassPointsCenter(pointsCenter + desiredTranslation)
+	local partial = self:GetPartialPos()
+	self:SetPhysicsPassPointsCenter(pointsCenter + desiredTranslation + partial)
 end
 
 function meta:RecachePointsCenter()
@@ -353,14 +356,48 @@ end
 function meta:DoPhysicsThink()
 	if not Rawget(self, "_physics") then return end
 
-	self:LinearIntegration()
-	self:AngularIntegration()
-
 	self:MarkPointsCenterDirty()
 	self:MarkPointsOriginDirty()
 end
 
 function meta:DoPhysicsPassThink()
+	self:MarkPhysicsPassPointsCenterDirty()
+	self:MarkPhysicsPassPointsOriginDirty()
+end
+
+function meta:Step(tim, iterations)
+	if not Rawget(self, "_physics") then return end
+
+	tim = tim / iterations
+
+	-- Gravity.
+	local vel = Rawget(self, "_vel")
+	local _, vy = Rawget(self, "_vel"):Unpack()
+	if vy < VGUIPHYS_TERMINAL_VELOCITY then
+		self:AddVel(VGUIPHYS_GRAVITY_VEC2 * tim)
+	end
+
+	-- Move our position.
+	local partial = Rawget(self, "_partialpos")
+	partial:DoAdd(vel * tim)
+
+	-- When the partial movements get high enough, move our parent panel.
+	-- Done this way because we can't move panels fractional pixels.
+	local mx, my = partial:Unpack()
+	local delta = Vector2(math.Round(mx, 0), math.Round(my, 0))
+	if not delta:IsZero() then
+		local parent = Rawget(self, "_parent")
+		local ivpos = parent:GetVPos()
+		ivpos:DoAdd(delta)
+		parent:SetPos(ivpos:Unpack())
+
+		-- The movement has been applied.
+		-- Therefore, subtract our movement from our partial pos.
+		partial:DoSub(delta)
+	end
+
+	self:AddRad(Rawget(self, "_radvel") * tim)
+
 	self:MarkPhysicsPassPointsCenterDirty()
 	self:MarkPhysicsPassPointsOriginDirty()
 end

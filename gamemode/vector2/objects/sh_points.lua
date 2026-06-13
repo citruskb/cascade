@@ -244,5 +244,20 @@ function meta:Translate(vec2)
 	return copy
 end
 
+function meta:IntersectAABB(other)
+	local minX, minY, maxX, maxY = self:GetMinX(), self:GetMinY(), self:GetMaxX(), self:GetMaxY()
+	local oMinX, oMinY, oMaxX, oMaxY = other:GetMinX(), other:GetMinY(), other:GetMaxX(), other:GetMaxY()
+
+	if
+		maxX <= oMinX or
+		oMaxX <= minX or
+		maxY <= oMinY or
+		oMaxY <= minY then
+			return false
+	end
+
+	return true
+end
+
 
 function Points(tab) return __points:Create(tab) end

@@ -291,12 +291,12 @@ function GM:VGUISAT(hbA, hbB)
 	mtv = OrientMTV(pointsA, pointsB, mtv)
 
 	-- A little messy. But we do this here since we have our normals cached in this file.
-	local referenceLine = GetBestAlignment(hbA, pointsTabA, -mtv)
-	local incidentLine = GetBestAlignment(hbB, pointsTabB, mtv)
-	local contactPoints = gamemode_Call("VGUIGetContactPoints", referenceLine, incidentLine, mtv)
+	--local referenceLine = GetBestAlignment(hbA, pointsTabA, -mtv)
+	--local incidentLine = GetBestAlignment(hbB, pointsTabB, mtv)
+	--local contactPoints = gamemode_Call("VGUIGetContactPoints", referenceLine, incidentLine, mtv)
 
 	-- Finally cache that we checked our collision and return our collision information.
 	SetCachedCollision(hbA, hbB)
 
-	return {hbA = hbA, hbB = hbB, physboxA = physboxA, physboxB = physboxB, overlap = smallestOverlap, mtv = mtv, contactPoints = contactPoints}
+	return {hbA = hbA, hbB = hbB, physboxA = physboxA, physboxB = physboxB, overlap = smallestOverlap, mtv = mtv}
 end
