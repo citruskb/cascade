@@ -7,13 +7,13 @@ if not vguiPhysLoaded then
 end
 
 -- How many loops do we make attempting to resolve collisions?
-VGUIPHYS_PASSES = 12
+VGUIPHYS_PASSES = 8
 
 -- Allow some degree of overlap between objects without taking collision corrective action.
 VGUIPHYS_SLOP = 1.5
 
 -- A bit of leniency determining if a collision point is behind a face or not.
-VGUIPHYS_SLOP_COL_POINT = 0.01 --VGUIPHYS_SLOP
+VGUIPHYS_SLOP_COL_POINT = 0.05
 
 -- Make sure our new better overlap is smaller by at least this much.
 VGUI_EPSILON_OVERLAP = 0.05
@@ -21,6 +21,9 @@ VGUI_EPSILON_OVERLAP = 0.05
 -- Amount to nudge velocity downwards every frame.
 VGUIPHYS_GRAVITY = 240 --0.024
 VGUIPHYS_GRAVITY_VEC2 = Vector2(0, VGUIPHYS_GRAVITY)
+
+VGUI_STATIC_FRICTION = 1
+VGUI_DYNAMIC_FRICTION = 1
 
 -- If our x or y velocity is under this much on collision it gets zero'd out.
 --VGUI_EPSILON_VELOCITY = VGUIPHYS_GRAVITY * 2

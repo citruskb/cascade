@@ -57,10 +57,8 @@ function meta:DisablePhysics()
 end
 
 function meta:GetMass() return Rawget(self, "_mass") end
-function meta:SetMass(num) Rawset(self, "_mass", num) end
 
 function meta:GetInertia() return Rawget(self, "_inertia") end
-function meta:SetInertia(num) Rawset(self, "_inertia", num) end
 
 function meta:GetHitboxes() return Rawget(self, "_hitboxes") end
 function meta:SetHitboxes(tab) Rawset(self, "_hitboxes", tab) end
@@ -72,8 +70,8 @@ function VGUIPhysbox:__Create(parentPan)
 	Rawset(self, "_parent", parentPan)
 	Rawset(self, "_supported", false)
 	Rawset(self, "_rad", 0)
-	Rawset(self, "_mass", 10)
-	Rawset(self, "_inertia", 80)
+	Rawset(self, "_mass", 1)
+	Rawset(self, "_inertia", 200)
 	Rawset(self, "_hitboxes", {})
 	Rawset(self, "_origincenteroffset", Vector2())
 	Rawset(self, "_center", Vector2())
@@ -238,6 +236,8 @@ function meta:Step(tim, iterations)
 
 	-- Add rotation.
 	self:AddRad(Rawget(self, "_radvel") * tim)
+
+	print("vel:", vel)
 end
 
 function meta:UpdateParentVars()

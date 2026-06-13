@@ -38,8 +38,7 @@ function GM:VGUIGetContactPoints(referenceLine, incidentLine, mtv)
 	local p1, p2 = Vector2(i1:Unpack()), Vector2(i2:Unpack())
 	local clippedPoints = ClipSegmentToPlane(p1, p2, plane1Normal, plane1Offset)
 
-	-- if we have no clipped points then something went wrong with SAT.
-	if #clippedPoints == 0 then Error("No collision point found.") end
+	if #clippedPoints == 0 then return {} end
 
 	-- Step 5: Get info on plane 2
 	local plane2Normal = refDir
@@ -49,7 +48,7 @@ function GM:VGUIGetContactPoints(referenceLine, incidentLine, mtv)
 	clippedPoints = ClipSegmentToPlane(clippedPoints[1], clippedPoints[2], plane2Normal, plane2Offset)
 
 	-- Same deal as above.
-	if #clippedPoints == 0 then Error("No collision point found.") end
+	if #clippedPoints == 0 then return {} end
 
 	-- Step 7: Keep only the points behind the reference face, plus some slop.
 	local collisionPoints = {}
