@@ -100,6 +100,13 @@ function meta:GetNormalized()
 	return Vector2(nx, ny)
 end
 
+-- Return the vector normal to the vector that connects two vectors.
+function meta:GetConnectingNormal(other)
+	local normal = Vector2(Rawget(other, "y") - Rawget(self, "y"), Rawget(self, "x") - Rawget(other, "x"))
+	normal:Normalize()
+	return normal
+end
+
 -- Returns if a vector is equal within a given tolerance
 function meta:IsEqualTol(compare, tol)
 	local x, y = Rawget(self, "x"), Rawget(self, "y")

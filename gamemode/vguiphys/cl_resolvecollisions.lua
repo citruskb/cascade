@@ -5,6 +5,7 @@ local math_Abs = math.Abs
 function GM:VGUIPhysPassComplete() end
 function GM:VGUIPhysCollisionsResolved() return self.VGUIPhysPassCount == VGUIPHYS_PASSES end
 
+--[[
 function GM:ResolveAllVGUICollisions()
 	local physboxes = GAMEMODE.VGUIPhysboxes
 	local hitboxes = GAMEMODE.VGUIHitboxes
@@ -33,11 +34,14 @@ function GM:ResolveAllVGUICollisions()
 		GAMEMODE.VGUIPhysPassCount = i
 	end
 end
+]]
 
+--[[
 local function ApplyTranslations(physboxA, physboxB, transA)
 	physboxA:AddDesiredTrans(transA)
 	physboxB:AddDesiredTrans(-transA)
 end
+]]
 
 local function OldResolveVelocity(physboxA, physboxB, mtv)
 	local velA, velB = Rawget(physboxA, "_vel"), Rawget(physboxB, "_vel")
@@ -120,6 +124,7 @@ local function CheckSupported(physboxA, physboxB, mtv)
 	end
 end
 
+--[[
 function GM:ResolveVGUICollision(data)
 	local physboxA = Rawget(data, "physboxA")
 	local physboxB = Rawget(data, "physboxB")
@@ -138,14 +143,6 @@ function GM:ResolveVGUICollision(data)
 	end
 
 	--OldResolveVelocity(physboxA, physboxB, mtv)
-
-	--[[ Try using the averaged contact as the only contact point
-	local points = Points(contactPoints)
-	local cp = points:GetCenter()
-	local liA, liB, riA, riB = Vector2(), Vector2(), 0, 0
-	liA, liB, riA, riB = ResolveVelocity(physboxA, physboxB, mtv, cp, #contactPoints, liA, liB, riA, riB)
-	ApplyImpulses(physboxA, physboxB, liA, liB, riA, riB)
-	]]
 
 	-- We sum up all our impulses over the contact points and apply them once at the end.
 	local impulses = {}
@@ -168,11 +165,14 @@ function GM:ResolveVGUICollision(data)
 	CheckSupported(physboxA, physboxB, mtv)
 
 end
+]]
 
 function GM:SeparatePhysboxes(data)
+	local overlap = Rawget(data, "overlap")
+	if overlap <= VGUIPHYS_SLOP then return end
+
 	local physboxA = Rawget(data, "physboxA")
 	local physboxB = Rawget(data, "physboxB")
-	local overlap = Rawget(data, "overlap")
 	local mtv = Rawget(data, "mtv")
 
 	if not Rawget(physboxA, "_physics") then
@@ -187,7 +187,7 @@ end
 
 local function GetNormal(tab, i)
 	local vec1 = Rawget(tab, i)
-	local vec2 = Rawget(tab, i == #tab and 1 or i + 1)
+	local vec2 = Rawget(tab, (i % #tab) + 1)
 	local normal = Vector2(Rawget(vec2, "y") - Rawget(vec1, "y"), Rawget(vec1, "x") - Rawget(vec2, "x"))
 	return normal:GetNormalized()
 end
@@ -222,11 +222,35 @@ function GM:GetCollisionPoints(data)
 	return contactPoints
 end
 
+local function SimpleResolution(physboxA, physboxB, mtv)
+	local velA, velB = Rawget(physboxA, "_vel"), Rawget(physboxB, "_vel")
+	if velA:IsZero() and velB:IsZero() then return end
+
+	local rv = velB - velA
+	local rnv = rv:Dot(mtv)
+	if rnv > 0 then return end -- Objects already moving apart.
+
+	local bounce = 0.2
+	local massA, massB = physboxA.mass or 1, physboxB.mass or 1 -- TODO: implement mass properly.
+
+	local j = rnv * -(1 + bounce)
+	j = j / (massA + massB)
+
+	local impulse = mtv * j
+
+	physboxA:AddVel(-impulse * physboxA:GetInvMass())
+	physboxB:AddVel(impulse * physboxB:GetInvMass())
+end
+
 function GM:ResolveCollision(manifold)
 	local physboxA = Rawget(manifold, "physboxA")
 	local physboxB = Rawget(manifold, "physboxB")
 	local mtv = Rawget(manifold, "mtv")
 	local contactPoints = Rawget(manifold, "contactPoints")
+
+	SimpleResolution(physboxA, physboxB, mtv)
+
+	--[[
 
 	-- We sum up all our impulses over the contact points and apply them once at the end.
 	local impulses = {}
@@ -245,4 +269,5 @@ function GM:ResolveCollision(manifold)
 		if not impulses[i] then continue end
 		ApplyImpulse(physboxA, physboxB, impulses[i], rAs[i], rBs[i])
 	end
+	]]
 end

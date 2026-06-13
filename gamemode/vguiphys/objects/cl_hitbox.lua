@@ -92,8 +92,6 @@ function meta:TransformPointsAroundOrigin(inputPoints, origin, pivot)
 		end
 	end
 
-	ret:MarkAllDirty()
-
 	return ret
 end
 

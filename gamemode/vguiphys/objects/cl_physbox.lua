@@ -18,7 +18,6 @@ function meta:GetVel() return Rawget(self, "_vel") end
 function meta:SetVel(vec2) Rawget(self, "_vel"):Set(vec2) end
 function meta:AddVel(vec2)
 	if not Rawget(self, "_physics") then return end
-	print(Rawget(self, "_vel"), vec2)
 	Rawget(self, "_vel"):DoAdd(vec2)
 end
 

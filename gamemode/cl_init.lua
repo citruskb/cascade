@@ -104,7 +104,7 @@ function GM:_Think()
 
 			engineTick = engineTick or engine.TickInterval()
 
-			gamemode.Call("VGUIPhysicsStep", 2, VGUIPHYS_PASSES)
+			gamemode.Call("VGUIPhysicsStep", engineTick, VGUIPHYS_PASSES)
 
 			nextVGUIPhysUpdate = ct + engineTick
 	end

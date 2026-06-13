@@ -229,9 +229,8 @@ end
 
 hook.Add("DrawOverlay", "DrawOverlay.Debug", DrawDebug)
 
-hook.Add("ResolveVGUICollision", "ResolveVGUICollision.Debug", function(data)
+hook.Add("ResolveCollision", "ResolveCollision.Debug", function(data)
 	if not GAMEMODE.Debug then return end
-	if GAMEMODE.VGUIPhysPassCount ~= VGUIPHYS_PASSES - 1 then return end
 
 	local contactPoints = Rawget(data, "contactPoints")
 	table.Add(cps, contactPoints)
@@ -249,7 +248,7 @@ hook.Add("VGUIGetContactPoints", "VGUIGetContactPoints.debug", function(referenc
 end)
 ]]
 
-hook.Add("VGUIPhysicsThink", "VGUIPhysicsThink.debug", function()
+hook.Add("VGUIPhysicsStep", "VGUIPhysicsStep.debug", function()
 	cps = {}
 	--mtvsA = {}
 	--mtvsB = {}
