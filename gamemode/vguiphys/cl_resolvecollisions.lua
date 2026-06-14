@@ -6,8 +6,8 @@ end
 local math_Abs = math.Abs
 local gamemode_Call = gamemode.Call
 
-local function GetRVAtCP(physboxA, physboxB, contactPoint)
-		-- First, get our lever points.
+local function GetRVars(physboxA, physboxB, contactPoint)
+	-- First, get our lever points.
 	local centerA, centerB = physboxA:GetPhysicsPassPointsCenter(), physboxB:GetPhysicsPassPointsCenter()
 
 	local rA = contactPoint - centerA
@@ -18,32 +18,37 @@ local function GetRVAtCP(physboxA, physboxB, contactPoint)
 	local rAP = Vector2(-ya, xa)
 	local rBP = Vector2(-yb, xb)
 
+	return rA, rB, rAP, rBP
+end
+
+local function GetRV(physboxA, physboxB, rAP, rBP)
 	-- We need our velocity at these points.
 	local vA = Rawget(physboxA, "_vel") + rAP * Rawget(physboxA, "_radvel")
 	local vB = Rawget(physboxB, "_vel") + rBP * Rawget(physboxB, "_radvel")
 
-	-- If velocities are zero, do nothing.
-	--if vA:IsZero() and vB:IsZero() then return liA, liB, riA, riB end
-
 	-- Get the velocity relative to each other along the normal.
-	local rv = vB - vA
-
-	return rv, rA, rB, rAP, rBP
+	return vB - vA
 end
 
-function GM:SettlePhysboxes(data)
+function GM:SettlePhysboxes(data, rv)
 	-- Very specific case. 
 	-- If velA is close to zero
 	-- And velB is close to zero
 	-- And the relative velocity is close to zero
 	-- Then it means we shouldn't be moving.
+	local mtv = Rawget(data, "mtv")
+	local y = Rawget(mtv, "y")
+	if y > -0.7 and y < 0.7 then return end
+
 	local physboxA = Rawget(data, "physboxA")
 	local physboxB = Rawget(data, "physboxB")
 	local velA = Rawget(physboxA, "_vel")
 	local velB = Rawget(physboxB, "_vel")
+
 	if (physboxA:IsStatic() or physboxA:IsStable()) or (physboxB:IsStatic() or physboxB:IsStable()) then
 		if velA:LengthSqr() < VGUIPHYS_SLEEP_VEL and velB:LengthSqr() < VGUIPHYS_SLEEP_VEL then
-			local rv = GetRVAtCP(physboxA, physboxB, physboxB:GetPhysicsPassPointsCenter() - physboxA:GetPhysicsPassPointsCenter())
+			local _, _, rAP, rBP = GetRVars(physboxA, physboxB, physboxB:GetPhysicsPassPointsCenter() - physboxA:GetPhysicsPassPointsCenter())
+			local rv = GetRV(physboxA, physboxB, rAP, rBP)
 			if rv:LengthSqr() < VGUIPHYS_SLEEP_VEL then
 				Rawget(physboxA, "_vel"):Zero()
 				Rawset(physboxA, "_radvel", 0)
@@ -126,9 +131,7 @@ local function ApplyImpulse(physboxA, physboxB, impulse, rA, rB, isFriction)
 	return impulse
 end
 
-local function ResolveWarmStart(physboxA, physboxB, contactPoint, normal, tangent, fID)
-	local rv, rA, rB, _, _ = GetRVAtCP(physboxA, physboxB, contactPoint)
-
+local function ResolveWarmStart(physboxA, physboxB, contactPoint, normal, tangent, rv, rA, rB, fID)
 	-- Get the velocity relative to each other along the normal.
 	-- Only apply impulse if objects aren't already moving apart.
 	local rnv = rv:Dot(normal)
@@ -147,10 +150,7 @@ local function ResolveWarmStart(physboxA, physboxB, contactPoint, normal, tangen
 	return (warmJ or 0), (warmJT or 0)
 end
 
-local function ResolveVelocity(warmJ, physboxA, physboxB, mtv, contactPoint, div, i)
-	-- Get vars related to relative velocity.
-	local rv, rA, rB, rAP, rBP = GetRVAtCP(physboxA, physboxB, contactPoint)
-
+local function ResolveVelocity(warmJ, physboxA, physboxB, mtv, rv, rAP, rBP, contactPoint, div, i)
 	-- Get the velocity relative to each other along the normal.
 	local rnv = rv:Dot(mtv)
 
@@ -175,14 +175,12 @@ local function ResolveVelocity(warmJ, physboxA, physboxB, mtv, contactPoint, div
 	local impulse = j * mtv
 
 
-	return impulse, rA, rB, j
+	return impulse, j
 end
 
-local function ResolveFriction(warmJT, physboxA, physboxB, mtv, tangent, contactPoint, div, j)
+local function ResolveFriction(warmJT, physboxA, physboxB, mtv, tangent, rv, rAP, rBP, contactPoint, div, j)
+	print("tangent", tangent)
 	if not tangent then return end
-
-	-- Get vars related to relative velocity.
-	local rv, rA, rB, rAP, rBP = GetRVAtCP(physboxA, physboxB, contactPoint)
 
 	local rnv = rv:Dot(mtv)
 	if rnv > 0 then return liA, liB, riA, riB end -- Objects already moving apart.
@@ -202,10 +200,13 @@ local function ResolveFriction(warmJT, physboxA, physboxB, mtv, tangent, contact
 
 	local frictionImpulse = jT * tangent
 
-	return frictionImpulse, rA, rB, jT
+	print("jT", jT)
+
+	return frictionImpulse, jT
 end
 
 function GM:ResolveCollision(manifold)
+	benchmark.Start("Init")
 	local hbA = Rawget(manifold, "hbA")
 	local hbB = Rawget(manifold, "hbB")
 	local refIDX = Rawget(manifold, "refIDX")
@@ -222,20 +223,35 @@ function GM:ResolveCollision(manifold)
 		physboxB:SetStable(physboxA:IsStatic() or stableA)
 		physboxA:SetStable(physboxB:IsStatic() or stableB)
 	else
-		physboxB:SetStable(false)
-		physboxA:SetStable(false)
+		--physboxB:SetStable(false)
+		--physboxA:SetStable(false)
+	end
+
+	benchmark.End("Init")
+
+	-- Cache some values we will be going back to repeatedly.
+	local rAs = {}
+	local rBs = {}
+	local rAPs = {}
+	local rBPs = {}
+	local rvs = {}
+	for i = 1, #contactPoints do
+		rAs[i], rBs[i], rAPs[i], rBPs[i] = GetRVars(physboxA, physboxB, contactPoints[i])
+		rvs[i] = GetRV(physboxA, physboxB, rAPs[i], rBPs[i])
 	end
 
 	-- We need the tangents for warmstarting and other calculations.
 	-- The normal for all contactPoints are the same -- the mtv.
+	benchmark.Start("Tangents")
 	local tangents = {}
 	for i = 1, #contactPoints do
-		local rv = GetRVAtCP(physboxA, physboxB, contactPoints[i])
+		local rv = rvs[i]
 		local tangent = rv - rv:Dot(mtv) * mtv
 		if tangent:IsEqualTol(VECTOR2_ZERO, 0.00001) then continue end
 		tangent:Normalize()
 		tangents[i] = tangent
 	end
+	benchmark.End("Tangents")
 
 
 	-- First, warmstarting.
@@ -244,9 +260,11 @@ function GM:ResolveCollision(manifold)
 	-- This is done for both our typical impulses and friction.
 	-- Helps improve stability.
 
+	benchmark.Start("Resolve Warmstart")
 	local fIDList = Rawget(manifold, "fIDList")
 	local warmstartJ = {}
 	local warmstartJT = {}
+	local didWarmstart = false
 	for i = 1, #contactPoints do
 		local fID = gamemode.Call("GetFeatureID", hbA, hbB, refIDX, incIDX, i)
 		table.Insert(fIDList, fID)
@@ -260,58 +278,71 @@ function GM:ResolveCollision(manifold)
 		end
 
 		-- if persistent, apply stored impulses, and remember that we are warmstarting.
-		warmstartJ[i], warmstartJT[i] = ResolveWarmStart(physboxA, physboxB, contactPoint, mtv, tangents[i], fID)
+		didWarmstart = true
+		warmstartJ[i], warmstartJT[i] = ResolveWarmStart(physboxA, physboxB, contactPoint, mtv, tangents[i], rvs[i], rAs[i], rBs[i], fID)
 	end
 
+	-- We need to recalculate our rvs if we changed our velocity from warmstarting.
+	if didWarmstart then
+		for i = 1, #contactPoints do
+			rvs[i] = GetRV(physboxA, physboxB, rAPs[i], rBPs[i])
+		end
+	end
+	benchmark.End("Resolve Warmstart")
+
 	-- Get our velocity impulses.
+	benchmark.Start("Velocity impulse calc")
 	local impulses = {}
-	local rAs = {}
-	local rBs = {}
 	local js = {}
 	for i = 1, #contactPoints do
-		local impulse, rA, rB, j = ResolveVelocity(warmstartJ[i], physboxA, physboxB, mtv, contactPoints[i], #contactPoints, i)
+		local impulse, j = ResolveVelocity(warmstartJ[i], physboxA, physboxB, mtv, rvs[i], rAPs[i], rBPs[i], contactPoints[i], #contactPoints, i)
 		if not impulse then continue end
 
 		impulses[i] = impulse
-		rAs[i] = rA
-		rBs[i] = rB
 		js[i] = j
 	end
+	benchmark.End("Velocity impulse calc")
 
 	-- Apply our velocity impulses.
+	benchmark.Start("Velocity impulse apply")
 	for i = 1, #contactPoints do
 		if not impulses[i] then continue end
 		impulses[i] = ApplyImpulse(physboxA, physboxB, impulses[i], rAs[i], rBs[i])
 	end
+	benchmark.End("Velocity impulse apply")
 
 	-- Get our friction impulses.
+	benchmark.Start("Friction impulse calc")
 	local frictionImpulses = {}
-	rAs = {}
-	rBs = {}
 	local jTs = {}
 	for i = 1, #contactPoints do
 		if not js[i] then continue end
 
-		local frictionImpulse, rA, rB, jT = ResolveFriction(warmstartJT[i], physboxA, physboxB, mtv, tangents[i], contactPoints[i], #contactPoints, js[i])
+		local frictionImpulse, jT = ResolveFriction(warmstartJT[i], physboxA, physboxB, mtv, tangents[i], rvs[i], rAPs[i], rBPs[i], contactPoints[i], #contactPoints, js[i])
 		if not frictionImpulse then continue end
 
 		frictionImpulses[i] = frictionImpulse
-		rAs[i] = rA
-		rBs[i] = rB
 		jTs[i] = jT
 	end
+	benchmark.End("Friction impulse calc")
 
+	benchmark.Start("Friction impulse apply")
 	-- Apply our friction impulses.
 	for i = 1, #contactPoints do
 		if not frictionImpulses[i] then continue end
 		frictionImpulses[i] = ApplyImpulse(physboxA, physboxB, frictionImpulses[i], rAs[i], rBs[i], true)
 	end
+	benchmark.End("Friction impulse apply")
 
 	-- Update our warmstart values.
 	-- But only if we aren't frozen.
+	benchmark.Start("Warmstart Lambda")
 	for i = 1, #contactPoints do
 		gamemode.Call("VGUIWarmstartLambda", fIDList[i], js[i], jTs[i], contactPoints[i])
 	end
+	benchmark.End("Warmstart Lambda")
 
+	benchmark.Start("SettlePhysboxes")
 	self:SettlePhysboxes(manifold)
+	benchmark.End("SettlePhysboxes")
 end
