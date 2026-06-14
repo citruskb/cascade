@@ -1,11 +1,15 @@
 
 if not VGUIPhysbox then
+	VGUIPhysboxCount = 0
 	GM.VGUIPhysboxes = {}
 	GM.DebugObjects = {}
 	VGUIPhysbox = Class:Create(nil, "VGUIPhysbox")
 end
 
 local meta = FindMetaTable("VGUIPhysbox")
+
+function meta:GetID() return Rawget(self, "_id") end
+function meta:SetID(val) Rawset(self, "_id", val) end
 
 function meta:GetParent() return Rawget(self, "_parent") end
 function meta:SetParent(pan) Rawset(self, "_parent", pan) end
@@ -97,6 +101,9 @@ function VGUIPhysbox:__Create(parentPan)
 	GAMEMODE.VGUIPhysboxes[self] = true
 	self.IsVGUIPhysbox = true
 
+	VGUIPhysboxCount = VGUIPhysboxCount + 1
+
+
 	return self
 end
 
@@ -162,6 +169,7 @@ function meta:AddHitbox(points, noResize)
 	-- If we make the assumption that the top left of all our points grids is 0,0 ...
 	-- our grid origin is the center minus half the max x and half the max y.
 	self:SetOriginCenterOffset(Vector2(-allpoints:GetMaxX() * 0.5, -allpoints:GetMaxY() * 0.5))
+	--self:RecalculateInertia()
 end
 
 function meta:GetPhysicsPassPointsOrigin()
@@ -305,6 +313,28 @@ function meta:UpdateParentVars()
 		partial:DoSub(delta)
 	end
 end
+
+--[[
+function meta:RecalculateInertia()
+	if Rawget(self, "_static") then return end
+
+	local mass = self:GetMass()
+	local points = self:GetAllHitboxPoints()
+	local pointsTab = points:GetPoints()
+	local center = points:GetCenter()
+	local xc, yc = center:Unpack()
+	local sum = 0
+	for i = 1, #pointsTab do
+		local point = pointsTab[i]
+		local x, y = point:Unpack()
+		local rsq = (x - xc) ^ 2 + (y - yc) ^ 2
+		sum = sum + mass * rsq
+	end
+
+	Rawset(self, "_inertia", sum)
+	print("new inertia is:", sum)
+end
+]]
 
 --[[
 function meta:EvaluateSupport()

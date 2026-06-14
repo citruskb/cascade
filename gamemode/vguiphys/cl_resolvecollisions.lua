@@ -117,6 +117,9 @@ local function ResolveVelocity(physboxA, physboxB, mtv, contactPoint, div)
 end
 
 local function ApplyImpulse(physboxA, physboxB, impulse, rA, rB)
+
+	print(impulse)
+
 	physboxA:AddVel(-impulse * physboxA:GetInvMass())
 	physboxB:AddVel(impulse * physboxB:GetInvMass())
 	physboxA:AddRadVel(-rA:Cross(impulse) * physboxA:GetInvInertia())
