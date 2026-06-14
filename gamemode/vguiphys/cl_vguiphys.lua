@@ -22,8 +22,8 @@ VGUI_EPSILON_OVERLAP = 0.05
 VGUIPHYS_GRAVITY = 240 --0.024
 VGUIPHYS_GRAVITY_VEC2 = Vector2(0, VGUIPHYS_GRAVITY)
 
-VGUI_STATIC_FRICTION = 1
-VGUI_DYNAMIC_FRICTION = 1
+VGUI_STATIC_FRICTION = 2
+VGUI_DYNAMIC_FRICTION = 1.5
 
 -- Checks delta in position and rotation for sleeping.
 VGUIPHYS_POS_SLEEP_THRESHOLD = 1
@@ -73,21 +73,26 @@ function GM:VGUIBroadPhase()
 	--local physboxes = self.VGUIPhysboxes
 	local hitboxes = self.VGUIHitboxes
 	local col = self.VGUIPotentialCollisions
+	local cache = {}
 
 	for hbA, _  in pairs(hitboxes) do
+		cache[hbA] = cache[hbA] or {}
+
 		for hbB, _ in pairs(hitboxes) do
+			cache[hbB] = cache[hbB] or {}
+
 			if hbA == hbB then continue end
 
 			local pA = hbA:GetPhysicsPassScreenPoints()
 			local pB = hbB:GetPhysicsPassScreenPoints()
 			if not pA:IntersectAABB(pB) then continue end
 
-			--[[
-			local collision = gamemode_Call("VGUISAT", hbA, hbB)
-			if not collision then continue end
-			]]
+			-- Check if we've already marked this pairing for collision evaluation.
+			if cache[hbA][hbB] or cache[hbB][hbA] then continue end
 
 			table.Insert(col, {hbA = hbA, hbB = hbB})
+			cache[hbA][hbB] = true
+			cache[hbB][hbA] = true
 		end
 	end
 end
@@ -102,7 +107,12 @@ function GM:VGUINarrowPhase()
 		if not collision then continue end
 
 		gamemode.Call("SeparatePhysboxes", collision)
-		collision.contactPoints = gamemode.Call("GetCollisionPoints", collision)
+
+		local contactPoints, refIDX, incIDX = gamemode.Call("GetCollisionPoints", collision)
+		collision.contactPoints = contactPoints
+		collision.refIDX = refIDX
+		collision.incIDX = incIDX
+
 		gamemode.Call("ResolveCollision", collision)
 	end
 end

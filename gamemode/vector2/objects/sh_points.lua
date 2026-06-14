@@ -105,6 +105,8 @@ function meta:GetMaxY()
 	return maxY
 end
 
+function meta:Count() return #Rawget(self, "_points") end
+
 function meta:ToTable()
 	local tab = self:GetTable()
 	local copy = {}

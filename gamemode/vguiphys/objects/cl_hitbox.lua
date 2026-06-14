@@ -26,9 +26,10 @@ function meta:SetPhysicsPassScreenPoints(points) Rawset(self, "_physicspassscree
 
 function meta:GetCenter() return Rawget(self, "_points"):GetCenter() end
 
-function VGUIHitbox:__Create(physbox, points)
+function VGUIHitbox:__Create(physbox, points, id)
 	Rawset(self, "_physbox", physbox)
 	Rawset(self, "_points", points)
+	Rawset(self, "_id", id)
 	Rawset(self, "_screenpoints", points:Copy())
 	Rawset(self, "_physicspassscreenpoints", points:Copy())
 

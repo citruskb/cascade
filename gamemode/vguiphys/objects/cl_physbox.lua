@@ -11,6 +11,9 @@ local meta = FindMetaTable("VGUIPhysbox")
 function meta:GetID() return Rawget(self, "_id") end
 function meta:SetID(val) Rawset(self, "_id", val) end
 
+function meta:GetHitboxCount() return Rawget(self, "_hitboxcount") end
+function meta:SetHitboxCount(val) Rawset(self, "_hitboxcount", val) end
+
 function meta:GetParent() return Rawget(self, "_parent") end
 function meta:SetParent(pan) Rawset(self, "_parent", pan) end
 
@@ -93,6 +96,7 @@ function VGUIPhysbox:__Create(parentPan)
 	Rawset(self, "_mass", 1)
 	Rawset(self, "_inertia", 200)
 	Rawset(self, "_hitboxes", {})
+	Rawset(self, "_hitboxcount", 0)
 	Rawset(self, "_origincenteroffset", Vector2())
 	Rawset(self, "_center", Vector2())
 
@@ -102,7 +106,7 @@ function VGUIPhysbox:__Create(parentPan)
 	self.IsVGUIPhysbox = true
 
 	VGUIPhysboxCount = VGUIPhysboxCount + 1
-
+	Rawset(self, "_id", VGUIPhysboxCount)
 
 	return self
 end
@@ -129,10 +133,13 @@ function VGUIPhysbox:Eq(other)
 end
 
 function meta:AddHitbox(points, noResize)
-	local hitbox = VGUIHitbox:Create(self, points)
+	local hitboxCount = Rawget(self, "_hitboxcount")
+	local id = hitboxCount + 1
+	Rawset(self, "_hitboxcount", id)
+
+	local hitbox = VGUIHitbox:Create(self, points, id)
 	local hitboxes = Rawget(self, "_hitboxes")
-	local idx = table.Insert(hitboxes, hitbox)
-	hitbox:SetID(idx)
+	table.Insert(hitboxes, hitbox)
 
 	GAMEMODE.DebugObjects[Rawget(self, "_parent")] = true
 

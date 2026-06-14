@@ -1,3 +1,8 @@
+if not VGUICollisionsLoaded then
+	GM.WarmStartImpulses = {}
+	VGUICollisionsLoaded = true
+end
+
 local math_Abs = math.Abs
 local gamemode_Call = gamemode.Call
 
@@ -26,7 +31,7 @@ local function GetNormal(tab, i)
 	return normal:GetNormalized()
 end
 local function GetBestAlignment(pointsTab, alignTo)
-	local bestP1, bestP2
+	local bestP1, bestP2, bestIDX
 	local bestAlignment
 	for i = 1, #pointsTab do
 		local p1 = pointsTab[i]
@@ -38,8 +43,9 @@ local function GetBestAlignment(pointsTab, alignTo)
 		bestAlignment = alignment
 		bestP1 = p1
 		bestP2 = p2
+		bestIDX = i
 	end
-	return Points({bestP1, bestP2})
+	return Points({bestP1, bestP2}), bestIDX
 end
 
 function GM:GetCollisionPoints(data)
@@ -49,11 +55,11 @@ function GM:GetCollisionPoints(data)
 	local pointsTabA = hbA:GetPhysicsPassScreenPoints():GetPoints()
 	local pointsTabB = hbB:GetPhysicsPassScreenPoints():GetPoints()
 
-	local referenceLine = GetBestAlignment(pointsTabA, -mtv)
-	local incidentLine = GetBestAlignment(pointsTabB, mtv)
+	local referenceLine, refIDX = GetBestAlignment(pointsTabA, -mtv)
+	local incidentLine, incIDX = GetBestAlignment(pointsTabB, mtv)
 	local contactPoints = gamemode_Call("VGUIGetContactPoints", referenceLine, incidentLine, mtv)
 
-	return contactPoints
+	return contactPoints, refIDX, incIDX
 end
 
 local function SimpleResolution(physboxA, physboxB, mtv)
@@ -76,7 +82,10 @@ local function SimpleResolution(physboxA, physboxB, mtv)
 	physboxB:AddVel(impulse * physboxB:GetInvMass())
 end
 
-local function ResolveVelocity(physboxA, physboxB, mtv, contactPoint, div)
+local function ResolveVelocity(hbA, hbB, refIDX, incIDX, physboxA, physboxB, mtv, contactPoint, div, i)
+	local featureID = gamemode.Call("GetFeatureID", hbA, hbB, refIDX, incIDX, i)
+	local lastImpulse = GAMEMODE.WarmStartImpulses[featureID] or 0
+
 	-- First, get our lever points.
 	local centerA, centerB = physboxA:GetPhysicsPassPointsCenter(), physboxB:GetPhysicsPassPointsCenter()
 
@@ -99,7 +108,7 @@ local function ResolveVelocity(physboxA, physboxB, mtv, contactPoint, div)
 	local rv = vB - vA
 	local rnv = rv:Dot(mtv)
 
-	if rnv > 0 then return liA, liB, riA, riB end -- Objects already moving apart.
+	if rnv > 0 then return end -- Objects already moving apart.
 
 	-- Calculate the impulse to apply.
 	local rAPDotMTV, rBPDotMTV = rAP:Dot(mtv), rBP:Dot(mtv)
@@ -113,13 +122,15 @@ local function ResolveVelocity(physboxA, physboxB, mtv, contactPoint, div)
 	j = j / div
 	local impulse = j * mtv
 
+	GAMEMODE.WarmStartImpulses[featureID] = j
+
+	-- if our last impulse on this contact point was nearly the same, then do nothing!
+	if math.IsNearlyEqual(lastImpulse, j, 0.1) then return end
+
 	return impulse, rA, rB, j
 end
 
 local function ApplyImpulse(physboxA, physboxB, impulse, rA, rB)
-
-	print(impulse)
-
 	physboxA:AddVel(-impulse * physboxA:GetInvMass())
 	physboxB:AddVel(impulse * physboxB:GetInvMass())
 	physboxA:AddRadVel(-rA:Cross(impulse) * physboxA:GetInvInertia())
@@ -197,6 +208,10 @@ local function ResolveFriction(physboxA, physboxB, mtv, contactPoint, div, j)
 end
 
 function GM:ResolveCollision(manifold)
+	local hbA = Rawget(manifold, "hbA")
+	local hbB = Rawget(manifold, "hbB")
+	local refIDX = Rawget(manifold, "refIDX")
+	local incIDX = Rawget(manifold, "incIDX")
 	local physboxA = Rawget(manifold, "physboxA")
 	local physboxB = Rawget(manifold, "physboxB")
 	local mtv = Rawget(manifold, "mtv")
@@ -208,7 +223,7 @@ function GM:ResolveCollision(manifold)
 	local rBs = {}
 	local js = {}
 	for i = 1, #contactPoints do
-		local impulse, rA, rB, j = ResolveVelocity(physboxA, physboxB, mtv, contactPoints[i], #contactPoints)
+		local impulse, rA, rB, j = ResolveVelocity(hbA, hbB, refIDX, incIDX, physboxA, physboxB, mtv, contactPoints[i], #contactPoints, i)
 		if not impulse then continue end
 
 		impulses[i] = impulse
