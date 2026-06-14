@@ -120,8 +120,20 @@ function GM:_Think()
 end
 function GM:PlayerThink(pl) end
 
+HideHUDElements = {}
+HideHUDElements["CHudWeaponSelection"] = true
+HideHUDElements["CHUDQuickInfo"] = true
+HideHUDElements["CHudHealth"] = true
+HideHUDElements["CHudSecondaryAmmo"] = true
+HideHUDElements["CHudAmmo"] = true
+HideHUDElements["CHudTrain"] = true
+HideHUDElements["CHudMessage"] = true
+HideHUDElements["CHudWeapon"] = true
+HideHUDElements["CHudCrosshair"] = true
+HideHUDElements["CHudCloseCaption"] = true
+HideHUDElements["CHudGMod"] = true
 function GM:_HUDShouldDraw(name)
-	return (self.clFilmMode and name == "CHudWeaponSelection") --or not HideHUDElements[name]
+	return (self.clFilmMode and name == "CHudWeaponSelection") or not HideHUDElements[name]
 end
 
 function GM:_CalcView(pl, origin, angles, fov, znear, zfar)

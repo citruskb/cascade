@@ -55,10 +55,6 @@ function meta:ClearSupporting() table.Empty(Rawget(self, "_supporting")) end
 function meta:SetSupporting(physbox) Rawget(self, "_supporting")[physbox] = true end
 function meta:AmSupporting(physbox) return Rawget(self, "_supporting")[physbox] end
 
-function meta:GetSleeping() return Rawget(self, "_sleeping") end
-function meta:SetSleeping(bool) Rawset(self, "_sleeping", bool) end
-function meta:Wake() self:SetSleeping(false) end
-
 function meta:IsStable()
 	if Rawget(self, "_static") then return true end
 	return Rawget(self, "_stable")
@@ -80,7 +76,6 @@ function meta:DisablePhysics()
 
 	Rawset(self, "_radvel", 0)
 
-	Rawset(self, "_sleeping", false)
 	Rawset(self, "_physics", false)
 	Rawset(self, "_static", false)
 	Rawset(self, "_stable", false)
@@ -263,7 +258,7 @@ end
 
 function meta:Step(tim, iterations)
 	if not Rawget(self, "_physics") then return end
-	if Rawget(self, "_sleeping") then return end
+	self:MarkHitboxesDirty()
 
 	tim = tim / iterations
 
@@ -296,6 +291,12 @@ function meta:UpdateParentVars()
 		-- The movement has been applied.
 		-- Therefore, subtract our movement from our partial pos.
 		partial:DoSub(delta)
+	end
+end
+
+function meta:MarkHitboxesDirty()
+	for _, hb in pairs(self:GetHitboxes()) do
+		hb:SetCacheDirty(true)
 	end
 end
 

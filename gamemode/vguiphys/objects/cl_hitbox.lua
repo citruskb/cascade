@@ -21,8 +21,17 @@ function meta:SetPhysbox(physbox) Rawset(self, "_physbox", physbox) end
 function meta:GetPoints() return Rawget(self, "_points") end
 function meta:SetPoints(points) Rawset(self, "_points", points) end
 
+
 function meta:SetScreenPoints(points) Rawset(self, "_screenpoints") end
+
+function meta:GetPhysicsPassScreenPoints()
+	if Rawget(self, "_cachedirty") then self:RecachePhysicsPassScreenPoints() end
+	return Rawget(self, "_physicspassscreenpoints")
+end
 function meta:SetPhysicsPassScreenPoints(points) Rawset(self, "_physicspassscreenpoints") end
+
+function meta:GetCacheDirty() return Rawget(self, "_cachedirty") end
+function meta:SetCacheDirty(bool) Rawset(self, "_cachedirty", bool) end
 
 function meta:GetCenter() return Rawget(self, "_points"):GetCenter() end
 
@@ -32,6 +41,7 @@ function VGUIHitbox:__Create(physbox, points, id)
 	Rawset(self, "_id", id)
 	Rawset(self, "_screenpoints", points:Copy())
 	Rawset(self, "_physicspassscreenpoints", points:Copy())
+	Rawset(self, "_cachedirty", true)
 
 	GAMEMODE.VGUIHitboxes[self] = true
 
@@ -107,15 +117,14 @@ function meta:GetScreenPoints()
 	return self:TransformPointsAroundOrigin(screenpoints, origin, pivot)
 end
 
--- TODO: Maybe this is worth caching?
--- Can't think of a clean way to detect when it has changed.. I suppose in the physbox whenever its desired translation changes?
-function meta:GetPhysicsPassScreenPoints()
+function meta:RecachePhysicsPassScreenPoints()
 	local physpassScreenpoints = Rawget(self, "_physicspassscreenpoints")
 	local physbox = Rawget(self, "_physbox")
 	local physpassOrigin = physbox:GetPhysicsPassPointsOrigin()
 	local physpassPivot = physbox:GetPhysicsPassPointsCenter()
 
-	return self:TransformPointsAroundOrigin(physpassScreenpoints, physpassOrigin, physpassPivot)
+	self:TransformPointsAroundOrigin(physpassScreenpoints, physpassOrigin, physpassPivot)
+	self:SetCacheDirty(false)
 end
 
 function meta:Remove()

@@ -50,9 +50,17 @@ end
 function GM:VGUIPhysicsStep(tim, iterations)
 	for i = 1, iterations do
 		self.VGUIPotentialCollisions = {}
+		--benchmark.Start("StepPhysboxes")
 		gamemode.Call("VGUIStepPhysboxes", tim, iterations)		-- Step through time and apply physics.
+		--benchmark.End("StepPhysboxes")
+
+		--benchmark.Start("BroadPhase")
 		gamemode.Call("VGUIBroadPhase")							-- Use simple AABB to find potential collisions.
+		--benchmark.End("BroadPhase")
+
+		--benchmark.Start("VGUINarrowPhase")
 		gamemode.Call("VGUINarrowPhase")						-- Refine collisions with SAT, and resolve said collisions.
+		--benchmark.End("VGUINarrowPhase")
 	end
 end
 
@@ -104,17 +112,25 @@ function GM:VGUINarrowPhase()
 		local data = col[i]
 		local hbA, hbB = Rawget(data, "hbA"), Rawget(data, "hbB")
 
+		--benchmark.Start("VGUISAT")
 		local collision = gamemode.Call("VGUISAT", hbA, hbB)
+		--benchmark.End("VGUISAT")
 		if not collision then continue end
 
+		--benchmark.Start("SeparatePhysboxes")
 		gamemode.Call("SeparatePhysboxes", collision)
+		--benchmark.End("SeparatePhysboxes")
 
+		--benchmark.Start("GetCollisionPoints")
 		local contactPoints, refIDX, incIDX = gamemode.Call("GetCollisionPoints", collision)
 		collision.contactPoints = contactPoints
 		collision.refIDX = refIDX
 		collision.incIDX = incIDX
+		--benchmark.End("GetCollisionPoints")
 
+		--benchmark.Start("ResolveCollision")
 		gamemode.Call("ResolveCollision", collision)
+		--benchmark.End("ResolveCollision")
 	end
 end
 

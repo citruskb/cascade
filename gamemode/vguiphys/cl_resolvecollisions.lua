@@ -77,20 +77,14 @@ function GM:SeparatePhysboxes(data)
 	end
 end
 
-local function GetNormal(tab, i)
-	local vec1 = Rawget(tab, i)
-	local vec2 = Rawget(tab, (i % #tab) + 1)
-	local normal = Vector2(Rawget(vec2, "y") - Rawget(vec1, "y"), Rawget(vec1, "x") - Rawget(vec2, "x"))
-	return normal:GetNormalized()
-end
 local function GetBestAlignment(pointsTab, alignTo)
 	local bestP1, bestP2, bestIDX
 	local bestAlignment
 	for i = 1, #pointsTab do
-		local p1 = pointsTab[i]
-		local p2 = pointsTab[(i % #pointsTab) + 1]
-		local normal = GetNormal(pointsTab, i)
-		local alignment = normal:Dot(alignTo)
+		local p1 = Rawget(pointsTab, i)
+		local p2 = Rawget(pointsTab,(i % #pointsTab) + 1)
+		local checkAlign = Vector2(Rawget(p2, "y") - Rawget(p1, "y"), Rawget(p1, "x") - Rawget(p2, "x"))
+		local alignment = checkAlign:Dot(alignTo)
 
 		if bestAlignment and alignment >= bestAlignment then continue end
 		bestAlignment = alignment
@@ -98,6 +92,7 @@ local function GetBestAlignment(pointsTab, alignTo)
 		bestP2 = p2
 		bestIDX = i
 	end
+
 	return Points({bestP1, bestP2}), bestIDX
 end
 
