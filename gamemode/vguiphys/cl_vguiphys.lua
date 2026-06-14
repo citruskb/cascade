@@ -38,6 +38,12 @@ VGUI_ROTATION_THRESHOLD = 0.001
 -- Stop nudging velocity downards after reaching this velocity.
 VGUIPHYS_TERMINAL_VELOCITY = 240 --1.4
 
+-- How different can x-y values of persistent contact points be and still be considered persistent?
+VGUIPHYS_WARMSTART_TOL = 0.05
+
+-- Ignore impulses below this threshold.
+VGUIPHYS_IMPULSE_TOL = 0.001
+
 local SPIN = 0.02
 
 function GM:VGUIUpdateParentVars()

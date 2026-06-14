@@ -62,30 +62,31 @@ function GM:GetCollisionPoints(data)
 	return contactPoints, refIDX, incIDX
 end
 
-local function SimpleResolution(physboxA, physboxB, mtv)
-	local velA, velB = Rawget(physboxA, "_vel"), Rawget(physboxB, "_vel")
-	if velA:IsZero() and velB:IsZero() then return end
-
-	local rv = velB - velA
-	local rnv = rv:Dot(mtv)
-	if rnv > 0 then return end -- Objects already moving apart.
-
-	local bounce = 0.2
-	local massA, massB = physboxA.mass or 1, physboxB.mass or 1 -- TODO: implement mass properly.
-
-	local j = rnv * -(1 + bounce)
-	j = j / (massA + massB)
-
-	local impulse = mtv * j
+local function ApplyImpulse(physboxA, physboxB, impulse, rA, rB)
+	if impulse:IsEqualTol(VECTOR2_ZERO, VGUIPHYS_IMPULSE_TOL) then return Vector2() end
 
 	physboxA:AddVel(-impulse * physboxA:GetInvMass())
 	physboxB:AddVel(impulse * physboxB:GetInvMass())
+	physboxA:AddRadVel(-rA:Cross(impulse) * physboxA:GetInvInertia())
+	physboxB:AddRadVel(rB:Cross(impulse) * physboxB:GetInvInertia())
+
+	return impulse
 end
 
-local function ResolveVelocity(hbA, hbB, refIDX, incIDX, physboxA, physboxB, mtv, contactPoint, div, i)
-	local featureID = gamemode.Call("GetFeatureID", hbA, hbB, refIDX, incIDX, i)
-	local lastImpulse = GAMEMODE.WarmStartImpulses[featureID] or 0
+local function ResolveWarmStart(physboxA, physboxB, contactPoint, fID)
+	local rA = contactPoint - physboxA:GetPhysicsPassPointsCenter()
+	local rB = contactPoint - physboxB:GetPhysicsPassPointsCenter()
 
+	local warmImpulse = gamemode.Call("VGUIGetWarmImpulse", fID) or 0
+	ApplyImpulse(physboxA, physboxB, warmImpulse, rA, rB)
+
+	local warmFrictionImpulse = gamemode.Call("VGUIGetWarmFrictionImpulse", fID) or 0
+	ApplyImpulse(physboxA, physboxB, warmFrictionImpulse, rA, rB)
+
+	return warmImpulse, warmFrictionImpulse
+end
+
+local function ResolveVelocity(warmImpulse, hbA, hbB, physboxA, physboxB, mtv, contactPoint, div, i)
 	-- First, get our lever points.
 	local centerA, centerB = physboxA:GetPhysicsPassPointsCenter(), physboxB:GetPhysicsPassPointsCenter()
 
@@ -122,19 +123,10 @@ local function ResolveVelocity(hbA, hbB, refIDX, incIDX, physboxA, physboxB, mtv
 	j = j / div
 	local impulse = j * mtv
 
-	GAMEMODE.WarmStartImpulses[featureID] = j
-
-	-- if our last impulse on this contact point was nearly the same, then do nothing!
-	if math.IsNearlyEqual(lastImpulse, j, 0.1) then return end
+	-- For warmstarting we need to get the difference between our warmstart and apply that as our impulse instead.
+	impulse = impulse - warmImpulse
 
 	return impulse, rA, rB, j
-end
-
-local function ApplyImpulse(physboxA, physboxB, impulse, rA, rB)
-	physboxA:AddVel(-impulse * physboxA:GetInvMass())
-	physboxB:AddVel(impulse * physboxB:GetInvMass())
-	physboxA:AddRadVel(-rA:Cross(impulse) * physboxA:GetInvInertia())
-	physboxB:AddRadVel(rB:Cross(impulse) * physboxB:GetInvInertia())
 end
 
 local function CheckSupported(physboxA, physboxB, mtv)
@@ -155,7 +147,7 @@ local function CheckSupported(physboxA, physboxB, mtv)
 	end
 end
 
-local function ResolveFriction(physboxA, physboxB, mtv, contactPoint, div, j)
+local function ResolveFriction(warmFrictionImpulse, physboxA, physboxB, mtv, contactPoint, div, j)
 	-- First, get our lever points.
 	local centerA, centerB = physboxA:GetPhysicsPassPointsCenter(), physboxB:GetPhysicsPassPointsCenter()
 
@@ -204,6 +196,9 @@ local function ResolveFriction(physboxA, physboxB, mtv, contactPoint, div, j)
 		frictionImpulse = -j * tangent * VGUI_DYNAMIC_FRICTION
 	end
 
+	-- For warmstarting we need to get the difference between our warmstart and apply that as our impulse instead.
+	frictionImpulse = frictionImpulse - warmFrictionImpulse
+
 	return frictionImpulse, rA, rB
 end
 
@@ -217,13 +212,40 @@ function GM:ResolveCollision(manifold)
 	local mtv = Rawget(manifold, "mtv")
 	local contactPoints = Rawget(manifold, "contactPoints")
 
-	-- We sum up all our impulses over the contact points and apply them once at the end.
+	Rawset(manifold, "fIDList", {})
+
+	-- First, warmstarting.
+	-- We check if this contact point is persistent frame-to-frame.
+	-- If it is, we apply a portion of the old accumulated solution as our starting point here
+	-- This is done for both our typical impulses and friction.
+	-- Helps improve stability.
+
+	local fIDList = Rawget(manifold, "fIDList")
+	local warmstartImpulses = {}
+	local warmStartFrictionImpulses = {}
+	for i = 1, #contactPoints do
+		local fID = gamemode.Call("GetFeatureID", hbA, hbB, refIDX, incIDX, i)
+		table.Insert(fIDList, fID)
+
+		-- If our contact point isn't persistent, reset our contact data. No warm start.
+		local contactPoint = contactPoints[i]
+		if not gamemode.Call("VGUIIsPersistentContact", fID, contactPoint) then
+			warmstartImpulses[i], warmStartFrictionImpulses[i] = Vector2(), Vector2()
+			gamemode.Call("VGUIInitWarmstartData", fID, contactPoint, warmstartImpulses[i], warmStartFrictionImpulses[i])
+			continue
+		end
+
+		-- if persistent, apply stored impulses, and remember that we are warmstarting.
+		warmstartImpulses[i], warmStartFrictionImpulses[i] = ResolveWarmStart(physboxA, physboxB, contactPoint, fID)
+	end
+
+	-- Get our velocity impulses.
 	local impulses = {}
 	local rAs = {}
 	local rBs = {}
 	local js = {}
 	for i = 1, #contactPoints do
-		local impulse, rA, rB, j = ResolveVelocity(hbA, hbB, refIDX, incIDX, physboxA, physboxB, mtv, contactPoints[i], #contactPoints, i)
+		local impulse, rA, rB, j = ResolveVelocity(warmstartImpulses[i], hbA, hbB, physboxA, physboxB, mtv, contactPoints[i], #contactPoints, i)
 		if not impulse then continue end
 
 		impulses[i] = impulse
@@ -232,18 +254,20 @@ function GM:ResolveCollision(manifold)
 		js[i] = j
 	end
 
+	-- Apply our velocity impulses.
 	for i = 1, #contactPoints do
 		if not impulses[i] then continue end
-		ApplyImpulse(physboxA, physboxB, impulses[i], rAs[i], rBs[i])
+		impulses[i] = ApplyImpulse(physboxA, physboxB, impulses[i], rAs[i], rBs[i])
 	end
 
-	frictionImpulses = {}
+	-- Get our friction impulses.
+	local frictionImpulses = {}
 	rAs = {}
 	rBs = {}
 	for i = 1, #contactPoints do
 		if not js[i] then continue end
 
-		local frictionImpulse, rA, rB = ResolveFriction(physboxA, physboxB, mtv, contactPoints[i], #contactPoints, js[i])
+		local frictionImpulse, rA, rB = ResolveFriction(warmStartFrictionImpulses[i], physboxA, physboxB, mtv, contactPoints[i], #contactPoints, js[i])
 		if not frictionImpulse then continue end
 
 		frictionImpulses[i] = frictionImpulse
@@ -251,9 +275,15 @@ function GM:ResolveCollision(manifold)
 		rBs[i] = rB
 	end
 
+	-- Apply our friction impulses.
 	for i = 1, #contactPoints do
 		if not frictionImpulses[i] then continue end
-		ApplyImpulse(physboxA, physboxB, frictionImpulses[i], rAs[i], rBs[i])
+		frictionImpulses[i] = ApplyImpulse(physboxA, physboxB, frictionImpulses[i], rAs[i], rBs[i])
+	end
+
+	-- Update our warmstart values.
+	for i = 1, #contactPoints do
+		gamemode.Call("VGUIWarmstartLambda", fIDList[i], impulses[i], frictionImpulses[i], contactPoints[i])
 	end
 
 	CheckSupported(physboxA, physboxB, mtv)
