@@ -59,6 +59,13 @@ function meta:GetSleeping() return Rawget(self, "_sleeping") end
 function meta:SetSleeping(bool) Rawset(self, "_sleeping", bool) end
 function meta:Wake() self:SetSleeping(false) end
 
+function meta:IsStable()
+	if Rawget(self, "_static") then return true end
+	return Rawget(self, "_stable")
+end
+function meta:GetStable() return Rawget(self, "_stable") end
+function meta:SetStable(bool) Rawset(self, "_stable", bool) end
+
 function meta:IsStatic() return Rawget(self, "_static") end
 function meta:SetStatic(bool) Rawset(self, "_static", bool) end
 
@@ -76,6 +83,7 @@ function meta:DisablePhysics()
 	Rawset(self, "_sleeping", false)
 	Rawset(self, "_physics", false)
 	Rawset(self, "_static", false)
+	Rawset(self, "_stable", false)
 end
 
 function meta:GetMass() return Rawget(self, "_mass") end
@@ -262,45 +270,16 @@ function meta:Step(tim, iterations)
 	local vel = Rawget(self, "_vel")
 
 	-- Gravity.
-	--if not self:IsSupported() then
-		local _, vy = Rawget(self, "_vel"):Unpack()
-		if vy < VGUIPHYS_TERMINAL_VELOCITY then
-			self:AddVel(VGUIPHYS_GRAVITY_VEC2 * tim)
-		end
-	--end
+	local _, vy = Rawget(self, "_vel"):Unpack()
+	if vy < VGUIPHYS_TERMINAL_VELOCITY then
+		self:AddVel(VGUIPHYS_GRAVITY_VEC2 * tim)
+	end
 
-	-- Move our position.
+	-- Move.
+	-- Rotate.
+	-- But only if not stable.
 	self:AddPartialPos(vel * tim)
 	self:AddRad(Rawget(self, "_radvel") * tim)
-
-	
-
-	--[[
-	local supported = Rawget(self, "_supported")
-	if not supported then
-		self:SetSleeping(false)
-		return
-	end
-
-	-- If we havent moved much, and we are supported, mark asleep.
-	local rad = Rawget(self, "_rad")
-	local lastRad = Rawget(self, "_lastrad")
-	local deltaRad = lastRad - rad
-	if deltaRad >= VGUIPHYS_RAD_SLEEP_THRESHOLD then
-		self:SetSleeping(false)
-		return
-	end
-
-	local partialPos = Rawget(self, "_partialpos")
-	local lastPartialPos = Rawget(self, "_lastpartialpos")
-	local deltaPos = (lastPartialPos - partialPos):Length()
-	if deltaPos >= VGUIPHYS_POS_SLEEP_THRESHOLD then
-		self:SetSleeping(false)
-		return
-	end
-
-	self:SetSleeping(true)
-	]]
 end
 
 function meta:UpdateParentVars()
@@ -320,28 +299,6 @@ function meta:UpdateParentVars()
 		partial:DoSub(delta)
 	end
 end
-
---[[
-function meta:RecalculateInertia()
-	if Rawget(self, "_static") then return end
-
-	local mass = self:GetMass()
-	local points = self:GetAllHitboxPoints()
-	local pointsTab = points:GetPoints()
-	local center = points:GetCenter()
-	local xc, yc = center:Unpack()
-	local sum = 0
-	for i = 1, #pointsTab do
-		local point = pointsTab[i]
-		local x, y = point:Unpack()
-		local rsq = (x - xc) ^ 2 + (y - yc) ^ 2
-		sum = sum + mass * rsq
-	end
-
-	Rawset(self, "_inertia", sum)
-	print("new inertia is:", sum)
-end
-]]
 
 --[[
 function meta:EvaluateSupport()

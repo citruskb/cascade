@@ -94,6 +94,7 @@ function GM:VGUIWarmstartLambda(fID, imp, fimp, cp)
 	local data = self:VGUIGetWarmstartData(fID)
 
 	-- Update the contact point.
+	--print("old cp:", Rawget(data, "cp"), "new cp:", cp)
 	Rawset(data, "cp", cp)
 
 	-- This means though that our previous warmstart plus a correction was added in the last collision resolution.
@@ -101,12 +102,14 @@ function GM:VGUIWarmstartLambda(fID, imp, fimp, cp)
 	if imp and not imp:IsZero() then
 		local oldimp = self:VGUIGetWarmImpulse(fID)
 		local lambda = imp
+		--print("lambda imp", lambda)
 		Rawset(data, "imp", oldimp + lambda)
 	end
 
 	if fimp and not fimp:IsZero() then
 		local oldfimp = self:VGUIGetWarmFrictionImpulse(fID)
 		lambda = fimp
+		--print("lambda fimp", lambda)
 		Rawset(data, "fimp", oldfimp + lambda)
 	end
 end

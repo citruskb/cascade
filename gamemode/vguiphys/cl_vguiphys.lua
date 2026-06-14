@@ -39,10 +39,10 @@ VGUI_ROTATION_THRESHOLD = 0.001
 VGUIPHYS_TERMINAL_VELOCITY = 240 --1.4
 
 -- How different can x-y values of persistent contact points be and still be considered persistent?
-VGUIPHYS_WARMSTART_TOL = 0.05
+VGUIPHYS_WARMSTART_TOL = 0.01
 
--- Ignore impulses below this threshold.
-VGUIPHYS_IMPULSE_TOL = 0.001
+-- What fraction of the warmstart impulse to apply?
+--VGUIPHYS_WARMSTART_FRAC = 0.5
 
 local SPIN = 0.02
 
@@ -71,7 +71,6 @@ function GM:VGUIStepPhysboxes(tim, iterations)
 		end
 
 		physbox:Step(tim, iterations)
-		--physbox:EvaluateSupport()
 	end
 end
 

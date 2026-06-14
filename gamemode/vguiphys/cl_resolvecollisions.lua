@@ -14,6 +14,9 @@ function GM:SeparatePhysboxes(data)
 	local physboxB = Rawget(data, "physboxB")
 	local mtv = Rawget(data, "mtv")
 
+	-- We target our movement for the middle of our slop allowance. 
+	overlap = overlap - (VGUIPHYS_SLOP * 0.5)
+
 	if not Rawget(physboxA, "_physics") then
 		physboxB:AddPartialPos(mtv * overlap)
 	elseif not Rawget(physboxB, "_physics") then
@@ -63,7 +66,7 @@ function GM:GetCollisionPoints(data)
 end
 
 local function ApplyImpulse(physboxA, physboxB, impulse, rA, rB)
-	if impulse:IsEqualTol(VECTOR2_ZERO, VGUIPHYS_IMPULSE_TOL) then return Vector2() end
+	if impulse:IsZero() then return impulse end
 
 	physboxA:AddVel(-impulse * physboxA:GetInvMass())
 	physboxB:AddVel(impulse * physboxB:GetInvMass())
@@ -223,6 +226,7 @@ function GM:ResolveCollision(manifold)
 	local fIDList = Rawget(manifold, "fIDList")
 	local warmstartImpulses = {}
 	local warmStartFrictionImpulses = {}
+	local unstable
 	for i = 1, #contactPoints do
 		local fID = gamemode.Call("GetFeatureID", hbA, hbB, refIDX, incIDX, i)
 		table.Insert(fIDList, fID)
@@ -232,11 +236,17 @@ function GM:ResolveCollision(manifold)
 		if not gamemode.Call("VGUIIsPersistentContact", fID, contactPoint) then
 			warmstartImpulses[i], warmStartFrictionImpulses[i] = Vector2(), Vector2()
 			gamemode.Call("VGUIInitWarmstartData", fID, contactPoint, warmstartImpulses[i], warmStartFrictionImpulses[i])
+
+			unstable = true
+			physboxA:SetStable(false)
+			physboxB:SetStable(false)
 			continue
 		end
 
 		-- if persistent, apply stored impulses, and remember that we are warmstarting.
 		warmstartImpulses[i], warmStartFrictionImpulses[i] = ResolveWarmStart(physboxA, physboxB, contactPoint, fID)
+		physboxA:SetStable(not unstable)
+		physboxB:SetStable(not unstable)
 	end
 
 	-- Get our velocity impulses.
@@ -282,6 +292,7 @@ function GM:ResolveCollision(manifold)
 	end
 
 	-- Update our warmstart values.
+	-- But only if we aren't frozen.
 	for i = 1, #contactPoints do
 		gamemode.Call("VGUIWarmstartLambda", fIDList[i], impulses[i], frictionImpulses[i], contactPoints[i])
 	end
