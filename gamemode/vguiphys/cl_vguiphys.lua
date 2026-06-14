@@ -29,20 +29,15 @@ VGUI_DYNAMIC_FRICTION = 1.5
 VGUIPHYS_POS_SLEEP_THRESHOLD = 1
 VGUIPHYS_RAD_SLEEP_THRESHOLD = 0.01
 
--- If rotation is less than this we set our rotational velocity to zero.
-VGUI_ROTATION_THRESHOLD = 0.001
-
--- If our x or y velocity is under this much on collision it gets zero'd out.
---VGUI_EPSILON_VELOCITY = VGUIPHYS_GRAVITY * 2
-
 -- Stop nudging velocity downards after reaching this velocity.
 VGUIPHYS_TERMINAL_VELOCITY = 240 --1.4
 
 -- How different can x-y values of persistent contact points be and still be considered persistent?
 VGUIPHYS_WARMSTART_TOL = 0.01
 
--- What fraction of the warmstart impulse to apply?
---VGUIPHYS_WARMSTART_FRAC = 0.5
+-- How close to zero should our velocity be to stop our motion? Note this uses the sqr value.
+VGUIPHYS_SLEEP_VEL = 2500 -- 50^2
+
 
 local SPIN = 0.02
 
@@ -71,6 +66,7 @@ function GM:VGUIStepPhysboxes(tim, iterations)
 		end
 
 		physbox:Step(tim, iterations)
+		physbox:SetStable(false)
 	end
 end
 

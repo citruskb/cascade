@@ -269,17 +269,16 @@ function meta:Step(tim, iterations)
 
 	local vel = Rawget(self, "_vel")
 
+	-- Move & rotate
+	self:AddPartialPos(vel * tim)
+	self:AddRad(Rawget(self, "_radvel") * tim)
+
 	-- Gravity.
+	-- We apply this after moving to allow our solver a chance to respond to it.
 	local _, vy = Rawget(self, "_vel"):Unpack()
 	if vy < VGUIPHYS_TERMINAL_VELOCITY then
 		self:AddVel(VGUIPHYS_GRAVITY_VEC2 * tim)
 	end
-
-	-- Move.
-	-- Rotate.
-	-- But only if not stable.
-	self:AddPartialPos(vel * tim)
-	self:AddRad(Rawget(self, "_radvel") * tim)
 end
 
 function meta:UpdateParentVars()

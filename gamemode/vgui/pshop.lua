@@ -90,6 +90,34 @@ function PANEL:Init()
 	physbox:SetStatic(true)
 	floorcontainer.Physbox = physbox
 
+	local invleftwall = vgui.Create("DPanel", self)
+	invleftwall:SetSize(w * 0.05, h)
+	invleftwall:SetPos(w * 0.35, 0)
+	invleftwall:SetBackgroundColor(Color(0, 67, 167, GAMEMODE.Debug and 0 or 200))
+	physbox = VGUIPhysbox:Create(invleftwall)
+	physbox:AddHitbox(Points({
+		Vector2(0, 0),
+		Vector2(w * 0.05, 0),
+		Vector2(w * 0.05, h),
+		Vector2(0, h),
+	}), true)
+	physbox:SetStatic(true)
+	invleftwall.Physbox = physbox
+
+	local invrightwall = vgui.Create("DPanel", self)
+	invrightwall:SetSize(w * 0.05, h)
+	invrightwall:SetPos(w * 0.65, 0)
+	invrightwall:SetBackgroundColor(Color(0, 67, 167, GAMEMODE.Debug and 0 or 200))
+	physbox = VGUIPhysbox:Create(invrightwall)
+	physbox:AddHitbox(Points({
+		Vector2(0, 0),
+		Vector2(w * 0.05, 0),
+		Vector2(w * 0.05, h),
+		Vector2(0, h),
+	}), true)
+	physbox:SetStatic(true)
+	invrightwall.Physbox = physbox
+
 	--[[
 	local invfloor = vgui.Create("DPhysbox1", floorcontainer)
 	invfloor:SetSize(w * 0.25, h * 0.1)
@@ -154,10 +182,23 @@ function PANEL:Init()
 
 	local size = 60
 	--MakeBox(size, Vector2(w * 0.5, h * 0.5))
-	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 4, size / 4), h * 0.5), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
-	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 4, size / 4), h * 0.6), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
-	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 4, size / 4), h * 0.7), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
-	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 4, size / 4), h * 0.8), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	local num = 20
+	for i = 1, num do
+		MakeBox(size,
+		Vector2(
+			w * 0.5 + math.Random(-size * 4, size * 4),
+			h * 0.5 + math.Random(-size * 4, size * 4)
+		)
+		,Vector2(
+			math.Rand(-VGUIPHYS_TERMINAL_VELOCITY, VGUIPHYS_TERMINAL_VELOCITY),
+			-math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)
+		))
+	end
+
+	
+	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.6), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.7), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.8), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
 
 
 	--[[ Irregular shape

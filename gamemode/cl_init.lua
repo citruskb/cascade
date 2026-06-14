@@ -93,6 +93,7 @@ hook.Add("OnReloaded", "OnReloaded.LocalPlayerFound", LocalPlayerFound)
 local nextTick = 0
 local nextVGUIPhysUpdate = 0
 local VGUItick = 0.030303030303030 -- Make sure that this runs the same regardless of server tick rate
+GM.VGUIStepCount = 0
 function GM:_Think()
 	local ct = CurTime()
 
@@ -100,6 +101,7 @@ function GM:_Think()
 	local physboxes = table.Count(self.VGUIPhysboxes)
 	if nextVGUIPhysUpdate <= ct
 		and (physboxes > 0 or table.Count(self.VGUIHitboxes) > 0) then
+			self.VGUIStepCount = self.VGUIStepCount + 1
 			gamemode.Call("VGUIPhysicsStep", VGUItick, VGUIPHYS_PASSES)
 			nextVGUIPhysUpdate = ct + VGUItick
 	end
