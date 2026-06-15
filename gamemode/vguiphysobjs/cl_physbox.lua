@@ -39,16 +39,6 @@ function meta:AddRadVel(num)
 	Rawset(self, "_radvel", Rawget(self, "_radvel") + num)
 end
 
-function meta:GetDesiredTrans() return Rawget(self, "_desiredtrans") end
-function meta:SetDesiredTrans(vec2) Rawget(self, "_desiredtrans"):Set(vec2) end
-function meta:AddDesiredTrans(vec2)
-	if not Rawget(self, "_physics") then return end
-	Rawget(self, "_desiredtrans"):DoAdd(vec2)
-end
-
---function meta:IsSupported() return Rawget(self, "_supported") end
---function meta:SetSupported(bool) Rawset(self, "_supported", bool) end
-
 function meta:IsSupporting() return table.Count(Rawget(self, "_supporting")) > 0 end
 function meta:GetSupporting() return Rawget(self, "_supporting") end
 function meta:ClearSupporting() table.Empty(Rawget(self, "_supporting")) end
@@ -72,7 +62,6 @@ end
 function meta:DisablePhysics()
 	Rawset(self, "_partialpos", Vector2())
 	Rawset(self, "_vel", Vector2())
-	Rawset(self, "_desiredtrans", Vector2())
 
 	Rawset(self, "_radvel", 0)
 
@@ -91,10 +80,12 @@ function meta:SetHitboxes(tab) Rawset(self, "_hitboxes", tab) end
 function meta:GetOriginCenterOffset() return Rawget(self, "_origincenteroffset") end
 function meta:SetOriginCenterOffset(vec2) Rawset(self, "_origincenteroffset", vec2) end
 
-function VGUIPhysbox:__Create(parentPan)
-	Rawset(self, "_parent", parentPan)
-	Rawset(self, "_supported", false)
-	Rawset(self, "_supporting", {})
+function VGUIPhysbox:__Create(parent)
+	self.parent = parent
+	self.mass = 1
+	self.momentOfInertia = 1
+	self.center = parent:GetCenterPos()
+
 	Rawset(self, "_rad", 0)
 	Rawset(self, "_mass", 1)
 	Rawset(self, "_inertia", 200)
@@ -184,9 +175,8 @@ end
 
 function meta:GetPhysicsPassPointsOrigin()
 	local pointsOrigin = self:GetPointsOrigin()
-	local desiredTranslation = self:GetDesiredTrans()
 	local partial = self:GetPartialPos()
-	return pointsOrigin + desiredTranslation + partial
+	return pointsOrigin + partial
 end
 
 function meta:GetPointsOrigin()
@@ -204,9 +194,8 @@ end
 
 function meta:GetPhysicsPassPointsCenter()
 	local pointsCenter = self:GetPointsCenter()
-	local desiredTranslation = self:GetDesiredTrans()
 	local partial = self:GetPartialPos()
-	return pointsCenter + desiredTranslation + partial
+	return pointsCenter + partial
 end
 
 function meta:GetPointsCenter()
@@ -299,39 +288,3 @@ function meta:MarkHitboxesDirty()
 		hb:SetCacheDirty(true)
 	end
 end
-
---[[
-function meta:EvaluateSupport()
-	if not Rawget(self, "_supported") then return end
-
-	local tab = {}
-	local physbox = self
-	local supportedBy = Rawget(self, "_supportedby")
-	local staticSupport = Rawget(supportedBy, "_static")
-	table.Insert(tab, supportedBy)
-
-	-- We don't know how many supporting elements we have.
-	while supportedBy and not staticSupport do
-		physbox = supportedBy
-		supportedBy = Rawget(physbox, "_supportedby")
-		staticSupport = Rawget(supportedBy, "_static")
-		table.Insert(tab, supportedBy)
-	end
-
-	if staticSupport then return end
-
-	-- Uh oh. Not supported.
-	self:SetSupported(false)
-
-	for i = 1, #tab do
-		local phys = tab[i]
-		if Rawget(phys, "_static") then break end
-		tab[i]:SetSupported(false)
-	end
-end
-
-function meta:SetSupported(bool, physbox)
-	Rawset(self, "_supported", bool)
-	Rawset(self, "_supportedby", physbox)
-end
-]]

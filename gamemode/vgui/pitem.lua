@@ -25,12 +25,6 @@ function PANEL:SetSize(w, h)
 	if IsValid(self.ModPan) then self.ModPan:SetSize(w, h) end
 end
 
-function PANEL:GetCenterPos()
-	local x, y = self:GetPos()
-	local w, h = self:GetSize()
-	return Vector2(x + w * 0.5, y + h * 0.5)
-end
-
 function PANEL:SetupModel(modelPath)
 	local modpan = vgui.Create("DItemModel", self)
 	local w, h = self:GetSize()

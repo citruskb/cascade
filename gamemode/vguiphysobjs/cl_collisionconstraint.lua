@@ -1,13 +1,13 @@
 --See https://github.com/majikayogames/physics-tutorial/blob/main/simple_phys.js
 
-if not VGUICol then
+if not VGUICollisionConstraint then
 	GM.VGUICollisions = {}
-	VGUICol = Class:Create(nil, "VGUICol")
+	VGUICollisionConstraint = Class:Create(nil, "VGUICollisionConstraint")
 end
 
-local meta = FindMetaTable("VGUICol")
+local meta = FindMetaTable("VGUICollisionConstraint")
 
-function VGUICol:__Create(objA, objB, screenPoint, normal, penetration, fID)
+function VGUICollisionConstraint:__Create(objA, objB, screenPoint, normal, penetration, fID)
 	self.bodyA = objA
 	self.bodyB = objB
 	self.fID = fID -- Contact persistence -> see cl_warmstarting.lua
@@ -36,9 +36,7 @@ function VGUICol:__Create(objA, objB, screenPoint, normal, penetration, fID)
 	return self
 end
 
-function VGUICol:ToString()
-	return ""
-end
+function VGUICollisionConstraint:ToString() return "[VGUICol] - " .. self.fID end
 
 function meta:SetCollisionData(screenPoint, normal, penetration)
 	self.screenPoint = screenPoint
