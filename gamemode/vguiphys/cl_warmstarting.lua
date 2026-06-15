@@ -11,13 +11,13 @@ end
 -- The point of this is to give each potential contact point from a collision a unique ID that way its results can be tracked frame-to-frame.
 
 function GM:GetFeatureID(refHitbox, incHitbox, refIDX, incIDX, idx)
-	local refPhysbox = Rawget(refHitbox, "_physbox")
-	local incPhysbox = Rawget(incHitbox, "_physbox")
+	local refPhysbox = refHitbox.physbox
+	local incPhysbox = incHitbox.physbox
 
-	local refPhysID = Rawget(refPhysbox, "_id")
-	local incPhysID = Rawget(incPhysbox, "_id")
-	local refHitID = Rawget(refHitbox, "_id")
-	local incHitID = Rawget(incHitbox, "_id")
+	local refPhysID = refPhysbox.id
+	local incPhysID = incPhysbox.id
+	local refHitID = refHitbox.id
+	local incHitID = incHirbox.id
 
 	local prefix =
 		bit.Bor(
@@ -27,8 +27,8 @@ function GM:GetFeatureID(refHitbox, incHitbox, refIDX, incIDX, idx)
 			bit.Lshift(bit.Band(incHitID, 0xF), 8)
 		)
 
-	local refNumPoints = Rawget(refHitbox, "_points"):Count()
-	local incNumPoints = Rawget(incHitbox, "_points"):Count()
+	local refNumPoints = refHitbox.pointsObj:Count()
+	local incNumPoints = incHitbox.pointsObj:Count()
 
 	local i11 = refIDX							-- ref edge start vertex (a1)
 	local i12 = (i11 + 1) % refNumPoints		-- ref edge end vertex (a2)

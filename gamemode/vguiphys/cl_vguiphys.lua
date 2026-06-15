@@ -84,8 +84,8 @@ function GM:VGUIBroadPhase()
 
 			if hbA == hbB then continue end
 
-			local pA = hbA:GetPhysicsPassScreenPoints()
-			local pB = hbB:GetPhysicsPassScreenPoints()
+			local pA = hbA:GetHBScreenPointsObj()
+			local pB = hbB:GetHBScreenPointsObj()
 			if not pA:IntersectAABB(pB) then continue end
 
 			-- Check if we've already marked this pairing for collision evaluation.

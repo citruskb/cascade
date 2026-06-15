@@ -121,11 +121,11 @@ function meta:GetAllHitboxPoints()
 	local allpoints
 	for _, hitbox in pairs(self.hitboxes) do
 		if not allpoints then
-			allpoints = hitbox:GetPoints()
+			allpoints = hitbox.pointsObj
 			continue
 		end
 
-		allpoints = allpoints + hitbox:GetPoints()
+		allpoints = allpoints + hitbox.pointsObj
 	end
 
 	return allpoints
@@ -174,7 +174,6 @@ end
 -- TODO may need to recode a bit
 function meta:Step(tim, iterations)
 	if not self.isPhysicsEnabled then return end
-	self:MarkHitboxesDirty()
 
 	tim = tim / iterations
 
@@ -192,8 +191,4 @@ function meta:Step(tim, iterations)
 		self:AddVel(VGUIPHYS_GRAVITY_VEC2 * tim)
 	end
 	]]
-end
-
-function meta:MarkHitboxesDirty()
-	for _, hb in pairs(self.hitboxes) do hb:SetCacheDirty(true) end
 end

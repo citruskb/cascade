@@ -122,7 +122,7 @@ local function DrawPhysboxDebug(physbox)
 end
 
 local function DrawHitboxDebug(hitbox)
-	local screenpoints = hitbox:GetScreenPoints()
+	local screenpoints = hitbox:GetHBScreenPointsObj()
 
 	local poly = screenpoints:ToTable()
 	surface.SetDrawColor(hitboxCol)

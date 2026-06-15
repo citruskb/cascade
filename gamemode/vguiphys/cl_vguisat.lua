@@ -76,10 +76,10 @@ function GM:VGUISAT(hbA, hbB)
 
 	-- A hitbox part of the same object can't collide with itself either.
 	-- This shouldn't ever happen unless laziness with making hitboxes. 
-	local physboxA, physboxB = Rawget(hbA, "_physbox"), Rawget(hbB, "_physbox")
+	local physboxA, physboxB = hbA.physbox, hbB.physbox
 	if physboxA == physboxB then return end
 
-	local pointsA, pointsB = hbA:GetPhysicsPassScreenPoints(), hbB:GetPhysicsPassScreenPoints()
+	local pointsA, pointsB = hbA:GetHBScreenPointsObj(), hbB:GetHBScreenPointsObj()
 	local pointsTabA, pointsTabB = pointsA:GetPoints(), pointsB:GetPoints()
 
 	local smallestOverlap, mtv, relativeTo
