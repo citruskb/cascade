@@ -8,113 +8,73 @@ end
 
 local meta = FindMetaTable("VGUIPhysbox")
 
-function meta:GetID() return Rawget(self, "_id") end
-function meta:SetID(val) Rawset(self, "_id", val) end
-
-function meta:GetHitboxCount() return Rawget(self, "_hitboxcount") end
-function meta:SetHitboxCount(val) Rawset(self, "_hitboxcount", val) end
-
-function meta:GetParent() return Rawget(self, "_parent") end
-function meta:SetParent(pan) Rawset(self, "_parent", pan) end
-
-function meta:GetPartialPos() return Rawget(self, "_partialpos") end
-function meta:SetPartialPos(vec2) Rawget(self, "_partialpos"):Set(vec2) end
-function meta:AddPartialPos(vec2) Rawget(self, "_partialpos"):DoAdd(vec2) end
-
-function meta:GetVel() return Rawget(self, "_vel") end
-function meta:SetVel(vec2) Rawget(self, "_vel"):Set(vec2) end
-function meta:AddVel(vec2)
-	if not Rawget(self, "_physics") then return end
-	Rawget(self, "_vel"):DoAdd(vec2)
-end
-
-function meta:GetRad() return Rawget(self, "_rad") end
-function meta:SetRad(num) Rawset(self, "_rad", num) end
-function meta:AddRad(num) Rawset(self, "_rad", Rawget(self, "_rad") + num) end
-
-function meta:GetRadVel() return Rawget(self, "_radvel") end
-function meta:SetRadVel(num) Rawset(self, "_radvel", num) end
-function meta:AddRadVel(num)
-	if not Rawget(self, "_physics") then return end
-	Rawset(self, "_radvel", Rawget(self, "_radvel") + num)
-end
-
-function meta:IsSupporting() return table.Count(Rawget(self, "_supporting")) > 0 end
-function meta:GetSupporting() return Rawget(self, "_supporting") end
-function meta:ClearSupporting() table.Empty(Rawget(self, "_supporting")) end
-function meta:SetSupporting(physbox) Rawget(self, "_supporting")[physbox] = true end
-function meta:AmSupporting(physbox) return Rawget(self, "_supporting")[physbox] end
-
-function meta:IsStable()
-	if Rawget(self, "_static") then return true end
-	return Rawget(self, "_stable")
-end
-function meta:GetStable() return Rawget(self, "_stable") end
-function meta:SetStable(bool) Rawset(self, "_stable", bool) end
-
-function meta:IsStatic() return Rawget(self, "_static") end
-function meta:SetStatic(bool) Rawset(self, "_static", bool) end
-
-function meta:IsPhysicsEnabled() return Rawget(self, "_physics") end
-function meta:EnablePhysics()
-	Rawset(self, "_physics", true)
-end
-function meta:DisablePhysics()
-	Rawset(self, "_partialpos", Vector2())
-	Rawset(self, "_vel", Vector2())
-
-	Rawset(self, "_radvel", 0)
-
-	Rawset(self, "_physics", false)
-	Rawset(self, "_static", false)
-	Rawset(self, "_stable", false)
-end
-
-function meta:GetMass() return Rawget(self, "_mass") end
-
-function meta:GetInertia() return Rawget(self, "_inertia") end
-
 function meta:GetHitboxes() return Rawget(self, "_hitboxes") end
 function meta:SetHitboxes(tab) Rawset(self, "_hitboxes", tab) end
 
 function meta:GetOriginCenterOffset() return Rawget(self, "_origincenteroffset") end
 function meta:SetOriginCenterOffset(vec2) Rawset(self, "_origincenteroffset", vec2) end
 
+--[[ new ]]
+function meta:GetCenter() return self.parent.scpos end
+
+function meta:EnablePhysics() self.isPhysicsEnabled = true end
+function meta:DisablePhysics()
+	-- We update our position by updating our parent's position.
+	-- We accumulate changes via. deltaPosition then apply the net change when needed.
+	-- Done this way mainly because absolute VGUI Panel positions are always whole numbers, so fractional changes are lost.
+	self.velocity = Vector2()
+	self.angularVelocity = 0
+
+	self.isPhysicsEnabled = false
+end
+
+function meta:AddVelocity(vec2)
+	if not self.isPhysicsEnabled then return end
+	self.velocity:DoAdd(vec2)
+end
+
+function meta:AddAngularVelocity(num)
+	if not self.isPhysicsEnabled then return end
+	self.angularVelocity = self.angularVelocity + num
+end
+
+function meta:AddDeltaPosition(vec2)
+	if not self.isPhysicsEnabled then return end
+	self.deltaPosition:DoAdd(vec2)
+end
+
+
 function VGUIPhysbox:__Create(parent)
+	-- Makes sure we have a unique ID for contact persistence.
+	VGUIPhysboxCount = VGUIPhysboxCount + 1
+	self.id = VGUIPhysboxCount
+
 	self.parent = parent
+
+	-- Init a bunch of dummy values.
+	-- To be set up a better way later?
+	self.hitboxes = {}
+	self.isStatic = false
 	self.mass = 1
 	self.momentOfInertia = 1
-	self.center = parent:GetCenterPos()
+	self.friction = 0.6
+	self.restitution = 0.05
 
-	Rawset(self, "_rad", 0)
-	Rawset(self, "_mass", 1)
-	Rawset(self, "_inertia", 200)
-	Rawset(self, "_hitboxes", {})
-	Rawset(self, "_hitboxcount", 0)
-	Rawset(self, "_origincenteroffset", Vector2())
-	Rawset(self, "_center", Vector2())
+	-- Offsets our hitbox point origin to center ourselves inside the item panel.
+	self.originCenterOffset = Vector2()
 
+	-- Initializes physics values.
+	self.deltaPosition = Vector2()
+	self.rotation = 0
 	self:DisablePhysics()
 
 	GAMEMODE.VGUIPhysboxes[self] = true
-	self.IsVGUIPhysbox = true
-
-	VGUIPhysboxCount = VGUIPhysboxCount + 1
-	Rawset(self, "_id", VGUIPhysboxCount)
+	self.isVGUIPhysbox = true
 
 	return self
 end
 
-function VGUIPhysbox:ToString()
-	local parent = Rawget(self, "_parent")
-	local id = parent.ID
-
-	if id then
-		return "[VGUIPhysbox] #" .. id
-	else
-		return "[VGUIPhysbox] associated with " .. ToString(parent)
-	end
-end
+function VGUIPhysbox:ToString() return "[VGUIPhysbox] #" .. self.id end
 
 function VGUIPhysbox:Eq(other)
 	if not IsTable(other) then return false end
