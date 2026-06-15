@@ -8,15 +8,6 @@ end
 
 local meta = FindMetaTable("VGUIPhysbox")
 
-function meta:GetHitboxes() return Rawget(self, "_hitboxes") end
-function meta:SetHitboxes(tab) Rawset(self, "_hitboxes", tab) end
-
-function meta:GetOriginCenterOffset() return Rawget(self, "_origincenteroffset") end
-function meta:SetOriginCenterOffset(vec2) Rawset(self, "_origincenteroffset", vec2) end
-
---[[ new ]]
-function meta:GetCenter() return self.parent.scpos end
-
 function meta:EnablePhysics() self.isPhysicsEnabled = true end
 function meta:DisablePhysics()
 	-- We update our position by updating our parent's position.
@@ -43,7 +34,6 @@ function meta:AddDeltaPosition(vec2)
 	self.deltaPosition:DoAdd(vec2)
 end
 
-
 function VGUIPhysbox:__Create(parent)
 	-- Makes sure we have a unique ID for contact persistence.
 	VGUIPhysboxCount = VGUIPhysboxCount + 1
@@ -55,6 +45,7 @@ function VGUIPhysbox:__Create(parent)
 	-- To be set up a better way later?
 	self.hitboxes = {}
 	self.isStatic = false
+	self.density = 1
 	self.mass = 1
 	self.momentOfInertia = 1
 	self.friction = 0.6
@@ -79,29 +70,20 @@ function VGUIPhysbox:ToString() return "[VGUIPhysbox] #" .. self.id end
 function VGUIPhysbox:Eq(other)
 	if not IsTable(other) then return false end
 	if not other.VGUIPhysbox then return false end
-
-	local parent = Rawget(self, "_parent")
-	local otherParent = Rawget(other, "_parent")
-
-	return parent == otherParent
+	return self.parent == other.parent
 end
 
 function meta:AddHitbox(points, noResize)
-	local hitboxCount = Rawget(self, "_hitboxcount")
-	local id = hitboxCount + 1
-	Rawset(self, "_hitboxcount", id)
+	local id = #self.hitboxes + 1
+	self.hitboxes[id] = VGUIHitbox:Create(self, points, id)
 
-	local hitbox = VGUIHitbox:Create(self, points, id)
-	local hitboxes = Rawget(self, "_hitboxes")
-	table.Insert(hitboxes, hitbox)
-
-	GAMEMODE.DebugObjects[Rawget(self, "_parent")] = true
+	local parent = self.parent
+	GAMEMODE.DebugObjects[parent] = true
 
 	if noResize then return end
 
 	-- Adjust the parent size to accomodate rotation of our hitboxes around their center point.
 	-- But only if our parent is an item.
-	local parent = Rawget(self, "_parent")
 	if not parent.IsItem then return end
 
 	-- First we find the furthest point from all our hitbox centers.
@@ -112,69 +94,32 @@ function meta:AddHitbox(points, noResize)
 	local pointsTab = allpoints:GetPoints()
 	for i = 1, #pointsTab do
 		local point = pointsTab[i]
-		local distsq = center:DistanceSqr(point)
+		local distsq = center:DistanceSqr(point) -- DistanceSqr is faster.
 
 		if fDistsq and distsq < fDistsq then continue end
 		fDistsq = distsq
 		fPoint = point
 	end
 
-	-- Now that we know the furthest dist, get the distance.
+	-- Now that we know the furthest dist, get the actual distance.
 	local fDist = center:Distance(fPoint)
 
 	-- Next, our size is twice this plus a small buffer
+	-- Setting our parent size also sets our "size"
 	local siz = (fDist * 2) + 2
 	parent:SetSize(siz, siz)
+
+	self:RecalculateMassAndInertia()
 
 	-- The center of our hitbox points must align with the center of our item.
 	-- If we make the assumption that the top left of all our points grids is 0,0 ...
 	-- our grid origin is the center minus half the max x and half the max y.
-	self:SetOriginCenterOffset(Vector2(-allpoints:GetMaxX() * 0.5, -allpoints:GetMaxY() * 0.5))
-	--self:RecalculateInertia()
-end
-
-function meta:GetPhysicsPassPointsOrigin()
-	local pointsOrigin = self:GetPointsOrigin()
-	local partial = self:GetPartialPos()
-	return pointsOrigin + partial
-end
-
-function meta:GetPointsOrigin()
-	-- If our parent isn't an item just assume our hitboxes originate from the item's top left corner.
-	local parent = Rawget(self, "_parent")
-	if not parent.GetCenterPos then
-		local origin = Vector2(parent:GetVPos():Unpack())
-		return origin
-	end
-
-	local centerOffset = Rawget(self, "_origincenteroffset")
-	local pcenter = parent.GetCenterPos and parent:GetCenterPos()
-	return pcenter + centerOffset
-end
-
-function meta:GetPhysicsPassPointsCenter()
-	local pointsCenter = self:GetPointsCenter()
-	local partial = self:GetPartialPos()
-	return pointsCenter + partial
-end
-
-function meta:GetPointsCenter()
-	-- If our parent isn't an item just assume our center is the calculated center.
-	local parent = Rawget(self, "_parent")
-	if not parent.GetCenterPos then
-		local w, h = parent:GetSize()
-		local x, y = parent:GetVPos():Unpack()
-		local center = Vector2(x + w / 2, y + h / 2)
-		return center
-	end
-
-	return parent:GetCenterPos()
+	self.originCenterOffset = Vector2(-allpoints:GetMaxX() * 0.5, -allpoints:GetMaxY() * 0.5)
 end
 
 function meta:GetAllHitboxPoints()
-	local hitboxes = Rawget(self, "_hitboxes")
 	local allpoints
-	for k, hitbox in pairs(hitboxes) do
+	for _, hitbox in pairs(self.hitboxes) do
 		if not allpoints then
 			allpoints = hitbox:GetPoints()
 			continue
@@ -186,27 +131,49 @@ function meta:GetAllHitboxPoints()
 	return allpoints
 end
 
--- TODO is this worth caching?
-function meta:GetInvMass()
-	if Rawget(self, "_static") then return 0 end
-	return 1 / Rawget(self, "_mass")
-end
-function meta:GetInvInertia()
-	if Rawget(self, "_static") then return 0 end
-	return 1 / Rawget(self, "_inertia")
+-- TODO better estimates.
+-- Possibly calculate these for all hitboxes then add together?
+function meta:RecalculateMassAndInertia()
+	local w, h = self.parent:GetSize()
+	self.mass = self.isStatic and math.HUGE or self.density * w * h
+	self.momentOfInertia = self.isStatic and math.HUGE or (self.mass * (w * w + h * h)) / 12
 end
 
+-- The center of our physbox, relative to screenspace.
+function meta:GetCenterScreenPoint() return self.parent.scpos end
+
+-- (0,0) of the grid the hitbox's points draw on.
+function meta:GetScreenHitboxPointsOrigin() return self.parent.scpos + self.originCenterOffset end
+
+-- For now, we need to handle what happens if our parent panel gets removed.
 function meta:Remove()
 	GAMEMODE.VGUIPhysboxes[self] = nil
 
-	local hitboxes = Rawget(self, "_hitboxes")
-	for k, hitbox in pairs(hitboxes) do hitbox:Remove() end
+	for _, hitbox in pairs(self.hitboxes) do hitbox:Remove() end
 
 	table.Empty(self)
 end
 
+function meta:UpdateParentVars()
+	-- When the partial movements get high enough, move our parent panel.
+	-- Done this way because we can't move panels fractional pixels.
+	local dx, dy = self.deltaPosition:Unpack()
+	local roundedDelta = Vector2(math.Round(dx, 0), math.Round(dy, 0))
+	if roundedDelta:IsZero() then return end
+
+	local parent = self.parent
+	local x, y = parent:GetPos()
+	dx, dy = roundedDelta:Unpack()
+	parent:SetPos(x + dx, y + dy)
+
+	-- The movement has been applied.
+	-- Therefore, subtract our movement from our delta position.
+	self.deltaPosition:DoSub(roundedDelta)
+end
+
+-- TODO may need to recode a bit
 function meta:Step(tim, iterations)
-	if not Rawget(self, "_physics") then return end
+	if not self.isPhysicsEnabled then return end
 	self:MarkHitboxesDirty()
 
 	tim = tim / iterations
@@ -219,32 +186,14 @@ function meta:Step(tim, iterations)
 
 	-- Gravity.
 	-- We apply this after moving to allow our solver a chance to respond to it.
+	--[[
 	local _, vy = Rawget(self, "_vel"):Unpack()
 	if vy < VGUIPHYS_TERMINAL_VELOCITY then
 		self:AddVel(VGUIPHYS_GRAVITY_VEC2 * tim)
 	end
-end
-
-function meta:UpdateParentVars()
-	-- When the partial movements get high enough, move our parent panel.
-	-- Done this way because we can't move panels fractional pixels.
-	local partial = Rawget(self, "_partialpos")
-	local mx, my = partial:Unpack()
-	local delta = Vector2(math.Round(mx, 0), math.Round(my, 0))
-	if not delta:IsZero() then
-		local parent = Rawget(self, "_parent")
-		local ivpos = parent:GetVPos()
-		ivpos:DoAdd(delta)
-		parent:SetPos(ivpos:Unpack())
-
-		-- The movement has been applied.
-		-- Therefore, subtract our movement from our partial pos.
-		partial:DoSub(delta)
-	end
+	]]
 end
 
 function meta:MarkHitboxesDirty()
-	for _, hb in pairs(self:GetHitboxes()) do
-		hb:SetCacheDirty(true)
-	end
+	for _, hb in pairs(self.hitboxes) do hb:SetCacheDirty(true) end
 end

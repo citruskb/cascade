@@ -183,16 +183,14 @@ end
 
 
 local function DrawAux(pan, physbox, hitbox)
-	if not pan.GetCenterPos then return end
-
 	-- Box at the center
 	surface.SetDrawColor(COLOR_BLACK)
-	local xp, yp = pan:GetCenterPos():Unpack()
+	local xp, yp = pan.scpos:Unpack()
 	local s = 8
 	surface.DrawRect(xp - s * 0.5, yp - s * 0.5, s, s)
 
 	-- Box at the origin point
-	xp, yp = physbox:GetPointsOrigin():Unpack()
+	xp, yp = physbox:GetScreenHitboxPointsOrigin():Unpack()
 	s = 6
 	surface.DrawRect(xp - s * 0.5, yp - s * 0.5, s, s)
 end
@@ -212,7 +210,7 @@ local function DrawDebug()
 		local physbox = pan.Physbox
 		if detailed then DrawPhysboxDebug(physbox) end
 
-		for _, hitbox in pairs(physbox:GetHitboxes()) do
+		for _, hitbox in pairs(physbox.hitboxes) do
 			DrawHitboxDebug(hitbox)
 		end
 

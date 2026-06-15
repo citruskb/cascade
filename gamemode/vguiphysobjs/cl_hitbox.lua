@@ -66,7 +66,7 @@ function VGUIHitbox:Eq(other)
 	return Rawget(self, "_id") == Rawget(other, "_id")
 end
 
-function meta:GetScreenOriginPoint() return Rawget(self, "_physbox"):GetPointsOrigin() end
+function meta:GetScreenOriginPoint() return Rawget(self, "_physbox"):GetScreenHitboxPointsOrigin() end
 
 function meta:TransformPointsAroundOrigin(inputPoints, origin, pivot)
 	local ret = inputPoints
@@ -111,8 +111,8 @@ end
 function meta:GetScreenPoints()
 	local screenpoints = Rawget(self, "_screenpoints")
 	local physbox = Rawget(self, "_physbox")
-	local origin = physbox:GetPointsOrigin()
-	local pivot = physbox:GetPointsCenter()
+	local origin = physbox:GetScreenHitboxPointsOrigin() -- (0,0) relative to our base hitbox points.
+	local pivot = physbox:GetCenterScreenPoint() -- Center of the physbox.
 
 	return self:TransformPointsAroundOrigin(screenpoints, origin, pivot)
 end
