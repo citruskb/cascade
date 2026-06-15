@@ -3,8 +3,20 @@ if not vguiPhysLoaded then
 	GM.VGUIPhysboxes = {}
 	GM.VGUIHitboxes = {}
 	GM.VGUIPotentialCollisions = {}
+	GM.VGUIPhysLastStepTime = 0
+	GM.VGUIPhysAccuStepTime = 0
 	vguiPhysLoaded = true
 end
+
+--	[[ New! ]]
+
+-- Physics timestep length. 1 / x = called x times per second.
+VGUIPHYS_DT = 1 / 240
+VGUIPHYS_MAXSTEPS = 10
+VGUIPHYS_CONSTRAINT_ITERATIONS = 10
+
+--	[[ End new ]]
+
 
 -- How many loops do we make attempting to resolve collisions?
 VGUIPHYS_PASSES = 8
@@ -41,13 +53,60 @@ VGUIPHYS_SLEEP_VEL = 2500 -- 50^2
 
 local SPIN = 0.02
 
+
+
+--	[[ NEW ]]
+function GM:VGUIPhysicsStep2(timeSinceLastCalled)
+	local ct = CurTime()
+	local dt = VGUIPHYS_DT
+	self.VGUIPhysAccuStepTime = self.VGUIPhysAccuStepTime + ct - self.VGUIPhysLastStepTime
+
+	-- Clamp number of steps to prevent a runaway lag situation.
+	self.VGUIPhysAccuStepTime = math.Min(self.VGUIPhysAccuStepTime, dt * VGUIPHYS_MAXSTEPS)
+
+	while self.VGUIPhysAccuStepTime > dt do
+		gamemode.Call("VGUIPhysicsPass", dt)
+		self.VGUIPhysAccuStepTime = self.VGUIPhysAccuStepTime - dt
+	end
+
+	self.VGUIPhysLastStepTime = CurTime()
+end
+
+function GM:VGUIPhysicsPass(dt)
+	gamemode.Call("VGUIPhysApplyGravity", dt)		-- Gravity.
+	gamemode.Call("VGUIPhysDetectCollisions")		-- Detect collisions. Build & update collision constraints.
+	gamemode.Call("VGUIPhysSolveConstraints", dt)	-- Iteratively solve collision constraints.
+	gamemode.Call("VGUIPhysStepPhysboxes", dt)		-- Update our physbox pos and rot based on velocities.
+end
+
+function GM:VGUIPhysApplyGravity(dt)
+	for _, physbox in pairs(self.VGUIPhysboxes) do
+		if physbox.isStatic then continue end
+
+		local _, vy = physbox.velocity:Unpack()
+		if vy >= VGUIPHYS_TERMINAL_VELOCITY then continue end
+
+		self:AddVel(VGUIPHYS_GRAVITY_VEC2 * dt)
+	end
+end
+
+function GM:VGUIPhysStepPhysboxes(dt)
+	for _, physbox in pairs(self.VGUIPhysboxes) do
+		if physbox.isStatic then continue end
+		physbox:Step(dt)
+	end
+end
+
+--	[[ end new ]]
+
+--[[
 function GM:VGUIUpdateParentVars()
 	for physbox, _ in pairs(self.VGUIPhysboxes) do
 		physbox:UpdateParentVars()
 	end
 end
 
-function GM:VGUIPhysicsStep(tim, iterations)
+function GM:VGUIPhysicsStep1(tim, iterations)
 	for i = 1, iterations do
 		self.VGUIPotentialCollisions = {}
 		gamemode.Call("VGUIStepPhysboxes", tim, iterations)		-- Step through time and apply physics.
@@ -125,4 +184,4 @@ function GM:VGUINarrowPhase()
 		--benchmark.End("ResolveCollision")
 	end
 end
-
+]]

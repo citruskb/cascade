@@ -1,8 +1,4 @@
 local cps = {}
---local refLines = {}
---local incLines = {}
---mtvsA = {}
---mtvsB = {}
 
 DEBUG_MODE_MINIMAL = 1
 DEBUG_MODE_DETAILED = 2
@@ -25,20 +21,7 @@ local physboxTxtCol = Color(
 	math.Min(physboxCol.a + 50, 255))
 
 local hitboxCol = Color(255, 10, 10, 200)
-local hitboxTxtCol = Color(
-	math.Max(physboxCol.r - 50, 0),
-	math.Max(physboxCol.g - 50, 0),
-	math.Max(physboxCol.b - 50, 0),
-	math.Min(physboxCol.a + 50, 255))
 
-local function DrawCross(x, y, len, col)
-	if col then surface.SetDrawColor(col) end
-
-	local x1, y1 = x - 0.5 * len, y - 0.5 * len
-	local x2, y2 = x + 0.5 * len, y + 0.5 * len
-	surface.DrawLine(x1, y1, x2, y2)
-	surface.DrawLine(x2, y1, x1, y2)
-end
 local function DrawOutlinedBox(x, y, w, h, thickness)
 	for i = 1, thickness do
 		local tx = x + (i - 1)
@@ -89,7 +72,7 @@ local function DrawItemDebug(pan)
 end
 
 local function DrawPhysboxDebug(physbox)
-	local parent = physbox:GetParent()
+	local parent = physbox.parent
 	local x, y = parent:GetPos()
 	local w, h = parent:GetSize()
 
@@ -108,14 +91,14 @@ local function DrawPhysboxDebug(physbox)
 	surface.SetTextPos(txtx, y)
 	surface.DrawText(txt1)
 
-	if not physbox:IsPhysicsEnabled() then
+	if not physbox.isPhysicsEnabled then
 		local txt2 = "Sleeping"
 		surface.SetTextPos(txtx, y + th)
 		surface.DrawText(txt2)
 		return
 	end
 
-	local vx, vy = physbox:GetVel():Unpack()
+	local vx, vy = physbox.velocity:Unpack()
 	local txt2 = "Vel: (" .. vx .. ", " .. vy .. ")"
 	surface.SetTextPos(txtx, y + th)
 	surface.DrawText(txt2)
@@ -139,48 +122,6 @@ local function DrawCollisionPoint(cpoint)
 	surface.DrawRect(cx - s * 0.5, cy - s * 0.5, s, s)
 end
 
---[[
-local function DrawReferenceLines(points)
-	local pointsTab = points:GetPoints()
-	local x1, y1 = pointsTab[1]:Unpack()
-	local x2, y2 = pointsTab[2]:Unpack()
-
-	surface.SetDrawColor(COLOR_PURPLE)
-	draw.NoTexture()
-	surface.DrawLine(x1, y1, x2, y2)
-end
-
-local function DrawIncidentLines(points)
-	local pointsTab = points:GetPoints()
-	local x1, y1 = pointsTab[1]:Unpack()
-	local x2, y2 = pointsTab[2]:Unpack()
-
-	surface.SetDrawColor(COLOR_YELLOW)
-	draw.NoTexture()
-	surface.DrawLine(x1, y1, x2, y2)
-end
-]]
-
---[[
-local function DrawNormal(data, col)
-	local p1, p2 = data.p1, data.p2
-	local normal = data.normal
-
-	local between = p2 - p1
-	local dir = between:GetNormalized()
-
-	local startP =  p1 + dir * p1:Distance(p2) * 0.5
-	local endP = startP + normal * 16
-
-	local x1, y1 = startP:Unpack()
-	local x2, y2 = endP:Unpack()
-
-	surface.SetDrawColor(col or COLOR_RED)
-	draw.NoTexture()
-	surface.DrawLine(x1, y1, x2, y2)
-end
-]]
-
 
 local function DrawAux(pan, physbox, hitbox)
 	-- Box at the center
@@ -189,7 +130,7 @@ local function DrawAux(pan, physbox, hitbox)
 	local s = 8
 	surface.DrawRect(xp - s * 0.5, yp - s * 0.5, s, s)
 
-	-- Box at the origin point
+	-- Box at the hitbox array origin point
 	xp, yp = physbox:GetScreenHitboxPointsOrigin():Unpack()
 	s = 6
 	surface.DrawRect(xp - s * 0.5, yp - s * 0.5, s, s)
@@ -234,22 +175,6 @@ hook.Add("ResolveCollision", "ResolveCollision.Debug", function(data)
 	table.Add(cps, contactPoints)
 end)
 
-
---[[
-hook.Add("VGUIGetContactPoints", "VGUIGetContactPoints.debug", function(referenceLine, incidentLine, mtv)
-	if not GAMEMODE.Debug then return end
-	if GAMEMODE.VGUIPhysPassCount ~= VGUIPHYS_PASSES - 1 then return end
-
-	table.Insert(refLines, referenceLine)
-	table.Insert(incLines, incidentLine)
-	--table.Insert(mtvs, mtv)
-end)
-]]
-
 hook.Add("VGUIStepPhysboxes", "VGUIPhysicsStep.debug", function()
 	cps = {}
-	--mtvsA = {}
-	--mtvsB = {}
-	--refLines = {}
-	--incLines = {}
 end)

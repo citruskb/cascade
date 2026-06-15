@@ -172,23 +172,14 @@ function meta:UpdateParentVars()
 end
 
 -- TODO may need to recode a bit
-function meta:Step(tim, iterations)
+function meta:Step(dt)
 	if not self.isPhysicsEnabled then return end
-
-	tim = tim / iterations
 
 	local vel = Rawget(self, "_vel")
 
 	-- Move & rotate
-	self:AddPartialPos(vel * tim)
-	self:AddRad(Rawget(self, "_radvel") * tim)
+	self:AddPartialPos(vel * dt)
+	self:AddRad(Rawget(self, "_radvel") * dt)
 
-	-- Gravity.
-	-- We apply this after moving to allow our solver a chance to respond to it.
-	--[[
-	local _, vy = Rawget(self, "_vel"):Unpack()
-	if vy < VGUIPHYS_TERMINAL_VELOCITY then
-		self:AddVel(VGUIPHYS_GRAVITY_VEC2 * tim)
-	end
-	]]
+	self:UpdateParentVars()
 end

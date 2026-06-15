@@ -3,7 +3,6 @@ local math_Cos = math.Cos
 local math_Sin = math.Sin
 local math_IsNearlyEqual = math.IsNearlyEqual
 
-
 if not VGUIHitbox then
 	GM.VGUIHitboxes = {}
 	VGUIHitbox = Class:Create(nil, "VGUIHitbox")
