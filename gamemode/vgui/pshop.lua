@@ -182,7 +182,7 @@ function PANEL:Init()
 
 	local size = 60
 	--MakeBox(size, Vector2(w * 0.5, h * 0.5))
-	local num = 20
+	local num = 12
 	for i = 1, num do
 		MakeBox(size,
 		Vector2(

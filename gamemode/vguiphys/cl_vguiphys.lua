@@ -50,17 +50,9 @@ end
 function GM:VGUIPhysicsStep(tim, iterations)
 	for i = 1, iterations do
 		self.VGUIPotentialCollisions = {}
-		--benchmark.Start("StepPhysboxes")
 		gamemode.Call("VGUIStepPhysboxes", tim, iterations)		-- Step through time and apply physics.
-		--benchmark.End("StepPhysboxes")
-
-		--benchmark.Start("BroadPhase")
 		gamemode.Call("VGUIBroadPhase")							-- Use simple AABB to find potential collisions.
-		--benchmark.End("BroadPhase")
-
-		--benchmark.Start("VGUINarrowPhase")
 		gamemode.Call("VGUINarrowPhase")						-- Refine collisions with SAT, and resolve said collisions.
-		--benchmark.End("VGUINarrowPhase")
 	end
 end
 
