@@ -107,6 +107,11 @@ function meta:GetConnectingNormal(other)
 	return normal
 end
 
+-- Rotates 90 degrees clockwise and returns that as a new vector2
+function meta:GetRotate90CW()
+	return Vector2(-Rawget(self, "y"), Rawget(self, "x"))
+end
+
 -- Returns if a vector is equal within a given tolerance
 function meta:IsEqualTol(compare, tol)
 	local x, y = Rawget(self, "x"), Rawget(self, "y")
