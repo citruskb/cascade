@@ -71,14 +71,6 @@ local function OrientMTV(pointsA, pointsB, mtv)
 end
 
 function GM:VGUISAT(hbA, hbB)
-	-- A hitbox can't collide with itself.
-	if hbA == hbB then return end
-
-	-- A hitbox part of the same object can't collide with itself either.
-	-- This shouldn't ever happen unless laziness with making hitboxes. 
-	local physboxA, physboxB = hbA.physbox, hbB.physbox
-	if physboxA == physboxB then return end
-
 	local pointsA, pointsB = hbA:GetHBScreenPointsObj(), hbB:GetHBScreenPointsObj()
 	local pointsTabA, pointsTabB = pointsA:GetPoints(), pointsB:GetPoints()
 
@@ -98,13 +90,6 @@ function GM:VGUISAT(hbA, hbB)
 
 		-- Get our overlap!
 		local overlap = GetRangeOverlap(projRangeA, projRangeB)
-
-		--[[
-		if GAMEMODE.Debug and GAMEMODE.VGUIPhysPassCount == VGUIPHYS_PASSES - 1 then
-			local tab = {p1 = pointsTabA[i], p2 = pointsTabA[(i % #pointsTabA) + 1], normal = normalA}
-			table.Insert(mtvsA, tab)
-		end
-		]]
 
 		-- No collision.
 		if overlap <= 0 then return end
@@ -126,13 +111,6 @@ function GM:VGUISAT(hbA, hbB)
 		local projRangeA = GetProjRange(pointsTabA, normalB)
 		local overlap = GetRangeOverlap(projRangeB, projRangeA)
 
-		--[[
-		if GAMEMODE.Debug and GAMEMODE.VGUIPhysPassCount == VGUIPHYS_PASSES - 1 then
-			local tab = {p1 = pointsTabB[i], p2 = pointsTabB[(i % #pointsTabB) + 1], normal = normalB}
-			table.Insert(mtvsB, tab)
-		end
-		]]
-
 		if overlap <= 0 then return end
 		if smallestOverlap and overlap >= smallestOverlap - VGUI_EPSILON_OVERLAP then continue end
 
@@ -151,22 +129,10 @@ function GM:VGUISAT(hbA, hbB)
 		local ref_pointsA, ref_pointsB = pointsA, pointsB
 		pointsA, pointsB = ref_pointsB, ref_pointsA
 		ref_pointsA, ref_pointsB = nil, nil
-
-		local ref_physboxA, ref_physboxB = physboxA, physboxB
-		physboxA, physboxB = ref_physboxB, ref_physboxA
-		ref_physboxA, ref_physboxB = nil, nil
-
-		local ref_pointsTabA, ref_pointsTabB = pointsTabA, pointsTabB
-		pointsTabA, pointsTabB = ref_pointsTabB, ref_pointsTabA
-		ref_pointsTabA, ref_pointsTabB = nil, nil
-
-		local ref_hbA, ref_hbB = hbA, hbB
-		hbA, hbB = ref_hbB, ref_hbA
-		ref_hbA, ref_hbB = nil, nil
 	end
 
 	-- Orient our MTV correctly so that it points from A -----> B
 	mtv = OrientMTV(pointsA, pointsB, mtv)
 
-	return {hbA = hbA, hbB = hbB, physboxA = physboxA, physboxB = physboxB, overlap = smallestOverlap, mtv = mtv}
+	return {overlap = smallestOverlap, normal = mtv}
 end

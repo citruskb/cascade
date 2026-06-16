@@ -25,8 +25,19 @@ local function ClipSegmentToPlane(p1, p2, planeNormal, planeOffset)
 	return points
 end
 
+
+
 -- Returns either 1 or 2 points of contact.
-function GM:VGUIGetContactPoints(referenceLine, incidentLine, mtv)
+function GM:VGUIGetContactPoints(bodyA, bodyB, hbA, hbB, normal)
+
+	local pointsTabA = hbA:GetHBScreenPointsObj():GetPoints()
+	local pointsTabB = hbB:GetHBScreenPointsObj():GetPoints()
+	local referenceLine, refIDX = GetBestAlignment(pointsTabA, -normal)
+	local incidentLine, incIDX = GetBestAlignment(pointsTabB, normal)
+
+	local collisionPoints = {}
+	collisionPoints.points = {}
+	collisionPoints.fIDs = {}
 
 	--Step 1: Get the reference line and incident line. This was done and passed to us in GM:VGUISAT().
 	local refPoints, incPoints = Rawget(referenceLine, "_points"), Rawget(incidentLine, "_points")
@@ -45,7 +56,7 @@ function GM:VGUIGetContactPoints(referenceLine, incidentLine, mtv)
 	local p1, p2 = Vector2(V2_Unpack(i1)), Vector2(V2_Unpack(i2))
 	local clippedPoints = ClipSegmentToPlane(p1, p2, plane1Normal, plane1Offset)
 
-	if #clippedPoints == 0 then return {} end
+	if #clippedPoints == 0 then return collisionPoints end
 
 	-- Step 5: Get info on plane 2
 	local plane2Normal = refDir
@@ -55,14 +66,14 @@ function GM:VGUIGetContactPoints(referenceLine, incidentLine, mtv)
 	clippedPoints = ClipSegmentToPlane(Rawget(clippedPoints, 1), Rawget(clippedPoints, 2), plane2Normal, plane2Offset)
 
 	-- Same deal as above.
-	if #clippedPoints == 0 then return {} end
+	if #clippedPoints == 0 then return collisionPoints end
 
 	-- Step 7: Keep only the points behind the reference face, plus some slop.
-	local collisionPoints = {}
 	for i = 1, #clippedPoints do
 		local point = clippedPoints[i]
-		if V2_Dot(mtv, point - r1) > VGUIPHYS_SLOP_COL_POINT then continue end
-		table_Insert(collisionPoints, point)
+		if V2_Dot(normal, point - r1) > VGUIPHYS_SLOP_COL_POINT then continue end
+		table_Insert(collisionPoints.points, point)
+		table_Insert(collisionPoints.fIDs, gamemode.Call("GetFeatureID", hbA, hbB, refIDX, incIDX, i))
 	end
 
 	return collisionPoints

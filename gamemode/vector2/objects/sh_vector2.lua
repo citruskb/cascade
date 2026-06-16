@@ -94,6 +94,22 @@ function meta:Dot(other)
 	return x * ox + y * oy
 end
 
+-- Returns a new vector with the smallest values of the x and y of the two points
+function meta:GetMin(other)
+	return Vector2(
+		math.Min(Rawget(self, "x"), Rawget(other, "x")),
+		math.Min(Rawget(self, "y"), Rawget(other, "y"))
+	)
+end
+
+-- Returns a new vector with the largest values of the x and y of the two points.
+function meta:GetMax(other)
+	return Vector2(
+		math.Max(Rawget(self, "x"), Rawget(other, "x")),
+		math.Max(Rawget(self, "y"), Rawget(other, "y"))
+	)
+end
+
 -- Return a new vector that's a normalized version of this vector.
 function meta:GetNormalized()
 	local nx, ny = GetNormalVars(self)

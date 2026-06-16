@@ -1,3 +1,8 @@
+--[[
+	We use this awesome guy's implementation of simple 2d physics!
+	https://github.com/majikayogames/physics-tutorial/blob/main/simple_phys.js
+]]
+
 -- Handle Lua refresh.
 if not vguiPhysLoaded then
 	GM.VGUIPhysboxes = {}
@@ -57,26 +62,28 @@ local SPIN = 0.02
 
 --	[[ NEW ]]
 function GM:VGUIPhysicsStep2(timeSinceLastCalled)
-	local ct = CurTime()
 	local dt = VGUIPHYS_DT
+	local iter = VGUIPHYS_CONSTRAINT_ITERATIONS
+
+	local ct = CurTime()
 	self.VGUIPhysAccuStepTime = self.VGUIPhysAccuStepTime + ct - self.VGUIPhysLastStepTime
 
 	-- Clamp number of steps to prevent a runaway lag situation.
 	self.VGUIPhysAccuStepTime = math.Min(self.VGUIPhysAccuStepTime, dt * VGUIPHYS_MAXSTEPS)
 
 	while self.VGUIPhysAccuStepTime > dt do
-		gamemode.Call("VGUIPhysicsPass", dt)
+		gamemode.Call("VGUIPhysicsPass", dt, iter)
 		self.VGUIPhysAccuStepTime = self.VGUIPhysAccuStepTime - dt
 	end
 
 	self.VGUIPhysLastStepTime = CurTime()
 end
 
-function GM:VGUIPhysicsPass(dt)
-	gamemode.Call("VGUIPhysApplyGravity", dt)		-- Gravity.
-	gamemode.Call("VGUIPhysDetectCollisions")		-- Detect collisions. Build & update collision constraints.
-	gamemode.Call("VGUIPhysSolveConstraints", dt)	-- Iteratively solve collision constraints.
-	gamemode.Call("VGUIPhysStepPhysboxes", dt)		-- Update our physbox pos and rot based on velocities.
+function GM:VGUIPhysicsPass(dt, iter)
+	gamemode.Call("VGUIPhysApplyGravity", dt)			-- Gravity.
+	gamemode.Call("VGUIPhysDetectCollisions")			-- Detect collisions. Build & update collision constraints.
+	gamemode.Call("VGUIPhysSolveConstraints", dt, iter)	-- Iteratively solve collision constraints.
+	gamemode.Call("VGUIPhysStepPhysboxes", dt)			-- Update our physbox pos and rot based on velocities.
 end
 
 function GM:VGUIPhysApplyGravity(dt)
@@ -96,6 +103,13 @@ function GM:VGUIPhysStepPhysboxes(dt)
 		physbox:Step(dt)
 	end
 end
+
+function GM:VGUIPhysDetectCollisions()
+
+end
+
+
+
 
 --	[[ end new ]]
 

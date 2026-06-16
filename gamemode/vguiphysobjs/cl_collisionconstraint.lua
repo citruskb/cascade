@@ -1,7 +1,5 @@
---See https://github.com/majikayogames/physics-tutorial/blob/main/simple_phys.js
-
 if not VGUICollisionConstraint then
-	GM.VGUICollisions = {}
+	GM.VGUICollisionConstraints = {}
 	VGUICollisionConstraint = Class:Create(nil, "VGUICollisionConstraint")
 end
 
@@ -33,6 +31,8 @@ function VGUICollisionConstraint:__Create(objA, objB, screenPoint, normal, penet
 	local rv = vB - vA
 	self.relativeVelocity = normal:Dot(rv)
 
+	GAMEMODE.VGUICollisionConstraints[self] = true
+
 	return self
 end
 
@@ -61,4 +61,9 @@ end
 function meta:SolveContact(dt)
 end
 function meta:SolveFriction()
+end
+
+function meta:Remove()
+	GAMEMODE.VGUICollisionConstraints[self] = nil
+	table.Empty(self)
 end

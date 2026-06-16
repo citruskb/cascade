@@ -131,6 +131,14 @@ function meta:GetAllHitboxPoints()
 	return allpoints
 end
 
+function meta:GetAABB()
+	local aabb = VGUIAABB:Create(Vec2(math.HUGE, math.HUGE), Vec2(math.HUGE, math.HUGE))
+	for _, hitbox in pairs(self.hitboxes) do
+		aabb:Expand(hitbox.pointsObj)
+	end
+	return aabb
+end
+
 -- TODO better estimates.
 -- Possibly calculate these for all hitboxes then add together?
 function meta:RecalculateMassAndInertia()
