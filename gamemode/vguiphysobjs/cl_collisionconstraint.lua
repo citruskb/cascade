@@ -71,7 +71,7 @@ function meta:Update()
 	local vA = self.bodyA.velocity + (self.rA:CrossS(self.bodyA.angularVelocity))
 	local vB = self.bodyB.velocity + (self.rB:CrossS(self.bodyB.angularVelocity))
 	local rv = vB - vA
-	self.relativeVelocity = normal:Dot(rv)
+	self.relativeVelocity = self.normal:Dot(rv)
 
 	-- Warmstarting -- apply the accumulated point impulse from the previous frame.
 	local normalImpulse = self.normal * self.accuNormalLambda
@@ -85,13 +85,64 @@ function meta:Solve(dt)
 	self:SolveFriction()
 end
 
-function meta:SolveContact(dt)
+local function GetSoftConstraintParams(hertz, dampingRatio, timeStep)
+	if hertz == 0 then
+		return {biasRate = 0, massScale = 0, impulseScale = 0}
+	end
+	local omega = 2 * math.PI * hertz
+	local a1 = 2 * dampingRatio + timeStep * omega
+	local a2 = timeStep * omega * a1
+	local a3 = 1 / (1 + a2)
+
+	return {biasRate = omega / a1, massScale = a2 * a3, impulseScale = a3}
 end
+function meta:SolveContact(dt)
+	local vA = self.bodyA.velocity + (self.rA:CrossS(self.bodyA.angularVelocity))
+	local vB = self.bodyB.velocity + (self.rB:CrossS(self.bodyB.angularVelocity))
+	local rv = vB - vA
+	local Cdot = self.normal:Dot(rv)
+
+	local rnA = self.rA:Cross(self.normal)
+	local rnB = self.rB:Cross(self.normal)
+	local effectiveMass = self.invMassA + self.invMassB + rnA * rnA * self.invIA + rnB * rnB * self.invIB
+	if effectiveMass < 0.0000001 then return end -- Prevent divide by zero.
+
+	-- using "soft" constaint settings
+	local allowedPenetration = VGUIPHYS_SLOP_LINEAR
+	local velocityBias = 0
+	local massScale = 1
+	local impulseScale = 0
+
+	local maxHertz = 0.25 / dt
+	local hz = math.Min(VGUIPHYS_SOFT_HERTZ, maxHertz)
+	local soft = GetSoftConstraintParams(hz, VGUIPHYS_SOFT_DAMPINGRATIO, dt)
+	local separation = math.Min(0, -self.penetration + allowedPenetration)
+	velocityBias = math.Max(soft.biasRate * separation, -VGUIPHYS_SOFT_CONTACTSPEED)
+	massScale = soft.massScale
+	impulseScale = soft.impulseScale
+
+	-- Compute normal impulse with bias included
+	local lambda = -(massScale * Cdot + velocityBias) / effectiveMass
+	lambda = lambda - impulseScale * self.accuNormalLambda / effectiveMass
+
+	-- Clamp accumulated impulse
+	local oldAccum = self.accumulatedNormalLambda
+	self.accumulatedNormalLambda = math.Max(oldAccum + lambda, 0)
+	lambda = self.accumulatedNormalLambda - oldAccum
+
+	if lambda == 0 then return end
+
+	local impulse = self.normal * lambda
+	self.bodyA:ApplyImpulse(-impulse, self.screenPoint)
+	self.bodyB:ApplyImpulse(impulse, self.screenPoint)
+end
+
 function meta:SolveFriction()
+	-- TODO
 end
 
 function meta:ApplyRestitution()
-
+	-- TODO
 end
 
 function meta:Remove()

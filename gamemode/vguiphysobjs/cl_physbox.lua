@@ -191,3 +191,11 @@ function meta:Step(dt)
 
 	self:UpdateParentVars()
 end
+
+function meta:ApplyImpulse(impulse, screenPoint)
+	local r = screenPoint - self:GetCenter()
+	local angularImpulse = r:Cross(impulse)
+
+	self:AddVelocity(impulse / self.mass)
+	self:AddAngularVelocity(angularImpulse / self.monentOfInertia)
+end

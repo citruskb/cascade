@@ -19,15 +19,16 @@ end
 VGUIPHYS_DT = 1 / 240
 VGUIPHYS_MAXSTEPS = 10
 VGUIPHYS_CONSTRAINT_ITERATIONS = 10
+VGUIPHYS_SLOP_LINEAR = 1.5	-- Allow some degree of overlap between objects without taking collision corrective action.
+VGUIPHYS_SOFT_HERTZ = 30
+VGUIPHYS_SOFT_DAMPINGRATIO = 10
+VGUIPHYS_SOFT_CONTACTSPEED = 3
 
 --	[[ End new ]]
 
 
 -- How many loops do we make attempting to resolve collisions?
 VGUIPHYS_PASSES = 8
-
--- Allow some degree of overlap between objects without taking collision corrective action.
-VGUIPHYS_SLOP = 1.5
 
 -- A bit of leniency determining if a collision point is behind a face or not.
 VGUIPHYS_SLOP_COL_POINT = 0.005
@@ -113,7 +114,7 @@ function GM:VGUIPhysSolveConstraints(dt, iter)
 		constr:Update()
 	end
 
-	-- Solve, iteratively!
+	-- Solve, iteratively! With warmstarting for persistent contacts!
 	for i = 1, iter do
 		for fID, constr in pairs(contactConstraints) do
 			constr:Solve(dt)
