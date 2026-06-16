@@ -104,7 +104,26 @@ function GM:VGUIPhysStepPhysboxes(dt)
 	end
 end
 
-function GM:VGUIPhysDetectCollisions()
+function GM:VGUIPhysSolveConstraints(dt, iter)
+	local contactConstraints = GAMEMODE.VGUICollisionConstraints
+
+	-- Update our constraint's info.
+	-- Also apply warmstarting in persistent contacts!
+	for fID, constr in pairs(contactConstraints) do
+		constr:Update()
+	end
+
+	-- Solve, iteratively!
+	for i = 1, iter do
+		for fID, constr in pairs(contactConstraints) do
+			constr:Solve(dt)
+		end
+	end
+
+	-- Evaluate bounce.
+	for fID, constr in pairs(constactConstraints) do
+		constr:ApplyRestitution()
+	end
 
 end
 

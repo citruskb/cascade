@@ -31,7 +31,7 @@ function VGUICollisionConstraint:__Create(objA, objB, screenPoint, normal, penet
 	local rv = vB - vA
 	self.relativeVelocity = normal:Dot(rv)
 
-	GAMEMODE.VGUICollisionConstraints[self] = true
+	GAMEMODE.VGUICollisionConstraints[fID] = self
 
 	return self
 end
@@ -50,7 +50,34 @@ function meta:SetCollisionData(screenPoint, normal, penetration)
 	self.tangent = normal:GetRotate90CW()
 end
 
+function meta:ApplyImpulses(impulse)
+	self.bodyA:AddVelocity(-impulse * self.invMassA)
+	self.bodyA:AddAngularVelocity(-self.invIA * self.rA:Cross(impulse))
+	self.bodyB:AddVelocity(impulse * self.invMassB)
+	self.bodyB:AddAngularVelocity(self.invIB * self.rB:Cross(impulse))
+end
+
 function meta:Update()
+	self.rA = self.screenPoint - self.BodyA:GetCenter()
+	self.rB = self.screenPoint - self.BodyB:GetCenter()
+
+	local objAStatic, objBStatic = objA:IsStatic(), objB:IsStatic()
+	self.invMassA = objAStatic and 0 or 1 / objA.mass
+	self.invMassB = objBStatic and 0 or 1 / objB.mass
+	self.invIA = objAStatic and 0 or 1 / objA.momentOfInertia
+	self.invIB = objBStatic and 0 or 1 / objB.momentOfInertia
+
+	-- Store relative velocity before warm starting, for restitution.
+	local vA = self.bodyA.velocity + (self.rA:CrossS(self.bodyA.angularVelocity))
+	local vB = self.bodyB.velocity + (self.rB:CrossS(self.bodyB.angularVelocity))
+	local rv = vB - vA
+	self.relativeVelocity = normal:Dot(rv)
+
+	-- Warmstarting -- apply the accumulated point impulse from the previous frame.
+	local normalImpulse = self.normal * self.accuNormalLambda
+	local frictionImpulse = self.tangent * self.accuFrictionLambda
+	local totalImpulse = normalImpulse + frictionImpulse
+	self:ApplyImpulses(totalImpulse)
 end
 
 function meta:Solve(dt)
@@ -63,7 +90,11 @@ end
 function meta:SolveFriction()
 end
 
+function meta:ApplyRestitution()
+
+end
+
 function meta:Remove()
-	GAMEMODE.VGUICollisionConstraints[self] = nil
+	GAMEMODE.VGUICollisionConstraints[self.fID] = nil
 	table.Empty(self)
 end
