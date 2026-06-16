@@ -1,4 +1,6 @@
-local cps = {}
+refLines = {}
+incLines = {}
+normals = {}
 
 DEBUG_MODE_MINIMAL = 1
 DEBUG_MODE_DETAILED = 2
@@ -43,10 +45,6 @@ end
 local function DrawItemDebug(pan)
 	local x, y = pan:GetPos()
 	local w, h = pan:GetSize()
-
-	if not pan.IsItem then
-		x, y = pan:LocalToScreen(x, y)
-	end
 
 	-- Draw box around object
 	surface.SetDrawColor(itemCol)
@@ -127,7 +125,7 @@ end
 local function DrawAux(pan, physbox, hitbox)
 	-- Box at the center
 	surface.SetDrawColor(COLOR_BLACK)
-	local xp, yp = pan.scpos:Unpack()
+	local xp, yp = pan.cpos:Unpack()
 	local s = 8
 	surface.DrawRect(xp - s * 0.5, yp - s * 0.5, s, s)
 
@@ -137,11 +135,50 @@ local function DrawAux(pan, physbox, hitbox)
 	surface.DrawRect(xp - s * 0.5, yp - s * 0.5, s, s)
 end
 
+local function DrawRefLine(line)
+	local points = line:GetPoints()
+	local x1, y1 = points[1].x, points[1].y
+	local x2, y2 = points[2].x, points[2].y
+	surface.SetDrawColor(COLOR_GREEN)
+	surface.DrawLine(x1, y1, x2, y2)
+end
+
+local function DrawIncLine(line)
+	local points = line:GetPoints()
+	local x1, y1 = points[1].x, points[1].y
+	local x2, y2 = points[2].x, points[2].y
+	surface.SetDrawColor(COLOR_PURPLE)
+	surface.DrawLine(x1, y1, x2, y2)
+end
+
+local function DrawNormal(data)
+	local bodyA = data.bodyA
+	local normal = data.normal
+	local referenceLine = data.referenceLine
+
+	local points = referenceLine:GetPoints()
+	local p1, p2 = points[1], points[2]
+	local dir = (p2 - p1):GetNormalized()
+	local dist = p1:Distance(p2)
+	local startPos = p1 + dir * dist / 2
+
+	local endPos = startPos + normal * 12
+
+	surface.SetDrawColor(COLOR_BLUE)
+	surface.DrawLine(startPos.x, startPos.y, endPos.x, endPos.y)
+end
+
 
 local function DrawDebug()
 	if not GAMEMODE.Debug then return end
 
 	local detailed = GAMEMODE.DebugMode == DEBUG_MODE_DETAILED
+
+	local constraints = GAMEMODE.VGUICollisionConstraints
+	local cps = {}
+	for fID, cobj in pairs(constraints) do
+		table.insert(cps, cobj.screenPoint)
+	end
 
 	local temp = {}
 	for pan, _ in pairs(GAMEMODE.DebugObjects) do
@@ -160,6 +197,10 @@ local function DrawDebug()
 
 		if detailed then DrawAux(pan, physbox, hitbox) end
 
+		for k, line in pairs(refLines) do DrawRefLine(line) end
+		for k, line in pairs(incLines) do DrawIncLine(line) end
+		for k, data in pairs(normals) do DrawNormal(data) end
+
 		temp[pan] = true
 	end
 
@@ -169,13 +210,8 @@ end
 
 hook.Add("DrawOverlay", "DrawOverlay.Debug", DrawDebug)
 
-hook.Add("ResolveCollision", "ResolveCollision.Debug", function(data)
-	if not GAMEMODE.Debug then return end
-
-	local contactPoints = Rawget(data, "contactPoints")
-	table.Add(cps, contactPoints)
-end)
-
-hook.Add("VGUIStepPhysboxes", "VGUIPhysicsStep.debug", function()
-	cps = {}
+hook.Add("VGUIPhysDetectCollisions", "VGUIPhysDetectCollisions.Debug", function()
+	refLines = {}
+	incLines = {}
+	normals = {}
 end)

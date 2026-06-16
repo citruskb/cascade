@@ -29,9 +29,9 @@ function meta:AddAngularVelocity(num)
 	self.angularVelocity = self.angularVelocity + num
 end
 
-function meta:AddDeltaPosition(vec2)
+function meta:AddPosition(vec2)
 	if not self.isPhysicsEnabled then return end
-	self.deltaPosition:DoAdd(vec2)
+	self.position:DoAdd(vec2)
 end
 
 function meta:AddRotation(num)
@@ -60,7 +60,7 @@ function VGUIPhysbox:__Create(parent)
 	self.originCenterOffset = Vector2()
 
 	-- Initializes physics values.
-	self.deltaPosition = Vector2()
+	self.position = Vector2(parent:GetPos())
 	self.rotation = 0
 	self:DisablePhysics()
 
@@ -89,7 +89,7 @@ function meta:AddHitbox(points, noResize)
 
 	-- Adjust the parent size to accomodate rotation of our hitboxes around their center point.
 	-- But only if our parent is an item.
-	if not parent.IsItem then return end
+	if not parent.isItem then return end
 
 	-- First we find the furthest point from all our hitbox centers.
 	local allpoints = self:GetAllHitboxPoints()
@@ -148,15 +148,21 @@ end
 -- Possibly calculate these for all hitboxes then add together?
 function meta:RecalculateMassAndInertia()
 	local w, h = self.parent:GetSize()
-	self.mass = self.isStatic and math.HUGE or self.density * w * h
+	self.mass = self.isStatic and math.HUGE or self.mass --self.density * w * h
 	self.momentOfInertia = self.isStatic and math.HUGE or (self.mass * (w * w + h * h)) / 12
 end
 
 -- The center of our physbox, relative to screenspace.
-function meta:GetCenterScreenPoint() return self.parent.scpos + self.deltaPosition end
+function meta:GetCenterScreenPoint() return self.parent.cpos end
 
 -- (0,0) of the grid the hitbox's points draw on.
-function meta:GetScreenHitboxPointsOrigin() return self.parent.scpos + self.deltaPosition + self.originCenterOffset end
+function meta:GetScreenHitboxPointsOrigin()
+	if self.parent.isItem then
+		return self.parent.cpos + self.originCenterOffset
+	else
+		return self.parent.vpos
+	end
+end
 
 -- For now, we need to handle what happens if our parent panel gets removed.
 function meta:Remove()
@@ -168,20 +174,6 @@ function meta:Remove()
 end
 
 function meta:UpdateParentVars()
-	-- When the partial movements get high enough, move our parent panel.
-	-- Done this way because we can't move panels fractional pixels.
-	local dx, dy = self.deltaPosition:Unpack()
-	local roundedDelta = Vector2(math.Round(dx, 0), math.Round(dy, 0))
-	if roundedDelta:IsZero() then return end
-
-	local parent = self.parent
-	local x, y = parent:GetPos()
-	dx, dy = roundedDelta:Unpack()
-	parent:SetPos(x + dx, y + dy)
-
-	-- The movement has been applied.
-	-- Therefore, subtract our movement from our delta position.
-	self.deltaPosition:DoSub(roundedDelta)
 end
 
 -- TODO may need to recode a bit
@@ -189,11 +181,11 @@ function meta:Step(dt)
 	if not self.isPhysicsEnabled then return end
 
 	-- Move & rotate
-	self:AddDeltaPosition(self.velocity * dt)
+	self:AddPosition(self.velocity * dt)
 	self:AddRotation(self.angularVelocity * dt)
 
 	-- Update our parent's position based on our's
-	--self:UpdateParentVars()
+	self.parent:SetPos(self.position:Unpack())
 end
 
 function meta:ApplyImpulse(impulse, screenPoint)

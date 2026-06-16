@@ -60,21 +60,21 @@ local function GetRangeOverlap(rangeA, rangeB)
 	return math_Min(Rawget(rangeA, "max"), Rawget(rangeB, "max")) - math_Max(Rawget(rangeA, "min"), Rawget(rangeB, "min"))
 end
 
-local function OrientMTV(pointsA, pointsB, mtv)
-	local centerA, centerB = pointsA:GetCenter(), pointsB:GetCenter()
+local function OrientMTV(hbA, hbB, mtv)
+	local centerA, centerB = hbA.physbox:GetCenterScreenPoint(), hbB.physbox:GetCenterScreenPoint()
 
 	-- Find the direction pointing from the center of hbB towards the center of hbA.
 	local centerDir = centerB - centerA
 
 	-- If the dot product is negative, it means we need to flip our MTV. Otherwise, do nothing.
-	return centerDir:Dot(mtv) < 0 and -mtv or mtv
+	return centerDir:Dot(mtv) <= 0 and -mtv or mtv
 end
 
 function GM:VGUISAT(hbA, hbB)
 	local pointsA, pointsB = hbA:GetHBScreenPointsObj(), hbB:GetHBScreenPointsObj()
 	local pointsTabA, pointsTabB = pointsA:GetPoints(), pointsB:GetPoints()
 
-	local smallestOverlap, mtv, relativeTo
+	local smallestOverlap, mtv, relativeTo, refEdge
 
 	-- Assuming there's at least one new line for each point that exists...
 	for i = 1, #pointsTabA do
@@ -100,6 +100,7 @@ function GM:VGUISAT(hbA, hbB)
 		smallestOverlap = overlap
 		mtv = Vector2(normalA:Unpack()) -- A new Vector2 because we cache the normal above, but also manipulate this later on.
 		relativeTo = hbA
+		refEdge = i
 
 	end
 
@@ -117,6 +118,7 @@ function GM:VGUISAT(hbA, hbB)
 		smallestOverlap = overlap
 		mtv = Vector2(normalB:Unpack())
 		relativeTo = hbB
+		refEdge = i
 
 	end
 
@@ -132,7 +134,11 @@ function GM:VGUISAT(hbA, hbB)
 	end
 
 	-- Orient our MTV correctly so that it points from A -----> B
-	mtv = OrientMTV(pointsA, pointsB, mtv)
+	mtv = OrientMTV(
+		relativeTo == hbB and hbB or hbA,
+		relativeTo == hbB and hbA or hbB,
+		mtv
+	)
 
-	return {penetration = smallestOverlap, normal = mtv}
+	return {penetration = smallestOverlap, normal = mtv, referenceEdgeIndex = refEdge}
 end

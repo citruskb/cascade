@@ -162,15 +162,16 @@ function PANEL:Init()
 		local item = vgui.Create("PItem", self)
 		item:SetSize(0, 0)
 		item:SetPos(origin:Unpack())
+		item:InitPhysbox()
 		item.Physbox:AddHitbox(Points({
 			Vector2(0, 0),
 			Vector2(size, 0),
 			Vector2(size, size),
 			Vector2(0, size),
 		}))
+
 		if vel then item.Physbox.velocity = vel end
 		if rad then item.Physbox.rotation = rad end
-
 		--item:SetupModel("models/props_junk/wood_crate001a.mdl")
 	end
 
@@ -199,7 +200,7 @@ function PANEL:Init()
 
 	local size = 60
 	MakeBox(size, Vector2(w * 0.5, h * 0.5))
-	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.6), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.6), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
 	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.7), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
 	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.8), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
 

@@ -8,14 +8,16 @@ local itemCount = 1
 function PANEL:Init()
 	GAMEMODE.VGUIItems[self] = true
 
-	local physbox = VGUIPhysbox:Create(self)
-	physbox:EnablePhysics()
-	self.Physbox = physbox
-
-	self.IsItem = true
+	self.isItem = true
 
 	self.ID = itemCount
 	itemCount = itemCount + 1
+end
+
+function PANEL:InitPhysbox()
+	local physbox = VGUIPhysbox:Create(self)
+	physbox:EnablePhysics()
+	self.Physbox = physbox
 end
 
 function PANEL:GetPhysbox() return self.Physbox end

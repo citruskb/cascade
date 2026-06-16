@@ -19,7 +19,7 @@ end
 VGUIPHYS_DT = 1 / 240
 VGUIPHYS_MAXSTEPS = 10
 VGUIPHYS_CONSTRAINT_ITERATIONS = 10
-VGUIPHYS_SLOP_LINEAR = 1.5	-- Allow some degree of overlap between objects without taking collision corrective action.
+VGUIPHYS_SLOP_LINEAR = 0.002 -- Allow some degree of overlap between objects without taking collision corrective action.
 VGUIPHYS_SOFT_HERTZ = 30
 VGUIPHYS_SOFT_DAMPINGRATIO = 10
 VGUIPHYS_SOFT_CONTACTSPEED = 3
@@ -29,9 +29,6 @@ VGUIPHYS_SOFT_CONTACTSPEED = 3
 
 -- How many loops do we make attempting to resolve collisions?
 VGUIPHYS_PASSES = 8
-
--- A bit of leniency determining if a collision point is behind a face or not.
-VGUIPHYS_SLOP_COL_POINT = 0.005
 
 -- Make sure our new better overlap is smaller by at least this much.
 VGUI_EPSILON_OVERLAP = 0.05

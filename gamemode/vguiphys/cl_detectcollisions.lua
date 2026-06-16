@@ -3,6 +3,7 @@ local function CheckCollision(bodyA, bodyB)
 	if bodyA.isStatic and bodyB.isStatic then return {} end
 	if not bodyA:GetAABB():Overlaps(bodyB:GetAABB()) then return {} end
 
+	local constr = {}
 	for idxA = 1, #bodyA.hitboxes do
 		local hitboxA = bodyA.hitboxes[idxA]
 
@@ -12,7 +13,7 @@ local function CheckCollision(bodyA, bodyB)
 			local collision = gamemode.Call("VGUISAT", hitboxA, hitboxB)
 			if not collision then continue end
 
-			local contactPoints = gamemode.Call("VGUIGetContactPoints", bodyA, bodyB, hitboxA, hitboxB, collision.normal)
+			local contactPoints = gamemode.Call("ClipPolyToPoly", bodyA, hitboxA, bodyB, hitboxB, collision)
 
 			-- Create contact constraints
 			for ptIdx = 1, #contactPoints.points do
@@ -24,9 +25,11 @@ local function CheckCollision(bodyA, bodyB)
 				if existingContact then
 					existingContact.isReused = true
 					existingContact:SetCollisionData(screenP, collision.normal, collision.penetration)
+					table.Insert(constr, existingcontact)
 				else
 					-- But if not found, make a new one!
-					VGUICollisionConstraint:Create(bodyA, bodyB, screenP, collision.normal, collision.penetration, fID)
+					local newC = VGUICollisionConstraint:Create(bodyA, bodyB, screenP, collision.normal, collision.penetration, fID)
+					table.Insert(constr, newC)
 				end
 
 			end
@@ -34,6 +37,8 @@ local function CheckCollision(bodyA, bodyB)
 		end
 
 	end
+
+	return constr
 
 end
 
@@ -44,9 +49,13 @@ function GM:VGUIPhysDetectCollisions()
 		table.Insert(objects, physbox)
 	end
 
+	local rebuildCollisionConstraints = {}
 	for i = 1, #objects do
 		for j = i + 1, #objects do
-			CheckCollision(objects[i], objects[j])
+			local tab = CheckCollision(objects[i], objects[j])
+			table.Add(rebuildCollisionConstraints, tab)
 		end
 	end
+
+	self.VGUICollisionConstraints = rebuildCollisionConstraints
 end

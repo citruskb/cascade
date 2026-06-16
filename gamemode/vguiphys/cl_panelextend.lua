@@ -24,7 +24,7 @@ local NewV2 = Vector2
 
 local math_Round = math.Round
 
-local function InitVector2(self) self.vpos = NewV2() self.svpos = NewV2() self.cpos = NewV2() self.scpos = NewV2() end
+local function InitVector2(self) self.vpos = NewV2() self.cpos = NewV2() end
 
 local function HandleVector2(self)
 	if not self.initv2 then
@@ -35,13 +35,8 @@ local function HandleVector2(self)
 	local x, y = self:GetPos()
 	self.vpos:SetUnpacked(x, y)
 
-	local relativeTo = IsValid(parent) and parent or self
-	self.svpos:SetUnpacked(relativeTo:LocalToScreen(x, y))
-
 	local w, h = self:GetSize()
 	self.cpos = self.vpos + Vector2(math_Round(w * 0.5, 0), math_Round(h * 0.5, 0))
-
-	self.scpos:SetUnpacked(relativeTo:LocalToScreen(x, y))
 end
 
 local OldInit = meta.Init
@@ -63,6 +58,4 @@ function meta:SetSize(w, h)
 end
 
 function meta:GetVPos() return self.vpos end
-function meta:GetSVPos() return self.svpos end
 function meta:GetCPos() return self.cpos end
-function meta:GetSCPos() return self.scpos end
