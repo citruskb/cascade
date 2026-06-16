@@ -166,7 +166,33 @@ function meta:SolveFriction()
 end
 
 function meta:ApplyRestitution()
-	-- TODO
+	-- We only apply restitution if:
+	-- 1. Theres a restitution coefficient > 0
+	-- 2. The contact point isn't persistent (isReused == false)
+	-- 3. The initial relative velocity was approaching fast enough
+	if self.isReused or self.restitution == 0 then return end
+
+	local restitutionThreshold = 1
+	if self.relativeVelocity < -restitutionThreshold then return end
+
+	local rnA = self.rA:Cross(self.normal)
+	local rnB = self.rB:Cross(self.normal)
+	local effectiveMass = self.invMassA + self.invMassB + rnA * rnA * self.invIA + rnB * rnB * self.invIB
+	if effectiveMass < 0.000001 then return end
+
+	local vA = self.bodyA.velocity + self.rA:CrossS(self.bodyA.angularVelocity)
+	local vB = self.bodyB.velocity + self.rB:CrossS(self.bodyB.angularVelocity)
+	local relVel = vB - vA
+	local vn = self.normal:Dot(relVel)
+
+	-- Compute restitution impulse!
+	local impulse = -(vn + self.restitution * self.relativeVelocity) / effectiveMass
+
+	-- Make sure impulse is positive only! (objects separating)
+	if impulse <= 0 then return end
+	local restitutionImpulse = self.normal * impulse
+	self.bodyA:ApplyImpulse(-restitutionImpulse, self.screenPoint)
+	self.bodyB:ApplyImpulse(restitutionImpulse, self.screenPoint)
 end
 
 function meta:Remove()
