@@ -85,13 +85,13 @@ function meta:Solve(dt)
 	self:SolveFriction()
 end
 
-local function GetSoftConstraintParams(hertz, dampingRatio, timeStep)
+local function GetSoftConstraintParams(hertz, dampingRatio, dt)
 	if hertz == 0 then
 		return {biasRate = 0, massScale = 0, impulseScale = 0}
 	end
 	local omega = 2 * math.PI * hertz
-	local a1 = 2 * dampingRatio + timeStep * omega
-	local a2 = timeStep * omega * a1
+	local a1 = 2 * dampingRatio + dt * omega
+	local a2 = dt * omega * a1
 	local a3 = 1 / (1 + a2)
 
 	return {biasRate = omega / a1, massScale = a2 * a3, impulseScale = a3}
@@ -138,7 +138,31 @@ function meta:SolveContact(dt)
 end
 
 function meta:SolveFriction()
-	-- TODO
+	if self.friction <= 0 then return end
+
+	local vA = self.bodyA.velocity + (self.rA:CrossS(self.bodyA.angularVelocity))
+	local vB = self.bodyB.velocity + (self.rB:CrossS(self.bodyB.angularVelocity))
+	local relVel = vB - vA
+	local Cdot = self.tangent:Dot(relVel)
+
+	local rtA = self.rA:Cross(self.tangent)
+	local rtB = self.rB:Cross(self.tangent)
+	local effectiveMassTangent = self.invMassA + self.invMassB + rtA * rtA * self.invIA + rtB * rtB * self.invIB
+	if effectiveMassTangent < 0.000001 then return end
+
+	local lambda = -Cdot / effectiveMassTangent
+
+	-- Maximum friction impulse according to Coulumb's law
+	local maxFriction = self.friction * self.accumulatedNormalLambda
+
+	-- Clamp force between -maxFriction and maxFriction
+	local oldAccum = self.accumulatedFrictionLambda
+	self.accumulatedFrictionLambda = math.Clamp(oldAccum + lambda, -maxFriction, maxFriction)
+	lambda = self.accumulatedFrictionLambda - oldAccum
+
+	local frictionImpulse = self.tangent * lambda
+	self.bodyA:ApplyImpulse(-frictionImpulse, self.screenPoint)
+	self.bodyB:ApplyImpulse(frictionImpulse, self.screenPoint)
 end
 
 function meta:ApplyRestitution()

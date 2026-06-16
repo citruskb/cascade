@@ -34,6 +34,11 @@ function meta:AddDeltaPosition(vec2)
 	self.deltaPosition:DoAdd(vec2)
 end
 
+function meta:AddRotation(num)
+	if not self.isPhysicsEnabled then return end
+	self.rotation = self.rotation + num
+end
+
 function VGUIPhysbox:__Create(parent)
 	-- Makes sure we have a unique ID for contact persistence.
 	VGUIPhysboxCount = VGUIPhysboxCount + 1
@@ -148,10 +153,10 @@ function meta:RecalculateMassAndInertia()
 end
 
 -- The center of our physbox, relative to screenspace.
-function meta:GetCenterScreenPoint() return self.parent.scpos end
+function meta:GetCenterScreenPoint() return self.parent.scpos + self.deltaPosition end
 
 -- (0,0) of the grid the hitbox's points draw on.
-function meta:GetScreenHitboxPointsOrigin() return self.parent.scpos + self.originCenterOffset end
+function meta:GetScreenHitboxPointsOrigin() return self.parent.scpos + self.deltaPosition + self.originCenterOffset end
 
 -- For now, we need to handle what happens if our parent panel gets removed.
 function meta:Remove()
@@ -183,12 +188,11 @@ end
 function meta:Step(dt)
 	if not self.isPhysicsEnabled then return end
 
-	local vel = Rawget(self, "_vel")
-
 	-- Move & rotate
-	self:AddPartialPos(vel * dt)
-	self:AddRad(Rawget(self, "_radvel") * dt)
+	self:AddDeltaPosition(self.velocity * dt)
+	self:AddRotation(self.angularVelocity * dt)
 
+	-- Update our parent's position based on our's
 	self:UpdateParentVars()
 end
 

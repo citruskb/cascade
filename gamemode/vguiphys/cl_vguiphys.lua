@@ -62,7 +62,7 @@ local SPIN = 0.02
 
 
 --	[[ NEW ]]
-function GM:VGUIPhysicsStep2(timeSinceLastCalled)
+function GM:VGUIPhysicsStep2()
 	local dt = VGUIPHYS_DT
 	local iter = VGUIPHYS_CONSTRAINT_ITERATIONS
 
@@ -134,12 +134,6 @@ end
 --	[[ end new ]]
 
 --[[
-function GM:VGUIUpdateParentVars()
-	for physbox, _ in pairs(self.VGUIPhysboxes) do
-		physbox:UpdateParentVars()
-	end
-end
-
 function GM:VGUIPhysicsStep1(tim, iterations)
 	for i = 1, iterations do
 		self.VGUIPotentialCollisions = {}

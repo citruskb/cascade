@@ -93,12 +93,11 @@ hook.Add("OnReloaded", "OnReloaded.LocalPlayerFound", LocalPlayerFound)
 local nextTick = 0
 local nextVGUIPhysUpdate = 0
 local VGUItick = 0.030303030303030 -- Make sure that this runs the same regardless of server tick rate
-
 GM.VGUIStepCount = 0
 function GM:_Think()
 	local ct = CurTime()
 
-	gamemode.Call("VGUIPhysicsStep2", timeSinceLastCalled)
+	gamemode.Call("VGUIPhysicsStep2")
 
 	-- Update item physics if it makes sense to.
 	--[[
@@ -109,9 +108,6 @@ function GM:_Think()
 			gamemode.Call("VGUIPhysicsStep1", VGUItick, VGUIPHYS_PASSES)
 			nextVGUIPhysUpdate = ct + VGUItick
 	end
-
-	-- We do this separate so that perceived motion is updated whenever client redraws the screen. Looks less choppy.
-	gamemode.Call("VGUIUpdateParentVars")
 	]]
 
 	if nextTick > ct then return end
