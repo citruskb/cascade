@@ -25,6 +25,24 @@ local function ClipSegmentToPlane(p1, p2, planeNormal, planeOffset)
 	return points
 end
 
+local function GetBestAlignment(pointsTab, alignTo)
+	local bestP1, bestP2, bestIDX
+	local bestAlignment
+	for i = 1, #pointsTab do
+		local p1 = Rawget(pointsTab, i)
+		local p2 = Rawget(pointsTab,(i % #pointsTab) + 1)
+		local checkAlign = Vector2(Rawget(p2, "y") - Rawget(p1, "y"), Rawget(p1, "x") - Rawget(p2, "x"))
+		local alignment = checkAlign:Dot(alignTo)
+
+		if bestAlignment and alignment >= bestAlignment then continue end
+		bestAlignment = alignment
+		bestP1 = p1
+		bestP2 = p2
+		bestIDX = i
+	end
+
+	return Points({bestP1, bestP2}), bestIDX
+end
 
 
 -- Returns either 1 or 2 points of contact.

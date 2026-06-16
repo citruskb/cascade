@@ -137,7 +137,7 @@ function meta:GetAllHitboxPoints()
 end
 
 function meta:GetAABB()
-	local aabb = VGUIAABB:Create(Vec2(math.HUGE, math.HUGE), Vec2(math.HUGE, math.HUGE))
+	local aabb = VGUIAABB:Create(Vector2(math.HUGE, math.HUGE), Vector2(math.HUGE, math.HUGE))
 	for _, hitbox in pairs(self.hitboxes) do
 		aabb:Expand(hitbox.pointsObj)
 	end
@@ -193,13 +193,13 @@ function meta:Step(dt)
 	self:AddRotation(self.angularVelocity * dt)
 
 	-- Update our parent's position based on our's
-	self:UpdateParentVars()
+	--self:UpdateParentVars()
 end
 
 function meta:ApplyImpulse(impulse, screenPoint)
-	local r = screenPoint - self:GetCenter()
+	local r = screenPoint - self:GetCenterScreenPoint()
 	local angularImpulse = r:Cross(impulse)
 
 	self:AddVelocity(impulse / self.mass)
-	self:AddAngularVelocity(angularImpulse / self.monentOfInertia)
+	self:AddAngularVelocity(angularImpulse / self.momentOfInertia)
 end

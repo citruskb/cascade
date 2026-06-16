@@ -15,7 +15,7 @@ function VGUICollisionConstraint:__Create(objA, objB, screenPoint, normal, penet
 	self.accuNormalLambda = 0
 	self.accuFrictionLambda = 0
 
-	local objAStatic, objBStatic = objA:IsStatic(), objB:IsStatic()
+	local objAStatic, objBStatic = objA.isStatic, objB.isStatic
 	self.invMassA = objAStatic and 0 or 1 / objA.mass
 	self.invMassB = objBStatic and 0 or 1 / objB.mass
 	self.invIA = objAStatic and 0 or 1 / objA.momentOfInertia
@@ -43,11 +43,10 @@ function meta:SetCollisionData(screenPoint, normal, penetration)
 	self.normal = normal
 	self.penetration = penetration
 
-	-- TODO physbox:GetCenter()
-	self.rA = screenPoint - bodyA:GetCenter()
-	self.rB = screenPoint - bodyB:GetCenter()
+	self.rA = screenPoint - self.bodyA:GetCenterScreenPoint()
+	self.rB = screenPoint - self.bodyB:GetCenterScreenPoint()
 
-	self.tangent = normal:GetRotate90CW()
+	self.tangent = self.normal:GetRotate90CW()
 end
 
 function meta:ApplyImpulses(impulse)
@@ -58,14 +57,16 @@ function meta:ApplyImpulses(impulse)
 end
 
 function meta:Update()
-	self.rA = self.screenPoint - self.BodyA:GetCenter()
-	self.rB = self.screenPoint - self.BodyB:GetCenter()
+	if self:CheckRemove() then return end
 
-	local objAStatic, objBStatic = objA:IsStatic(), objB:IsStatic()
-	self.invMassA = objAStatic and 0 or 1 / objA.mass
-	self.invMassB = objBStatic and 0 or 1 / objB.mass
-	self.invIA = objAStatic and 0 or 1 / objA.momentOfInertia
-	self.invIB = objBStatic and 0 or 1 / objB.momentOfInertia
+	self.rA = self.screenPoint - self.bodyA:GetCenterScreenPoint()
+	self.rB = self.screenPoint - self.bodyB:GetCenterScreenPoint()
+
+	local objAStatic, objBStatic = self.bodyA.isStatic, self.bodyB.isStatic
+	self.invMassA = objAStatic and 0 or 1 / self.bodyA.mass
+	self.invMassB = objBStatic and 0 or 1 / self.bodyB.mass
+	self.invIA = objAStatic and 0 or 1 / self.bodyA.momentOfInertia
+	self.invIB = objBStatic and 0 or 1 / self.bodyB.momentOfInertia
 
 	-- Store relative velocity before warm starting, for restitution.
 	local vA = self.bodyA.velocity + (self.rA:CrossS(self.bodyA.angularVelocity))
@@ -126,9 +127,9 @@ function meta:SolveContact(dt)
 	lambda = lambda - impulseScale * self.accuNormalLambda / effectiveMass
 
 	-- Clamp accumulated impulse
-	local oldAccum = self.accumulatedNormalLambda
-	self.accumulatedNormalLambda = math.Max(oldAccum + lambda, 0)
-	lambda = self.accumulatedNormalLambda - oldAccum
+	local oldAccum = self.accuNormalLambda
+	self.accuNormalLambda = math.Max(oldAccum + lambda, 0)
+	lambda = self.accuNormalLambda - oldAccum
 
 	if lambda == 0 then return end
 
@@ -153,12 +154,12 @@ function meta:SolveFriction()
 	local lambda = -Cdot / effectiveMassTangent
 
 	-- Maximum friction impulse according to Coulumb's law
-	local maxFriction = self.friction * self.accumulatedNormalLambda
+	local maxFriction = self.friction * self.accuNormalLambda
 
 	-- Clamp force between -maxFriction and maxFriction
-	local oldAccum = self.accumulatedFrictionLambda
-	self.accumulatedFrictionLambda = math.Clamp(oldAccum + lambda, -maxFriction, maxFriction)
-	lambda = self.accumulatedFrictionLambda - oldAccum
+	local oldAccum = self.accuFrictionLambda
+	self.accuFrictionLambda = math.Clamp(oldAccum + lambda, -maxFriction, maxFriction)
+	lambda = self.accuFrictionLambda - oldAccum
 
 	local frictionImpulse = self.tangent * lambda
 	self.bodyA:ApplyImpulse(-frictionImpulse, self.screenPoint)
@@ -193,6 +194,15 @@ function meta:ApplyRestitution()
 	local restitutionImpulse = self.normal * impulse
 	self.bodyA:ApplyImpulse(-restitutionImpulse, self.screenPoint)
 	self.bodyB:ApplyImpulse(restitutionImpulse, self.screenPoint)
+end
+
+function meta:CheckRemove()
+	if not IsValid(self.bodyA.parent) or not IsValid(self.bodyB.parent) then
+		self:Remove()
+		return true
+	end
+
+	return false
 end
 
 function meta:Remove()

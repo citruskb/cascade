@@ -73,6 +73,11 @@ function GM:VGUIPhysicsStep2()
 	self.VGUIPhysAccuStepTime = math.Min(self.VGUIPhysAccuStepTime, dt * VGUIPHYS_MAXSTEPS)
 
 	while self.VGUIPhysAccuStepTime > dt do
+		for physbox, _ in pairs(self.VGUIPhysboxes) do
+			if IsValid(physbox.parent) then continue end
+			physbox:Remove()
+		end
+
 		gamemode.Call("VGUIPhysicsPass", dt, iter)
 		self.VGUIPhysAccuStepTime = self.VGUIPhysAccuStepTime - dt
 	end
@@ -88,18 +93,18 @@ function GM:VGUIPhysicsPass(dt, iter)
 end
 
 function GM:VGUIPhysApplyGravity(dt)
-	for _, physbox in pairs(self.VGUIPhysboxes) do
+	for physbox, _ in pairs(self.VGUIPhysboxes) do
 		if physbox.isStatic then continue end
 
 		local _, vy = physbox.velocity:Unpack()
 		if vy >= VGUIPHYS_TERMINAL_VELOCITY then continue end
 
-		self:AddVel(VGUIPHYS_GRAVITY_VEC2 * dt)
+		physbox:AddVelocity(VGUIPHYS_GRAVITY_VEC2 * dt)
 	end
 end
 
 function GM:VGUIPhysStepPhysboxes(dt)
-	for _, physbox in pairs(self.VGUIPhysboxes) do
+	for physbox, _ in pairs(self.VGUIPhysboxes) do
 		if physbox.isStatic then continue end
 		physbox:Step(dt)
 	end
@@ -122,7 +127,7 @@ function GM:VGUIPhysSolveConstraints(dt, iter)
 	end
 
 	-- Evaluate bounce.
-	for fID, constr in pairs(constactConstraints) do
+	for fID, constr in pairs(contactConstraints) do
 		constr:ApplyRestitution()
 	end
 

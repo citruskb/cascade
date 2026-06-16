@@ -134,5 +134,5 @@ function GM:VGUISAT(hbA, hbB)
 	-- Orient our MTV correctly so that it points from A -----> B
 	mtv = OrientMTV(pointsA, pointsB, mtv)
 
-	return {overlap = smallestOverlap, normal = mtv}
+	return {penetration = smallestOverlap, normal = mtv}
 end

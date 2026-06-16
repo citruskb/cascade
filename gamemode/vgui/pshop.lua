@@ -87,7 +87,7 @@ function PANEL:Init()
 		Vector2(w * 0.25, h * 0.1),
 		Vector2(0, h * 0.1),
 	}), true)
-	physbox:SetStatic(true)
+	physbox.isStatic = true
 	floorcontainer.Physbox = physbox
 
 	local invleftwall = vgui.Create("DPanel", self)
@@ -101,7 +101,7 @@ function PANEL:Init()
 		Vector2(w * 0.05, h),
 		Vector2(0, h),
 	}), true)
-	physbox:SetStatic(true)
+	physbox.isStatic = true
 	invleftwall.Physbox = physbox
 
 	local invrightwall = vgui.Create("DPanel", self)
@@ -115,7 +115,7 @@ function PANEL:Init()
 		Vector2(w * 0.05, h),
 		Vector2(0, h),
 	}), true)
-	physbox:SetStatic(true)
+	physbox.isStatic = true
 	invrightwall.Physbox = physbox
 
 	--[[
@@ -168,8 +168,8 @@ function PANEL:Init()
 			Vector2(size, size),
 			Vector2(0, size),
 		}))
-		if vel then item.Physbox:SetVel(vel) end
-		if rad then item.Physbox:SetRad(rad) end
+		if vel then item.Physbox.velocity = vel end
+		if rad then item.Physbox.rotation = rad end
 
 		--item:SetupModel("models/props_junk/wood_crate001a.mdl")
 	end
@@ -180,6 +180,7 @@ function PANEL:Init()
 	end
 
 
+	--[[
 	local size = 60
 	--MakeBox(size, Vector2(w * 0.5, h * 0.5))
 	local num = 12
@@ -194,11 +195,13 @@ function PANEL:Init()
 			-math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)
 		))
 	end
+	]]
 
-	
-	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.6), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
-	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.7), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
-	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.8), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	local size = 60
+	MakeBox(size, Vector2(w * 0.5, h * 0.5))
+	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.6), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.7), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.8), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
 
 
 	--[[ Irregular shape

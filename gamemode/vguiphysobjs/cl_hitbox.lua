@@ -82,8 +82,8 @@ end
 -- Returns the position of our points on the screen.
 function meta:GetHBScreenPointsObj()
 	local physpassScreenpoints = self.screenPointsObj
-	local physpassOrigin = self.physbox:GetPhysicsPassPointsOrigin()
-	local physpassPivot = self.physbox:GetPhysicsPassPointsCenter()
+	local physpassOrigin = self.physbox:GetScreenHitboxPointsOrigin()
+	local physpassPivot = self.physbox:GetCenterScreenPoint()
 
 	self:TransformPointsAroundOrigin(physpassScreenpoints, physpassOrigin, physpassPivot)
 

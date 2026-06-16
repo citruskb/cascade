@@ -15,7 +15,7 @@ local function CheckCollision(bodyA, bodyB)
 			local contactPoints = gamemode.Call("VGUIGetContactPoints", bodyA, bodyB, hitboxA, hitboxB, collision.normal)
 
 			-- Create contact constraints
-			for ptIdx = 0, #contactPoints.points do
+			for ptIdx = 1, #contactPoints.points do
 				local screenP = contactPoints.points[ptIdx]
 				local fID = contactPoints.fIDs[ptIdx]
 

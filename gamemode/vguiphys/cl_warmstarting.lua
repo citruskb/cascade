@@ -17,7 +17,7 @@ function GM:GetFeatureID(refHitbox, incHitbox, refIDX, incIDX, idx)
 	local refPhysID = refPhysbox.id
 	local incPhysID = incPhysbox.id
 	local refHitID = refHitbox.id
-	local incHitID = incHirbox.id
+	local incHitID = incHitbox.id
 
 	local prefix =
 		bit.Bor(

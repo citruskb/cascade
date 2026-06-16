@@ -27,52 +27,21 @@ local math_Round = math.Round
 local function InitVector2(self) self.vpos = NewV2() self.svpos = NewV2() self.cpos = NewV2() self.scpos = NewV2() end
 
 local function HandleVector2(self)
-
 	if not self.initv2 then
 		InitVector2(self)
 		self.initv2 = true
 	end
 
+	local x, y = self:GetPos()
+	self.vpos:SetUnpacked(x, y)
 
-	-- Set "vpos"
-	-- This is a Vector2, top left corner. Pannel positions are always whole numbers.
-	local vpos = self.vpos
-	V2_SetUnpacked(vpos,
-		PAN_GetPos(self))
+	local relativeTo = IsValid(parent) and parent or self
+	self.svpos:SetUnpacked(relativeTo:LocalToScreen(x, y))
 
+	local w, h = self:GetSize()
+	self.cpos = self.vpos + Vector2(math_Round(w * 0.5, 0), math_Round(h * 0.5, 0))
 
-	-- Set "svpos"
-	-- This is a Vector2, top left corner relative to the entire screen.
-	-- If we have a parent, LocalToScreen needs to be relative to that parent. Otherwise, it's simply the same as vpos.
-	local parent = PAN_GetParent(self)
-	local svpos = self.svpos
-	if IsValid(parent) then
-		local x, y = V2_Unpack(vpos)
-		V2_SetUnpacked(svpos,
-			PAN_LocalToScreen(parent, x, y))
-	else
-		V2_Set(svpos, vpos)
-	end
-
-
-	-- Set "cpos"
-	-- This is a Vector2, center of the panel. Remember, postive x is right, positive y is down.
-	local w, h = PAN_GetSize(self)
-	self.cpos = svpos + Vector2(math_Round(w * 0.5, 0), math_Round(h * 0.5, 0))
-
-
-	-- Set "scpos"
-	-- This is a Vector2, center of the panel relative to the entire screen.
-	-- Again, if we have a parent, LocalToScreen needs to be relative to that parent. Otherwise this is the same as cpos.
-	local scpos = self.scpos
-	if IsValid(parent) then
-		local x, y = V2_Unpack(scpos)
-		V2_SetUnpacked(scpos,
-			PAN_LocalToScreen(self, x, y))
-	else
-		V2_Set(scpos, cpos)
-	end
-
+	self.scpos:SetUnpacked(relativeTo:LocalToScreen(x, y))
 end
 
 local OldInit = meta.Init
