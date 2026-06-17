@@ -12,8 +12,8 @@ local function ClipLineSegmentToLine(point1, point2, normal, offset)
 	-- If one is in front of the plane, we have to clip it to the intersection point
 	-- #clippedPoints < 2 for edge case where 1 point is exactly on the plane
 	if math.Sign(dist1) ~= math.Sign(dist2) and #clippedPoints < 2 then
-		local pctAcross = dist2 / (dist2 - dist1)
-		local intersectionPt = point2 + (point1 - point2) * pctAcross
+		local pctAcross = dist1 / (dist1 - dist2)
+		local intersectionPt = point1 + (point2 - point1) * pctAcross
 		table.Insert(clippedPoints, intersectionPt)
 	end
 
@@ -67,8 +67,8 @@ function GM:ClipPolyToPoly(refBody, refHitbox, incObj, incHitbox, collision)
 		incIdx = i
 	end
 
-	local b2 = incVerts[incIdx]
-	local b1 = incVerts[incIdx % #incVerts + 1]
+	local b1 = incVerts[incIdx]
+	local b2 = incVerts[incIdx % #incVerts + 1]
 
 	table.Insert(refLines, Points({a1, a2}))
 	table.Insert(incLines, Points({b1, b2}))
