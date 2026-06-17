@@ -201,8 +201,8 @@ function PANEL:Init()
 	local size = 60
 	MakeBox(size, Vector2(w * 0.5, h * 0.5))
 	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.6), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
-	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.7), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
-	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.8), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.7), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.8), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
 
 
 	--[[ Irregular shape

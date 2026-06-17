@@ -27,8 +27,6 @@ local function GetNormals(verts)
 		local p2 = verts[k % #verts + 1]
 		tab[k] = (p1 - p2):GetRotate90CW():GetNormalized()
 
-		local data = {normal = tab[k], referenceLine = Points({p1, p2})}
-		table.insert(normals, data)
 	end
 	return tab
 end
@@ -38,18 +36,32 @@ function GM:ClipPolyToPoly(refBody, refHitbox, incObj, incHitbox, collision)
 	local incVerts = incHitbox:GetHBScreenPointsObj():GetPoints()
 	local refNormals = GetNormals(refVerts)
 	local incNormals = GetNormals(incVerts)
+	local n = collision.normal
 
-	local refIdx = collision.referenceEdgeIndex
+
+	-- ref edge selection: edge with normal points most towards n
+	local largestDot = -math.HUGE
+	local refIdx = 1
+	for i = 1, #refNormals do
+		local d = n:Dot(refNormals[i])
+		if d < largestDot then continue end
+
+		largestDot = d
+		refIdx = i
+	end
+
 	local a1 = refVerts[refIdx]
 	local a2 = refVerts[refIdx % #refVerts + 1]
-	local n = refNormals[refIdx]
+
+	local data = {normal = n, referenceLine = Points({a1, a2})}
+	table.insert(normals, data)
 
 	-- incident edge selection: edge with normal pointing most opposite to n
-	local largestDot = -math.HUGE
+	local lowestDot = math.HUGE
 	local incIdx = 1
 	for i = 1, #incNormals do
 		local d = n:Dot(incNormals[i])
-		if d < largestDot then continue end
+		if d > lowestDot then continue end
 
 		lowestDot = d
 		incIdx = i
@@ -71,7 +83,7 @@ function GM:ClipPolyToPoly(refBody, refHitbox, incObj, incHitbox, collision)
 	local finalPoints = {points = {}, fIDs = {}}
 	for i = 1, #clippedPoints do
 		local point = clippedPoints[i]
-		if n:Dot(point - a1) <= VGUIPHYS_SLOP_LINEAR then continue end
+		if n:Dot(point - a1) > VGUIPHYS_SLOP_LINEAR then continue end
 		table.Insert(finalPoints.points, point)
 		table.Insert(finalPoints.fIDs, gamemode.Call("GetFeatureID", refHitbox, incHitbox, refIdx, incIdx, i))
 	end

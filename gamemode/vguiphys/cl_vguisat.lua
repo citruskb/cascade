@@ -35,11 +35,24 @@ local math_Min = math.Min
 local function GetNormal(pointstab, i)
 	local vec1 = Rawget(pointstab, i)
 	local vec2 = Rawget(pointstab, i == #pointstab and 1 or i + 1)
-	return vec1:GetConnectingNormal(vec2)
+	local normal = vec1:GetConnectingNormal(vec2)
+
+	return normal
 end
 
--- We know that for any given normal, an array of points will always project the same way.
--- We can leverage this for caching.
+local function ProjectVerts(verts, axis)
+	local min, max = math.HUGE, -math.HUGE
+
+	for k, point in pairs(verts) do
+		local p = point:Dot(axis)
+		min = math.Min(min, p)
+		max = math.Max(max, p)
+	end
+
+	return {min = min, max = max}
+end
+
+--[[
 local function GetProjRange(pointstab, normal)
 	local nx, ny = normal:Unpack()
 
@@ -55,6 +68,7 @@ local function GetProjRange(pointstab, normal)
 
 	return {min = min, max = max}
 end
+]]
 
 local function GetRangeOverlap(rangeA, rangeB)
 	return math_Min(Rawget(rangeA, "max"), Rawget(rangeB, "max")) - math_Max(Rawget(rangeA, "min"), Rawget(rangeB, "min"))
@@ -74,7 +88,7 @@ function GM:VGUISAT(hbA, hbB)
 	local pointsA, pointsB = hbA:GetHBScreenPointsObj(), hbB:GetHBScreenPointsObj()
 	local pointsTabA, pointsTabB = pointsA:GetPoints(), pointsB:GetPoints()
 
-	local smallestOverlap, mtv, relativeTo, refEdge
+	local smallestOverlap, mtv, relativeTo, refEdgeA, refEdgeB
 
 	-- Assuming there's at least one new line for each point that exists...
 	for i = 1, #pointsTabA do
@@ -83,10 +97,10 @@ function GM:VGUISAT(hbA, hbB)
 		local normalA = GetNormal(pointsTabA, i)
 
 		-- Next, we get the projection of hbA vs that normal.
-		local projRangeA = GetProjRange(pointsTabA, normalA)
+		local projRangeA = ProjectVerts(pointsTabA, normalA)
 
 		-- We do the same for hbB.
-		local projRangeB = GetProjRange(pointsTabB, normalA)
+		local projRangeB = ProjectVerts(pointsTabB, normalA)
 
 		-- Get our overlap!
 		local overlap = GetRangeOverlap(projRangeA, projRangeB)
@@ -100,7 +114,7 @@ function GM:VGUISAT(hbA, hbB)
 		smallestOverlap = overlap
 		mtv = Vector2(normalA:Unpack()) -- A new Vector2 because we cache the normal above, but also manipulate this later on.
 		relativeTo = hbA
-		refEdge = i
+		refEdgeA = i
 
 	end
 
@@ -108,8 +122,8 @@ function GM:VGUISAT(hbA, hbB)
 	for i = 1, #pointsTabB do
 
 		local normalB = GetNormal(pointsTabB, i)
-		local projRangeB = GetProjRange(pointsTabB, normalB)
-		local projRangeA = GetProjRange(pointsTabA, normalB)
+		local projRangeB = ProjectVerts(pointsTabB, normalB)
+		local projRangeA = ProjectVerts(pointsTabA, normalB)
 		local overlap = GetRangeOverlap(projRangeB, projRangeA)
 
 		if overlap <= 0 then return end
@@ -118,7 +132,7 @@ function GM:VGUISAT(hbA, hbB)
 		smallestOverlap = overlap
 		mtv = Vector2(normalB:Unpack())
 		relativeTo = hbB
-		refEdge = i
+		refEdgeB = i
 
 	end
 
@@ -126,12 +140,12 @@ function GM:VGUISAT(hbA, hbB)
 	-- But we need to make sure we are pointing our MTV the correct direction.
 	-- And relative to the right object.
 
-	-- If our mtv is relative to hbB instead of hbA then simply swap the two.
-	if relativeTo == hbB then
-		local ref_pointsA, ref_pointsB = pointsA, pointsB
-		pointsA, pointsB = ref_pointsB, ref_pointsA
-		ref_pointsA, ref_pointsB = nil, nil
-	end
+	--[[
+	local p1 = relativeTo == hbB and pointsTabB[refEdgeB] or pointsTabA[refEdgeA]
+	local p2 = relativeTo == hbB and pointsTabB[refEdgeB % #pointsTabB + 1] or pointsTabA[refEdgeA % #pointsTabA + 1]
+	local data = {normal = mtv, referenceLine = Points({p1, p2})}
+	table.insert(normals, data)
+	]]
 
 	-- Orient our MTV correctly so that it points from A -----> B
 	mtv = OrientMTV(
@@ -140,5 +154,5 @@ function GM:VGUISAT(hbA, hbB)
 		mtv
 	)
 
-	return {penetration = smallestOverlap, normal = mtv, referenceEdgeIndex = refEdge}
+	return {penetration = smallestOverlap, normal = mtv}
 end

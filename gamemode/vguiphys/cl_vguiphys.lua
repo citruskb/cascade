@@ -34,7 +34,7 @@ VGUIPHYS_PASSES = 8
 VGUI_EPSILON_OVERLAP = 0.05
 
 -- Amount to nudge velocity downwards every frame.
-VGUIPHYS_GRAVITY = 240 --0.024
+VGUIPHYS_GRAVITY = 240
 VGUIPHYS_GRAVITY_VEC2 = Vector2(0, VGUIPHYS_GRAVITY)
 
 VGUI_STATIC_FRICTION = 2
@@ -45,7 +45,7 @@ VGUIPHYS_POS_SLEEP_THRESHOLD = 1
 VGUIPHYS_RAD_SLEEP_THRESHOLD = 0.01
 
 -- Stop nudging velocity downards after reaching this velocity.
-VGUIPHYS_TERMINAL_VELOCITY = 240 --1.4
+VGUIPHYS_TERMINAL_VELOCITY = 240
 
 -- How different can x-y values of persistent contact points be and still be considered persistent?
 VGUIPHYS_WARMSTART_TOL = 0--0.01
