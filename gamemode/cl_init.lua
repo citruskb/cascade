@@ -91,24 +91,10 @@ hook.Add("OnReloaded", "OnReloaded.LocalPlayerFound", LocalPlayerFound)
 
 -- The following functions should be set up as is with the underscore. No need to check if the local player is valid or not.
 local nextTick = 0
-local nextVGUIPhysUpdate = 0
-local VGUItick = 0.030303030303030 -- Make sure that this runs the same regardless of server tick rate
-GM.VGUIStepCount = 0
 function GM:_Think()
 	local ct = CurTime()
 
-	gamemode.Call("VGUIPhysicsStep2")
-
-	-- Update item physics if it makes sense to.
-	--[[
-	local physboxes = table.Count(self.VGUIPhysboxes)
-	if nextVGUIPhysUpdate <= ct
-		and (physboxes > 0 or table.Count(self.VGUIHitboxes) > 0) then
-			self.VGUIStepCount = self.VGUIStepCount + 1
-			gamemode.Call("VGUIPhysicsStep1", VGUItick, VGUIPHYS_PASSES)
-			nextVGUIPhysUpdate = ct + VGUItick
-	end
-	]]
+	gamemode.Call("VGUIPhysicsStep")
 
 	if nextTick > ct then return end
 	nextTick = ct + 1

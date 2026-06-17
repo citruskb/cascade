@@ -1,5 +1,4 @@
 if not VGUICollisionConstraint then
-	GM.VGUICollisionConstraints = {}
 	VGUICollisionConstraint = Class:Create(nil, "VGUICollisionConstraint")
 end
 

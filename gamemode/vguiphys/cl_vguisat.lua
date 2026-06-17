@@ -52,24 +52,6 @@ local function ProjectVerts(verts, axis)
 	return {min = min, max = max}
 end
 
---[[
-local function GetProjRange(pointstab, normal)
-	local nx, ny = normal:Unpack()
-
-	local min, max
-	for j = 1, #pointstab do
-		local point = Rawget(pointstab, j)
-		local x, y = point:Unpack()
-		local proj = x * nx + y * ny
-
-		if not min or (min and proj < min) then min = proj end
-		if not max or (max and proj > max) then max = proj end
-	end
-
-	return {min = min, max = max}
-end
-]]
-
 local function GetRangeOverlap(rangeA, rangeB)
 	return math_Min(Rawget(rangeA, "max"), Rawget(rangeB, "max")) - math_Max(Rawget(rangeA, "min"), Rawget(rangeB, "min"))
 end
@@ -88,7 +70,7 @@ function GM:VGUISAT(hbA, hbB)
 	local pointsA, pointsB = hbA:GetHBScreenPointsObj(), hbB:GetHBScreenPointsObj()
 	local pointsTabA, pointsTabB = pointsA:GetPoints(), pointsB:GetPoints()
 
-	local smallestOverlap, mtv, relativeTo, refEdgeA, refEdgeB
+	local smallestOverlap, mtv, relativeTo
 
 	-- Assuming there's at least one new line for each point that exists...
 	for i = 1, #pointsTabA do

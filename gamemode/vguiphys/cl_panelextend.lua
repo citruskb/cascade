@@ -10,21 +10,8 @@ Since normally panels don't change their size or position frequently, I figure t
 ]]--
 
 local meta = FindMetaTable("Panel")
-local PAN_GetPos = meta.GetPos
-local PAN_GetSize = meta.GetSize
-local PAN_LocalToScreen = meta.LocalToScreen
-local PAN_GetParent = meta.GetParent
 
-local vmeta = FindMetaTable("v2")
-local V2_SetUnpacked = vmeta.SetUnpacked
-local V2_Unpack = vmeta.Unpack
-local V2_Set = vmeta.Set
-
-local NewV2 = Vector2
-
-local math_Round = math.Round
-
-local function InitVector2(self) self.vpos = NewV2() self.cpos = NewV2() end
+local function InitVector2(self) self.vpos = Vector2() self.cpos = Vector2() end
 
 local function HandleVector2(self)
 	if not self.initv2 then
@@ -36,7 +23,7 @@ local function HandleVector2(self)
 	self.vpos:SetUnpacked(x, y)
 
 	local w, h = self:GetSize()
-	self.cpos = self.vpos + Vector2(math_Round(w * 0.5, 0), math_Round(h * 0.5, 0))
+	self.cpos = self.vpos + Vector2(w * 0.5, 0, h * 0.5, 0)
 end
 
 local OldInit = meta.Init
