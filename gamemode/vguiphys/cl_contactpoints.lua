@@ -53,9 +53,6 @@ function GM:ClipPolyToPoly(refBody, refHitbox, incObj, incHitbox, collision)
 	local a1 = refVerts[refIdx]
 	local a2 = refVerts[refIdx % #refVerts + 1]
 
-	local data = {normal = n, referenceLine = Points({a1, a2})}
-	table.insert(normals, data)
-
 	-- incident edge selection: edge with normal pointing most opposite to n
 	local lowestDot = math.HUGE
 	local incIdx = 1
@@ -70,11 +67,15 @@ function GM:ClipPolyToPoly(refBody, refHitbox, incObj, incHitbox, collision)
 	local b1 = incVerts[incIdx]
 	local b2 = incVerts[incIdx % #incVerts + 1]
 
-	table.Insert(refLines, Points({a1, a2}))
-	table.Insert(incLines, Points({b1, b2}))
+	--table.Insert(refLines, Points({a1, a2}))
+	--table.Insert(incLines, Points({b1, b2}))
 
 	-- Clip to start and end faces. Tangents on ends of reference edge
 	local refTangent = (a2 - a1):GetNormalized()
+
+	--local data = {normal = refTangent, referenceLine = Points({a1, a2})}
+	--table.insert(normals, data)
+
 	local clippedPoints = ClipLineSegmentToLine(b1, b2, -refTangent, a1)
 	if #clippedPoints == 0 then return {points = {}, fIDs = {}} end
 	clippedPoints = ClipLineSegmentToLine(clippedPoints[1], clippedPoints[2], refTangent, a2)

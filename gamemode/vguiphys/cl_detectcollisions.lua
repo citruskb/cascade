@@ -13,6 +13,11 @@ local function CheckCollision(bodyA, bodyB)
 			local collision = gamemode.Call("VGUISAT", hitboxA, hitboxB)
 			if not collision then continue end
 
+			hitboxA = collision.hbA
+			hitboxB = collision.hbB
+			bodyA = hitboxA.physbox
+			bodyB = hitboxB.physbox
+
 			local contactPoints = gamemode.Call("ClipPolyToPoly", bodyA, hitboxA, bodyB, hitboxB, collision)
 
 			-- Create contact constraints

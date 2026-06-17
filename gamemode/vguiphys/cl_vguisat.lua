@@ -136,5 +136,5 @@ function GM:VGUISAT(hbA, hbB)
 		mtv
 	)
 
-	return {penetration = smallestOverlap, normal = mtv}
+	return {hbA = relativeTo == hbB and hbB or hbA, hbB = relativeTo == hbB and hbA or hbB, penetration = smallestOverlap, normal = mtv}
 end

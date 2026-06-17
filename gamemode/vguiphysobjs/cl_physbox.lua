@@ -51,7 +51,7 @@ function VGUIPhysbox:__Create(parent)
 	self.hitboxes = {}
 	self.isStatic = false
 	self.density = 1
-	self.mass = 1
+	self.mass = 10
 	self.momentOfInertia = 1
 	self.friction = 0.6
 	self.restitution = 0.05
@@ -148,7 +148,7 @@ end
 -- Possibly calculate these for all hitboxes then add together?
 function meta:RecalculateMassAndInertia()
 	local w, h = self.parent:GetSize()
-	self.mass = self.isStatic and math.HUGE or self.mass --self.density * w * h
+	self.mass = self.isStatic and math.HUGE or self.density * w / 100 * h / 100
 	self.momentOfInertia = self.isStatic and math.HUGE or (self.mass * (w * w + h * h)) / 12
 end
 

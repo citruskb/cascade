@@ -181,10 +181,9 @@ function PANEL:Init()
 	end
 
 
-	--[[
 	local size = 60
 	--MakeBox(size, Vector2(w * 0.5, h * 0.5))
-	local num = 12
+	local num = 16
 	for i = 1, num do
 		MakeBox(size,
 		Vector2(
@@ -196,13 +195,21 @@ function PANEL:Init()
 			-math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)
 		))
 	end
-	]]
 
+
+	--[[
 	local size = 60
+	MakeBox(size, Vector2(w * 0.5, h * 0.3))
+	MakeBox(size, Vector2(w * 0.5, h * 0.6))
 	MakeBox(size, Vector2(w * 0.5, h * 0.5))
-	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.6), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
-	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.7), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
-	MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.8), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	MakeBox(size, Vector2(w * 0.5, h * 0.4))
+	MakeBox(size, Vector2(w * 0.5, h * 0.3))
+	MakeBox(size, Vector2(w * 0.5, h * 0.2))
+	MakeBox(size, Vector2(w * 0.5, h * 0.1))
+	]]
+	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.6), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.7), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.8), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
 
 
 	--[[ Irregular shape
