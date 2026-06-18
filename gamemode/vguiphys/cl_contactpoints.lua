@@ -84,7 +84,7 @@ function GM:ClipPolyToPoly(refBody, refHitbox, incObj, incHitbox, collision)
 	local finalPoints = {points = {}, fIDs = {}}
 	for i = 1, #clippedPoints do
 		local point = clippedPoints[i]
-		if n:Dot(point - a1) > VGUIPHYS_SLOP_LINEAR then continue end
+		if n:Dot(point - a1) > VGUIPHYS_SLOP_COL then continue end
 		table.Insert(finalPoints.points, point)
 		table.Insert(finalPoints.fIDs, gamemode.Call("GetFeatureID", refHitbox, incHitbox, refIdx, incIdx, i))
 	end

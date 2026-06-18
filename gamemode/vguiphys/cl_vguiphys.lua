@@ -16,11 +16,12 @@ end
 -- Physics timestep length. 1 / x = called x times per second.
 VGUIPHYS_DT = 1 / 100
 VGUIPHYS_MAXSTEPS = 10
-VGUIPHYS_CONSTRAINT_ITERATIONS = 3--10
+VGUIPHYS_CONSTRAINT_ITERATIONS = 8--10
 VGUI_EPSILON_OVERLAP = 0.05 -- Make sure our new better overlap is smaller by at least this much.
-VGUIPHYS_SLOP_LINEAR = 0.002 -- Allow some degree of overlap between objects without taking collision corrective action.
-VGUIPHYS_SOFT_HERTZ = 50
-VGUIPHYS_SOFT_DAMPINGRATIO = 3
+VGUIPHYS_SLOP_LINEAR = 1.4 -- Allow some degree of overlap between objects without taking collision corrective action.
+VGUIPHYS_SLOP_COL = 0.002 -- Allow some degree of leniency deciding collision points.
+VGUIPHYS_SOFT_HERTZ = 30
+VGUIPHYS_SOFT_DAMPINGRATIO = 10
 VGUIPHYS_SOFT_CONTACTSPEED = 150
 
 VGUIPHYS_GRAVITY = 240
@@ -62,7 +63,7 @@ function GM:VGUIPhysApplyGravity(dt)
 	for physbox, _ in pairs(self.VGUIPhysboxes) do
 		if physbox.isStatic then continue end
 
-		physbox:AddRotation(dt)
+		--physbox:AddRotation(dt)
 
 		local _, vy = physbox.velocity:Unpack()
 		if vy >= VGUIPHYS_TERMINAL_VELOCITY then continue end
