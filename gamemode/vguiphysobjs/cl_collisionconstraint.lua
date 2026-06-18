@@ -8,7 +8,7 @@ function VGUICollisionConstraint:__Create(objA, objB, screenPoint, normal, penet
 	self.bodyA = objA
 	self.bodyB = objB
 	self.fID = fID -- Contact persistence -> see cl_warmstarting.lua
-	self.reusedCount = 0 -- Track if this contact was reused from last physics step
+	self.isReused = false -- Track if this contact was reused from last physics step
 	self.friction = math.Sqrt(objA.friction * objB.friction)
 	self.restitution = math.Sqrt(objA.restitution * objB.restitution)
 	self.accuNormalLambda = 0
@@ -167,7 +167,7 @@ function meta:ApplyRestitution()
 	-- 1. Theres a restitution coefficient > 0
 	-- 2. The contact point isn't persistent
 	-- 3. The initial relative velocity was approaching fast enough
-	if self.reusedCount > 0 or self.restitution == 0 then return end
+	if self.isReused or self.restitution == 0 then return end
 
 	local restitutionThreshold = 1
 	if self.relativeVelocity < -restitutionThreshold then return end

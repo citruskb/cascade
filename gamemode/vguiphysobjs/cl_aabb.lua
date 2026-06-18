@@ -1,5 +1,4 @@
 if not VGUIAABB then
-	GM.VGUIAABB = {}
 	VGUIAABB = Class:Create(nil, "VGUIAABB")
 end
 

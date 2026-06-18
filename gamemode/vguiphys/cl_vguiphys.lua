@@ -11,6 +11,7 @@ if not vguiPhysLoaded then
 	GM.VGUIPhysboxes = {}
 	GM.VGUIHitboxes = {}
 	GM.VGUICollisionConstraints = {}
+	GM.VGUICollisionCandidates = {}
 	GM.VGUIPhysLastStepTime = 0
 	GM.VGUIPhysAccuStepTime = 0
 	vguiPhysLoaded = true
@@ -26,6 +27,8 @@ VGUIPHYS_SLOP_COL = 0.002 -- Allow some degree of leniency deciding collision po
 VGUIPHYS_SOFT_HERTZ = 30
 VGUIPHYS_SOFT_DAMPINGRATIO = 10
 VGUIPHYS_SOFT_CONTACTSPEED = 150
+
+VGUIPHYS_HASHGRID_SIZE = 80	-- vgui position divided by this to determine grid position for VGUI collisions hashing.
 
 VGUIPHYS_GRAVITY = 240
 VGUIPHYS_GRAVITY_VEC2 = Vector2(0, VGUIPHYS_GRAVITY)
@@ -56,6 +59,7 @@ end
 
 function GM:VGUIPhysicsPass(dt, iter)
 	gamemode.Call("VGUIPhysApplyGravity", dt)			-- Gravity.
+	gamemode.Call("VGUIPhysHashGridCollisions")			-- Broad phase. Drastic performance increase.
 	gamemode.Call("VGUIPhysDetectCollisions")			-- Detect collisions. Build & update collision constraints.
 	gamemode.Call("VGUIPhysSolveConstraints", dt, iter)	-- Iteratively solve collision constraints.
 	gamemode.Call("VGUIPhysStepPhysboxes", dt)			-- Update our physbox pos and rot based on velocities.
@@ -80,9 +84,60 @@ end
 
 
 
+--	[[ Hash Collisions ]]
+local function GetGridIDX(x, y) return ToString(x) .. "x" .. ToString(y) end
+local function HashPairID(objA, objB) return ToString(math.Min(objA.id, objB.id)) .. ":" .. ToString(math.Max(objA.id, objB.id)) end
+function GM:VGUIPhysHashGridCollisions()
+	local newGrid = {}
+	--self.VGUICollisionHashGrid = {}
+
+	local objects = {}
+	for physbox, _ in pairs(self.VGUIPhysboxes) do
+		table.Insert(objects, physbox)
+	end
+
+	-- Get all our objects hashed into grids.
+	local gridSize = VGUIPHYS_HASHGRID_SIZE
+	for i = 1, #objects do
+		local obj = objects[i]
+		local aabb = obj:GetAABB()
+		local minCellX = math.floor(aabb.min.x / gridSize)
+		local minCellY = math.floor(aabb.min.y / gridSize)
+		local maxCellX = math.floor(aabb.max.x / gridSize)
+		local maxCellY = math.floor(aabb.max.y / gridSize)
+
+		for x = minCellX, maxCellX do
+			for y = minCellY, maxCellY do
+				local idx = GetGridIDX(x, y)
+				if not newGrid[idx] then newGrid[idx] = {} end
+				table.Insert(newGrid[idx], obj)
+			end
+		end
+	end
+
+	-- Now go over all our grids and evaluate potential candidates
+	local potentialSATCandidates = {}
+	for _, elements in pairs(newGrid) do
+		if #elements <= 1 then continue end
+
+		for i = 1, #elements do
+			for j = i + 1, #elements do
+				table.Insert(potentialSATCandidates, HashPairID(elements[i], elements[j]), {bodyA = elements[i], bodyB = elements[j]})
+			end
+		end
+	end
+
+	self.VGUICollisionCandidates = potentialSATCandidates
+end
+--	[[	]]
+
+
+
 --	[[ DetectCollisions ]]
 local function CheckCollision(bodyA, bodyB)
 	if bodyA.isStatic and bodyB.isStatic then return {} end
+
+	-- This is effectively our broad phase, all in one line.
 	if not bodyA:GetAABB():Overlaps(bodyB:GetAABB()) then return {} end
 
 	local constr = {}
@@ -110,7 +165,7 @@ local function CheckCollision(bodyA, bodyB)
 				-- Try to re-use existing contact
 				local existingContact = GAMEMODE.VGUICollisionConstraints[fID]
 				if existingContact then
-					existingContact.reusedCount = existingContact.reusedCount + 1
+					existingContact.isReused = true
 					existingContact:SetCollisionData(screenP, collision.normal, collision.penetration)
 					table.Insert(constr, fID, existingContact)
 				else
@@ -126,12 +181,22 @@ local function CheckCollision(bodyA, bodyB)
 end
 
 function GM:VGUIPhysDetectCollisions()
+	--[[
 	local objects = {}
 	for physbox, _ in pairs(self.VGUIPhysboxes) do
 		table.Insert(objects, physbox)
 	end
+	]]
 
 	local rebuildCollisionConstraints = {}
+	for pairID, objects in pairs(self.VGUICollisionCandidates) do
+		local tab = CheckCollision(objects.bodyA, objects.bodyB)
+		for fID, const in pairs(tab) do
+			rebuildCollisionConstraints[fID] = const
+		end
+	end
+
+	--[[
 	for i = 1, #objects do
 		for j = i + 1, #objects do
 			local tab = CheckCollision(objects[i], objects[j])
@@ -140,6 +205,7 @@ function GM:VGUIPhysDetectCollisions()
 			end
 		end
 	end
+	]]
 
 	self.VGUICollisionConstraints = rebuildCollisionConstraints
 end
