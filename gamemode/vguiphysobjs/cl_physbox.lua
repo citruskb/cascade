@@ -153,14 +153,17 @@ function meta:RecalculateMassAndInertia()
 end
 
 -- The center of our physbox, relative to screenspace.
-function meta:GetCenterScreenPoint() return self.parent.cpos end
+function meta:GetCenterScreenPoint()
+	local w, h = self.parent:GetSize()
+	return self.position + Vector2(w * 0.5, h * 0.5)
+end
 
 -- (0,0) of the grid the hitbox's points draw on.
 function meta:GetScreenHitboxPointsOrigin()
 	if self.parent.isItem then
-		return self.parent.cpos + self.originCenterOffset
+		return self:GetCenterScreenPoint() + self.originCenterOffset
 	else
-		return self.parent.vpos
+		return self.position
 	end
 end
 

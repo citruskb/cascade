@@ -122,10 +122,10 @@ local function DrawCollisionPoint(cpoint)
 end
 
 
-local function DrawAux(pan, physbox, hitbox)
+local function DrawAux(physbox, hitbox)
 	-- Box at the center
 	surface.SetDrawColor(COLOR_BLACK)
-	local xp, yp = pan.cpos:Unpack()
+	local xp, yp = physbox:GetCenterScreenPoint():Unpack()
 	local s = 8
 	surface.DrawRect(xp - s * 0.5, yp - s * 0.5, s, s)
 
@@ -195,7 +195,7 @@ local function DrawDebug()
 
 		for k, cpoint in pairs(cps) do DrawCollisionPoint(cpoint) end
 
-		if detailed then DrawAux(pan, physbox, hitbox) end
+		if detailed then DrawAux(physbox, hitbox) end
 
 		for k, line in pairs(refLines) do DrawRefLine(line) end
 		for k, line in pairs(incLines) do DrawIncLine(line) end
