@@ -1,12 +1,6 @@
 --[[
-
-This looks like it was coded by an alien. I know. Sorry.
-Doing everything possible to save frames with localization and sidestepping indexing overhead.
-Some funcs here are potentially called thousands of times per second due to moving physics panels in the UI.
-
-The point of this is to cache our panel position, screen-based position, center, and screen-based center everytime a panel position or size changes.
+The point of this is to cache our Vector2-based panel position and center everytime a panel position or size changes.
 Since normally panels don't change their size or position frequently, I figure this is probably OK to tack onto every existing panel.
-
 ]]--
 
 local meta = FindMetaTable("Panel")
@@ -23,7 +17,7 @@ local function HandleVector2(self)
 	self.vpos:SetUnpacked(x, y)
 
 	local w, h = self:GetSize()
-	self.cpos = self.vpos + Vector2(w * 0.5, 0, h * 0.5, 0)
+	self.cpos = self.vpos + Vector2(w * 0.5, h * 0.5)
 end
 
 local OldInit = meta.Init

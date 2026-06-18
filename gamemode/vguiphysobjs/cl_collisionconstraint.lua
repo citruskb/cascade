@@ -192,17 +192,6 @@ function meta:ApplyRestitution()
 	self.bodyB:ApplyImpulse(restitutionImpulse, self.screenPoint)
 end
 
---[[
-function meta:CheckRemove()
-	if not IsValid(self.bodyA.parent) or not IsValid(self.bodyB.parent) then
-		self:Remove()
-		return true
-	end
-
-	return false
-end
-]]
-
 function meta:Remove()
 	GAMEMODE.VGUICollisionConstraints[self.fID] = nil
 	table.Empty(self)
