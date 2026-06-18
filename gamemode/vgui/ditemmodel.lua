@@ -2,10 +2,19 @@
 
 PANEL = {}
 
+--[[
+Critical vars:
+
+FOV
+camPos
+]]
+
 -- Init vars?
 -- Make sure item is postioned correctly?
 function PANEL:Init()
-	self.FOV = 60
+	self.fov = 60
+	self.camPos = Vector(1, 0, 0)
+	self.rotation = 0
 end
 
 -- ?
@@ -28,9 +37,11 @@ function PANEL:Paint()
 	cam.IgnoreZ(true)
 
 	local mins, maxs = ent:OBBMins(), ent:OBBMaxs()
-	local campos = mins:Distance(maxs) * Vector(1, 0, 0)
+	local campos = mins:Distance(maxs) * self.camPos
 	local lookat = (mins + maxs) / 2
-	local ang = (lookat - campos):Angle()
+	local towards = lookat - campos
+	local ang = towards:Angle()
+	ang:RotateAroundAxis(towards, self.rotation)
 
 	local x, y = self:LocalToScreen(0, 0)
 	local w, h = self:GetSize()

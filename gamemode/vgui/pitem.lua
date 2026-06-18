@@ -36,6 +36,11 @@ function PANEL:SetupModel(modelPath)
 	self.ModPan = modpan
 end
 
+function PANEL:Think()
+	if not IsValid(self.ModPan) then return end
+	self.ModPan.rotation = math.Ang(self.Physbox.rotation)
+end
+
 function PANEL:Paint() end
 
 function PANEL:OnRemove()
