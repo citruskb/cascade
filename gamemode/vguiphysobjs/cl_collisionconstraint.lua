@@ -8,11 +8,14 @@ function VGUICollisionConstraint:__Create(objA, objB, screenPoint, normal, penet
 	self.bodyA = objA
 	self.bodyB = objB
 	self.fID = fID -- Contact persistence -> see cl_warmstarting.lua
-	self.isReused = false -- Track if this contact was reused from last physics step
+	self.reusedCount = 0 -- Track if this contact was reused from last physics step
 	self.friction = math.Sqrt(objA.friction * objB.friction)
 	self.restitution = math.Sqrt(objA.restitution * objB.restitution)
 	self.accuNormalLambda = 0
 	self.accuFrictionLambda = 0
+
+	objA.isSleeping = false
+	objB.isSleeping = false
 
 	local objAStatic, objBStatic = objA.isStatic, objB.isStatic
 	self.invMassA = objAStatic and 0 or 1 / objA.mass
@@ -29,8 +32,6 @@ function VGUICollisionConstraint:__Create(objA, objB, screenPoint, normal, penet
 	local vB = self.bodyB.velocity + (self.rB:CrossS(self.bodyB.angularVelocity))
 	local rv = vB - vA
 	self.relativeVelocity = normal:Dot(rv)
-
-	GAMEMODE.VGUICollisionConstraints[fID] = self
 
 	return self
 end
@@ -56,8 +57,6 @@ function meta:ApplyImpulses(impulse)
 end
 
 function meta:Update()
-	if self:CheckRemove() then return end
-
 	self.rA = self.screenPoint - self.bodyA:GetCenterScreenPoint()
 	self.rB = self.screenPoint - self.bodyB:GetCenterScreenPoint()
 
@@ -77,12 +76,14 @@ function meta:Update()
 	local normalImpulse = self.normal * self.accuNormalLambda
 	local frictionImpulse = self.tangent * self.accuFrictionLambda
 	local totalImpulse = normalImpulse + frictionImpulse
+
 	self:ApplyImpulses(totalImpulse)
 end
 
 function meta:Solve(dt)
 	self:SolveContact(dt)
-	self:SolveFriction()
+
+	if not self.bodyA.isSleeping and not self.bodyB.isSleeping then self:SolveFriction() end
 end
 
 local function GetSoftConstraintParams(hertz, dampingRatio, dt)
@@ -133,12 +134,22 @@ function meta:SolveContact(dt)
 	if lambda == 0 then return end
 
 	local impulse = self.normal * lambda
+
+	if self.reusedCount > VGUIPHYS_SLEEP_REUSE_COUNT and lambda < VGUIPHYS_SLEEP_IMPULSE_THRESHOLD then
+		self.bodyA.isSleeping = true
+		self.bodyB.isSleeping = true
+		return
+	end
+
 	self.bodyA:ApplyImpulse(-impulse, self.screenPoint)
 	self.bodyB:ApplyImpulse(impulse, self.screenPoint)
 end
 
 function meta:SolveFriction()
 	if self.friction <= 0 then return end
+
+	if self.bodyA.isSleeping then self.bodyA.isSleeping = false end
+	if self.bodyB.isSleeping then self.bodyB.isSleeping = false end
 
 	local vA = self.bodyA.velocity + (self.rA:CrossS(self.bodyA.angularVelocity))
 	local vB = self.bodyB.velocity + (self.rB:CrossS(self.bodyB.angularVelocity))
@@ -168,9 +179,9 @@ end
 function meta:ApplyRestitution()
 	-- We only apply restitution if:
 	-- 1. Theres a restitution coefficient > 0
-	-- 2. The contact point isn't persistent (isReused == false)
+	-- 2. The contact point isn't persistent
 	-- 3. The initial relative velocity was approaching fast enough
-	if self.isReused or self.restitution == 0 then return end
+	if self.reusedCount > 0 or self.restitution == 0 then return end
 
 	local restitutionThreshold = 1
 	if self.relativeVelocity < -restitutionThreshold then return end
@@ -195,6 +206,7 @@ function meta:ApplyRestitution()
 	self.bodyB:ApplyImpulse(restitutionImpulse, self.screenPoint)
 end
 
+--[[
 function meta:CheckRemove()
 	if not IsValid(self.bodyA.parent) or not IsValid(self.bodyB.parent) then
 		self:Remove()
@@ -203,6 +215,7 @@ function meta:CheckRemove()
 
 	return false
 end
+]]
 
 function meta:Remove()
 	GAMEMODE.VGUICollisionConstraints[self.fID] = nil

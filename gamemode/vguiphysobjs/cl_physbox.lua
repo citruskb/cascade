@@ -39,6 +39,20 @@ function meta:AddRotation(num)
 	self.rotation = self.rotation + num
 end
 
+-- Recursively unsleep everything that's slept touching, if we unsleep.
+function meta:SetSleeping(bool)
+	if bool == false then
+		for k, fID in pairs(persistentContacts) do
+			local constr = GAMEMODE.VGUICollisionConstraints[fID]
+			constr.BodyA:SetSleeping(false)
+			constr.BodyB:SetSleeping(false)
+			constr:Remove()
+		end
+	end
+
+	self.isSleeping = bool
+end
+
 function VGUIPhysbox:__Create(parent)
 	-- Makes sure we have a unique ID for contact persistence.
 	VGUIPhysboxCount = VGUIPhysboxCount + 1
@@ -50,11 +64,14 @@ function VGUIPhysbox:__Create(parent)
 	-- To be set up a better way later?
 	self.hitboxes = {}
 	self.isStatic = false
+	self.isSleeping = false
 	self.density = 1
 	self.mass = 10
 	self.momentOfInertia = 1
 	self.friction = 0.6
 	self.restitution = 0.05
+
+	self.persistentContacts = {}
 
 	-- Offsets our hitbox point origin to center ourselves inside the item panel.
 	self.originCenterOffset = Vector2()
@@ -178,7 +195,14 @@ end
 
 -- TODO may need to recode a bit
 function meta:Step(dt)
+	table.Empty(self.persistentContacts)
+
 	if not self.isPhysicsEnabled then return end
+	if self.isSleeping then
+		self.velocity = Vector2()
+		self.angularVelocity = 0
+		return
+	end
 
 	-- Move & rotate
 	self:AddPosition(self.velocity * dt)

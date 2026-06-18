@@ -25,16 +25,19 @@ local function CheckCollision(bodyA, bodyB)
 				local screenP = contactPoints.points[ptIdx]
 				local fID = contactPoints.fIDs[ptIdx]
 
-				-- To to re-use existing contact
+				-- Try to re-use existing contact
 				local existingContact = GAMEMODE.VGUICollisionConstraints[fID]
 				if existingContact then
-					existingContact.isReused = true
+					existingContact.reusedCount = existingContact.reusedCount + 1
 					existingContact:SetCollisionData(screenP, collision.normal, collision.penetration)
-					table.Insert(constr, existingcontact)
+					bodyA.persistentContacts[fID] = existingContact
+					bodyB.persistentContacts[fID] = existingContact
+
+					table.Insert(constr, fID, existingContact)
 				else
 					-- But if not found, make a new one!
 					local newC = VGUICollisionConstraint:Create(bodyA, bodyB, screenP, collision.normal, collision.penetration, fID)
-					table.Insert(constr, newC)
+					table.Insert(constr, fID, newC)
 				end
 
 			end
@@ -58,7 +61,9 @@ function GM:VGUIPhysDetectCollisions()
 	for i = 1, #objects do
 		for j = i + 1, #objects do
 			local tab = CheckCollision(objects[i], objects[j])
-			table.Add(rebuildCollisionConstraints, tab)
+			for fID, const in pairs(tab) do
+				rebuildCollisionConstraints[fID] = const
+			end
 		end
 	end
 
