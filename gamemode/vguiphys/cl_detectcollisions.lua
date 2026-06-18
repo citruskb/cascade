@@ -30,9 +30,6 @@ local function CheckCollision(bodyA, bodyB)
 				if existingContact then
 					existingContact.reusedCount = existingContact.reusedCount + 1
 					existingContact:SetCollisionData(screenP, collision.normal, collision.penetration)
-					bodyA.persistentContacts[fID] = existingContact
-					bodyB.persistentContacts[fID] = existingContact
-
 					table.Insert(constr, fID, existingContact)
 				else
 					-- But if not found, make a new one!

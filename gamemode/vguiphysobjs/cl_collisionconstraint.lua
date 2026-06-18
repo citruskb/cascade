@@ -14,9 +14,6 @@ function VGUICollisionConstraint:__Create(objA, objB, screenPoint, normal, penet
 	self.accuNormalLambda = 0
 	self.accuFrictionLambda = 0
 
-	objA.isSleeping = false
-	objB.isSleeping = false
-
 	local objAStatic, objBStatic = objA.isStatic, objB.isStatic
 	self.invMassA = objAStatic and 0 or 1 / objA.mass
 	self.invMassB = objBStatic and 0 or 1 / objB.mass
@@ -82,8 +79,7 @@ end
 
 function meta:Solve(dt)
 	self:SolveContact(dt)
-
-	if not self.bodyA.isSleeping and not self.bodyB.isSleeping then self:SolveFriction() end
+	self:SolveFriction()
 end
 
 local function GetSoftConstraintParams(hertz, dampingRatio, dt)
@@ -134,22 +130,12 @@ function meta:SolveContact(dt)
 	if lambda == 0 then return end
 
 	local impulse = self.normal * lambda
-
-	if self.reusedCount > VGUIPHYS_SLEEP_REUSE_COUNT and lambda < VGUIPHYS_SLEEP_IMPULSE_THRESHOLD then
-		self.bodyA.isSleeping = true
-		self.bodyB.isSleeping = true
-		return
-	end
-
 	self.bodyA:ApplyImpulse(-impulse, self.screenPoint)
 	self.bodyB:ApplyImpulse(impulse, self.screenPoint)
 end
 
 function meta:SolveFriction()
 	if self.friction <= 0 then return end
-
-	if self.bodyA.isSleeping then self.bodyA.isSleeping = false end
-	if self.bodyB.isSleeping then self.bodyB.isSleeping = false end
 
 	local vA = self.bodyA.velocity + (self.rA:CrossS(self.bodyA.angularVelocity))
 	local vB = self.bodyB.velocity + (self.rB:CrossS(self.bodyB.angularVelocity))
