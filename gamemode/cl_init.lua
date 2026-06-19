@@ -6,6 +6,9 @@ include("vgui/ditemmodel.lua")
 include("vgui/pitem.lua")
 include("vgui/pshop.lua")
 
+GM_ZPOS_POVERLAY = 10
+GM_ZPOS_PSHOP = 9
+
 MySelf = MySelf or NULL
 hook.Add("InitPostEntity", "GetLocal", function()
 	MySelf = LocalPlayer()

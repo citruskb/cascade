@@ -12,6 +12,10 @@ function BackpackItem:__Create(data)
 	self.hitboxPoints = data.hitboxPoints
 	self.gridPoints = data.gridPoints
 	self.DoActivate = data.DoActivate
+
+	self.id = string.Lower(string.Replace(data.name, " ", ""))
+
+	GAMEMODE.BackpackItems[self.id] = self
 end
 
 function GM:RegisterBackpackItem(data) BackpackItem:Create(data) end

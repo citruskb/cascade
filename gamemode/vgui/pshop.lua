@@ -7,6 +7,8 @@ end
 PANEL = {}
 
 function PANEL:Init()
+	self.SetZPos(GM_ZPOS_PSHOP)
+
 	--local screenscale = BetterScreenScale()
 	local w, h = ScrW(), ScrH()
 
@@ -287,6 +289,12 @@ function GM:ShowHelp(pl)
 	if IsValid(self.pShop) then
 		self.pShop:Remove()
 		return
+	end
+
+	if IsValid(self.pPhysObj2DOverlay) then
+		self.pPhysObj2DOverlay:SetVisible(not self.pPhysObj2DOverlay:GetVisible())
+	else
+		self.pPhysObj2DOverlay = vgui.Create("PPhysObj2DOverlay")
 	end
 
 	self.pShop = vgui.Create("PShop")

@@ -8,8 +8,8 @@ local math_IsNearlyEqual = math.IsNearlyEqual
 --	//////////////////////
 
 if not PhysicsObject2D then
-	--GM.VGUIItems = {}
-	PhysicsObject2D = Class:Create(nil, "2DPhysicsObject")
+	GM.PhysicsObject2D = {}
+	PhysicsObject2D = Class:Create(nil, "PhysicsObject2D")
 end
 
 local meta = FindMetaTable("PhysicsObject2D")
@@ -17,30 +17,44 @@ local meta = FindMetaTable("PhysicsObject2D")
 function PhysicsObject2D:__Create(position, rotation, itemData, velocity, angularVelocity, isStatic)
 	self.position = position
 	self.rotation = rotation
+	self.itemData = itemData
 
-	self:InitPhysbox()
+	self:InitPhysbox(velocity, angularVelocity, isStatic)
+end
 
-	self.isStatic = isStatic
-	if not isStatic then
-		self.velocity = velocity
-		self.angularVelocity = angularVelocity
+function meta:InitPhysbox(velocity, angularVelocity, isStatic)
+	local physbox = VGUIPhysbox:Create(self)
+
+	physbox.isStatic = isStatic or physbox.isStatic
+	if not physbox.isStatic then
+		physbox.velocity = velocity or physbox.velocity
+		physbox.angularVelocity = angularVelocity or physbox.angularVelocity
 	end
 
-	self:EnablePhysics(false)
+	self:AddHitboxesToPhysbox()
 end
 
-function meta:EnablePhysics(bool)
-	if not bool then
-		self.velocity = Vector2()
-		self.angularVelocity = 0
+function meta:AddHitboxesToPhysbox()
+	if not self.itemData then return end
+	if not self.itemData.hitboxPoints then return end
+
+	local screenscale = BetterScreenScale()
+
+	local hitboxPoints = self.itemData.hitboxPoints
+	for i = 1, #hitboxPoints do
+		local pointsTab = Points(hitboxPoints[i]):GetPoints() -- TODO maybe add a shortcut for this in the points obj.
+		local scaledPointsTab = {}
+		for j = 1, #pointsTab do
+			scaledPointsTab[j] = pointsTab[i] * screenscale
+		end
+
+		local scaledPointsObj = Points(scaledPointsTab)
+		self.physbox:AddHitbox(scaledPointsObj)
 	end
-
-	self.isPhysicsEnabled = bool
 end
 
-function meta:InitPhysbox()
-	self.physbox = VGUIPhysbox:Create(self)
-end
+function meta:EnablePhysics() self.physbox:EnablePhysics() end
+function meta:DisablePhysics() self.physbox:DisablePhysics() end
 
 --	//////////////////////////
 --	[[	End PhysicsObject2D	]]
@@ -159,8 +173,8 @@ function VGUIPhysbox:__Create(parent)
 	self.originCenterOffset = Vector2()
 
 	-- Initializes physics values.
-	self.position = Vector2(parent:GetPos())
-	self.rotation = 0
+	self.position = parent.position
+	self.rotation = parent.rotation
 	self:DisablePhysics()
 
 	GAMEMODE.VGUIPhysboxes[self] = true
