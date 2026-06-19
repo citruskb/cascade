@@ -67,6 +67,9 @@ function VGUIPhysbox:__Create(parent)
 	GAMEMODE.VGUIPhysboxes[self] = true
 	self.isVGUIPhysbox = true
 
+	self.checkStartSleep = 0
+	self.isSleeping = false
+
 	return self
 end
 
@@ -136,10 +139,10 @@ function meta:GetAllHitboxPoints()
 	return allpoints
 end
 
-function meta:GetAABB()
-	local aabb = VGUIAABB:Create(Vector2(math.HUGE, math.HUGE), Vector2(math.HUGE, math.HUGE))
+function meta:GetAABB(raw)
+	local aabb = VGUIAABB:Create(Vector2(math.HUGE, math.HUGE), -Vector2(math.HUGE, math.HUGE))
 	for _, hitbox in pairs(self.hitboxes) do
-		aabb:Expand(hitbox.pointsObj)
+		aabb:Expand(raw and hitbox.pointsObj or hitbox:GetHBScreenPointsObj())
 	end
 	return aabb
 end
@@ -154,7 +157,15 @@ end
 
 -- The center of our physbox, relative to screenspace.
 function meta:GetCenterScreenPoint()
-	local w, h = self.parent:GetSize()
+	local w, h
+	if self.parent.isItem then
+		w, h = self.parent:GetSize()
+	else
+		local aabb = self:GetAABB(true)
+		local min, max = aabb.min, aabb.max
+		w, h = max.x - min.x, max.y - min.y
+	end
+
 	return self.position + Vector2(w * 0.5, h * 0.5)
 end
 
@@ -183,12 +194,22 @@ end
 function meta:Step(dt)
 	if not self.isPhysicsEnabled then return end
 
-	-- Move & rotate
-	self:AddPosition(self.velocity * dt)
-	self:AddRotation(self.angularVelocity * dt)
+	if self.isSleeping then
+		self.velocity:Zero()
+		self.angularVelocity = 0
+	else
+		-- Move & rotate
+		self:AddPosition(self.velocity * dt)
+		self:AddRotation(self.angularVelocity * dt)
 
-	-- Update our parent's position based on our's
-	self.parent:SetPos(self.position:Unpack())
+		-- Update our parent's position based on our's
+		self.parent:SetPos(self.position:Unpack())
+	end
+
+	-- Rotate our parent's model to match us.
+	if IsValid(self.parent.ModPan) then
+		self.parent.ModPan.rotation = -self.rotation
+	end
 end
 
 function meta:ApplyImpulse(impulse, screenPoint)

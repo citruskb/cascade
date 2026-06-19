@@ -18,9 +18,9 @@ if not vguiPhysLoaded then
 end
 
 -- Physics timestep length. 1 / x = called x times per second.
-VGUIPHYS_DT = 1 / 100
+VGUIPHYS_DT = 1 / 80
 VGUIPHYS_MAXSTEPS = 10
-VGUIPHYS_CONSTRAINT_ITERATIONS = 8--10
+VGUIPHYS_CONSTRAINT_ITERATIONS = 3
 VGUI_EPSILON_OVERLAP = 0.05 -- Make sure our new better overlap is smaller by at least this much.
 VGUIPHYS_SLOP_LINEAR = 1.4 -- Allow some degree of overlap between objects without taking collision corrective action.
 VGUIPHYS_SLOP_COL = 0.002 -- Allow some degree of leniency deciding collision points.
@@ -28,11 +28,14 @@ VGUIPHYS_SOFT_HERTZ = 30
 VGUIPHYS_SOFT_DAMPINGRATIO = 10
 VGUIPHYS_SOFT_CONTACTSPEED = 150
 
-VGUIPHYS_HASHGRID_SIZE = 80	-- vgui position divided by this to determine grid position for VGUI collisions hashing.
+VGUIPHYS_HASHGRID_SIZE = 180	-- vgui position divided by this to determine grid position for VGUI collisions hashing.
 
 VGUIPHYS_GRAVITY = 240
 VGUIPHYS_GRAVITY_VEC2 = Vector2(0, VGUIPHYS_GRAVITY)
 VGUIPHYS_TERMINAL_VELOCITY = 240 -- Stop applying gravity after reaching this velocity.
+
+VGUIPHYS_SLEEP_VEL_THRESHOLD = 3
+VGUIPHYS_SLEEP_ANGVEL_THRESHOLD = 0.1
 
 function GM:VGUIPhysicsStep()
 	local dt = VGUIPHYS_DT
@@ -59,9 +62,19 @@ end
 
 function GM:VGUIPhysicsPass(dt, iter)
 	gamemode.Call("VGUIPhysApplyGravity", dt)			-- Gravity.
+
+	--benchmark.Start("HashGridCollisions")
 	gamemode.Call("VGUIPhysHashGridCollisions")			-- Broad phase. Drastic performance increase.
+	--benchmark.End("HashGridCollisions")
+
+	--benchmark.Start("DetectCollisions")
 	gamemode.Call("VGUIPhysDetectCollisions")			-- Detect collisions. Build & update collision constraints.
+	--benchmark.End("DetectCollisions")
+
+	--benchmark.Start("SolveConstraints")
 	gamemode.Call("VGUIPhysSolveConstraints", dt, iter)	-- Iteratively solve collision constraints.
+	--benchmark.End("SolveConstraints")
+
 	gamemode.Call("VGUIPhysStepPhysboxes", dt)			-- Update our physbox pos and rot based on velocities.
 end
 
@@ -117,12 +130,11 @@ function GM:VGUIPhysHashGridCollisions()
 
 	-- Now go over all our grids and evaluate potential candidates
 	local potentialSATCandidates = {}
-	for _, elements in pairs(newGrid) do
-		if #elements <= 1 then continue end
-
-		for i = 1, #elements do
-			for j = i + 1, #elements do
-				table.Insert(potentialSATCandidates, HashPairID(elements[i], elements[j]), {bodyA = elements[i], bodyB = elements[j]})
+	for idx, gridElements in pairs(newGrid) do
+		if #gridElements == 1 then continue end
+		for i = 1, #gridElements do
+			for j = i + 1, #gridElements do
+				potentialSATCandidates[HashPairID(gridElements[i], gridElements[j])] = {bodyA = gridElements[i], bodyB = gridElements[j]}
 			end
 		end
 	end
@@ -138,7 +150,7 @@ local function CheckCollision(bodyA, bodyB)
 	if bodyA.isStatic and bodyB.isStatic then return {} end
 
 	-- This is effectively our broad phase, all in one line.
-	if not bodyA:GetAABB():Overlaps(bodyB:GetAABB()) then return {} end
+	--if not bodyA:GetAABB():Overlaps(bodyB:GetAABB()) then return {} end
 
 	local constr = {}
 	for idxA = 1, #bodyA.hitboxes do
@@ -147,7 +159,9 @@ local function CheckCollision(bodyA, bodyB)
 		for idxB = 1, #bodyB.hitboxes do
 			local hitboxB = bodyB.hitboxes[idxB]
 
+			benchmark.Start("SAT")
 			local collision = gamemode.Call("VGUIPhysSAT", hitboxA, hitboxB)
+			benchmark.End("SAT")
 			if not collision then continue end
 
 			hitboxA = collision.hbA
@@ -155,8 +169,11 @@ local function CheckCollision(bodyA, bodyB)
 			bodyA = hitboxA.physbox
 			bodyB = hitboxB.physbox
 
+			benchmark.Start("ClipPoly")
 			local contactPoints = gamemode.Call("ClipPolyToPoly", bodyA, hitboxA, bodyB, hitboxB, collision)
+			benchmark.End("ClipPoly")
 
+			benchmark.Start("CreateConstr")
 			-- Create contact constraints
 			for ptIdx = 1, #contactPoints.points do
 				local screenP = contactPoints.points[ptIdx]
@@ -167,13 +184,14 @@ local function CheckCollision(bodyA, bodyB)
 				if existingContact then
 					existingContact.isReused = true
 					existingContact:SetCollisionData(screenP, collision.normal, collision.penetration)
-					table.Insert(constr, fID, existingContact)
+					constr[fID] = existingContact
 				else
 					-- But if not found, make a new one!
 					local newC = VGUICollisionConstraint:Create(bodyA, bodyB, screenP, collision.normal, collision.penetration, fID)
-					table.Insert(constr, fID, newC)
+					constr[ToString(fID)] = newC
 				end
 			end
+			benchmark.End("CreateConstr")
 		end
 	end
 
@@ -181,12 +199,9 @@ local function CheckCollision(bodyA, bodyB)
 end
 
 function GM:VGUIPhysDetectCollisions()
-	--[[
-	local objects = {}
-	for physbox, _ in pairs(self.VGUIPhysboxes) do
-		table.Insert(objects, physbox)
+	for hitbox, _ in pairs(self.VGUIHitboxes) do
+		hitbox.screenPointsObjDirty = true
 	end
-	]]
 
 	local rebuildCollisionConstraints = {}
 	for pairID, objects in pairs(self.VGUICollisionCandidates) do
@@ -195,17 +210,6 @@ function GM:VGUIPhysDetectCollisions()
 			rebuildCollisionConstraints[fID] = const
 		end
 	end
-
-	--[[
-	for i = 1, #objects do
-		for j = i + 1, #objects do
-			local tab = CheckCollision(objects[i], objects[j])
-			for fID, const in pairs(tab) do
-				rebuildCollisionConstraints[fID] = const
-			end
-		end
-	end
-	]]
 
 	self.VGUICollisionConstraints = rebuildCollisionConstraints
 end
@@ -230,19 +234,34 @@ function GM:VGUIPhysSolveConstraints(dt, iter)
 
 	-- Update our constraint's info.
 	-- Also apply warmstarting in persistent contacts!
+	local count = 0
 	for fID, constr in pairs(contactConstraints) do
 		constr:Update()
+		if constr:Asleep() then count = count + 1 end
 	end
 
 	-- Solve, iteratively! With warmstarting for persistent contacts!
 	for i = 1, iter do
 		for fID, constr in pairs(contactConstraints) do
+			if constr:Asleep() then continue end
 			constr:Solve(dt)
+
+			if i ~= iter then continue end
+
+			if math.IsNearlyEqual(constr.lastNormalLambda, 0, 0.5) then
+				if constr.bodyA.velocity:LengthSqr() < VGUIPHYS_SLEEP_VEL_THRESHOLD and math.Abs(constr.bodyA.angularVelocity) < VGUIPHYS_SLEEP_ANGVEL_THRESHOLD and 
+					constr.bodyB.velocity:LengthSqr() < VGUIPHYS_SLEEP_VEL_THRESHOLD and math.Abs(constr.bodyB.angularVelocity) < VGUIPHYS_SLEEP_ANGVEL_THRESHOLD then
+						constr:SleepBodies()
+				end
+			else
+				constr:WakeBodies()
+			end
 		end
 	end
 
 	-- Evaluate bounce.
 	for fID, constr in pairs(contactConstraints) do
+		if constr:Asleep() then continue end
 		constr:ApplyRestitution()
 	end
 
@@ -286,7 +305,7 @@ end
 
 function GM:VGUIPhysSAT(hbA, hbB)
 	local pointsTabA, pointsTabB = hbA:GetHBScreenPointsObj():GetPoints(), hbB:GetHBScreenPointsObj():GetPoints()
-	local smallestOverlap, finalNormal, relativeTo
+	local smallestOverlap, finalNormal, relativeTo, refEdgeA, refEdgeB
 
 	for i = 1, #pointsTabA do
 		local normalA = GetNormal(pointsTabA, i)
@@ -326,7 +345,12 @@ function GM:VGUIPhysSAT(hbA, hbB)
 		finalNormal
 	)
 
-	return {hbA = relativeTo == hbB and hbB or hbA, hbB = relativeTo == hbB and hbA or hbB, penetration = smallestOverlap, normal = mtv}
+	return {
+		hbA = relativeTo == hbB and hbB or hbA,
+		hbB = relativeTo == hbB and hbA or hbB,
+		penetration = smallestOverlap,
+		normal = finalNormal
+	}
 end
 --	[[	]]
 
@@ -400,14 +424,8 @@ function GM:ClipPolyToPoly(refBody, refHitbox, incObj, incHitbox, collision)
 	local b1 = incVerts[incIdx]
 	local b2 = incVerts[incIdx % #incVerts + 1]
 
-	--table.Insert(refLines, Points({a1, a2}))
-	--table.Insert(incLines, Points({b1, b2}))
-
 	-- Clip to start and end faces. Tangents on ends of reference edge
 	local refTangent = (a2 - a1):GetNormalized()
-
-	--local data = {normal = refTangent, referenceLine = Points({a1, a2})}
-	--table.insert(normals, data)
 
 	local clippedPoints = ClipLineSegmentToLine(b1, b2, -refTangent, a1)
 	if #clippedPoints == 0 then return {points = {}, fIDs = {}} end
@@ -469,6 +487,6 @@ function GM:VGUIPhysGetFeatureID(refHitbox, incHitbox, refIDX, incIDX, idx)
 			)
 	end
 
-	return bit.Bor(prefix, suffix)
+	return ToString(bit.Bor(prefix, suffix))
 end
 --	[[	]]

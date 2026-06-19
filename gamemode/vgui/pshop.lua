@@ -96,8 +96,8 @@ function PANEL:Init()
 	invleftwall:SetBackgroundColor(Color(0, 67, 167, GAMEMODE.Debug and 0 or 200))
 	physbox = VGUIPhysbox:Create(invleftwall)
 	physbox:AddHitbox(Points({
-		Vector2(0, 0),
-		Vector2(w * 0.05, 0),
+		Vector2(0, -h * 4),
+		Vector2(w * 0.05, -h * 4),
 		Vector2(w * 0.05, h),
 		Vector2(0, h),
 	}), true)
@@ -110,8 +110,8 @@ function PANEL:Init()
 	invrightwall:SetBackgroundColor(Color(0, 67, 167, GAMEMODE.Debug and 0 or 200))
 	physbox = VGUIPhysbox:Create(invrightwall)
 	physbox:AddHitbox(Points({
-		Vector2(0, 0),
-		Vector2(w * 0.05, 0),
+		Vector2(0, -h * 4),
+		Vector2(w * 0.05, -h * 4),
 		Vector2(w * 0.05, h),
 		Vector2(0, h),
 	}), true)
@@ -172,7 +172,7 @@ function PANEL:Init()
 
 		if vel then item.Physbox.velocity = vel end
 		if rad then item.Physbox.rotation = rad end
-		--item:SetupModel("models/props_junk/wood_crate001a.mdl")
+		item:SetupModel("models/props_junk/wood_crate001a.mdl")
 	end
 
 
@@ -183,7 +183,7 @@ function PANEL:Init()
 
 	local size = 60
 	--MakeBox(size, Vector2(w * 0.5, h * 0.5))
-	local num = 16
+	local num = 64
 	for i = 1, num do
 		MakeBox(size,
 		Vector2(
@@ -197,16 +197,16 @@ function PANEL:Init()
 	end
 
 
-	--[[
-	local size = 60
-	MakeBox(size, Vector2(w * 0.5, h * 0.3))
-	MakeBox(size, Vector2(w * 0.5, h * 0.6))
-	MakeBox(size, Vector2(w * 0.5, h * 0.5))
-	MakeBox(size, Vector2(w * 0.5, h * 0.4))
-	MakeBox(size, Vector2(w * 0.5, h * 0.3))
-	MakeBox(size, Vector2(w * 0.5, h * 0.2))
-	MakeBox(size, Vector2(w * 0.5, h * 0.1))
-	]]
+	--local size = 60
+	--MakeBox(size, Vector2(w * 0.5, h * 0.3))
+	--MakeBox(size, Vector2(w * 0.5, h * 0.6))
+	--MakeBox(size, Vector2(w * 0.5, h * 0.5))
+	--MakeBox(size, Vector2(w * 0.5, h * 0.4))
+	--MakeBox(size, Vector2(w * 0.5, h * 0.3))
+	--MakeBox(size, Vector2(w * 0.5, h * 0.2))
+	--MakeBox(size, Vector2(w * 0.5, h * 0.1))
+	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.4), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
+	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.5), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
 	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.6), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
 	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.7), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
 	--MakeBox(size, Vector2(w * 0.5 + math.Random(-size / 2, size / 2), h * 0.8), Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)))
@@ -279,7 +279,6 @@ function PANEL:Init()
 end
 
 function PANEL:Paint()
-	--Derma_DrawBackgroundBlur(self, self.Created)
 end
 
 vgui.Register("PShop", PANEL, "DPanel")

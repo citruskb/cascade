@@ -10,6 +10,8 @@ end
 
 local meta = FindMetaTable("VGUIHitbox")
 
+
+
 function VGUIHitbox:__Create(physbox, pointsObj, id)
 	-- This coupled with the physbox's ID makes a completely unique pairing representing this hitbox for contact persistence.
 	self.id = id
@@ -22,6 +24,7 @@ function VGUIHitbox:__Create(physbox, pointsObj, id)
 	-- The actual screen location of our points, accounting for rotation, physbox position, etc
 	-- This is initialized here but recalculated when needed.
 	self.screenPointsObj = pointsObj:Copy()
+	self.screenPointsObjDirty = true
 
 	GAMEMODE.VGUIHitboxes[self] = true
 
@@ -80,12 +83,16 @@ end
 
 -- Done this way to save memory/GC. We don't want to make literally thousands of new Vector2/Point objects per frame.
 -- Returns the position of our points on the screen.
+-- We also want to cache this per physics pass.
 function meta:GetHBScreenPointsObj()
-	local physpassScreenpoints = self.screenPointsObj
-	local physpassOrigin = self.physbox:GetScreenHitboxPointsOrigin()
-	local physpassPivot = self.physbox:GetCenterScreenPoint()
+	if self.screenPointsObjDirty then
+		local physpassScreenpoints = self.screenPointsObj
+		local physpassOrigin = self.physbox:GetScreenHitboxPointsOrigin()
+		local physpassPivot = self.physbox:GetCenterScreenPoint()
 
-	self:TransformPointsAroundOrigin(physpassScreenpoints, physpassOrigin, physpassPivot)
+		self:TransformPointsAroundOrigin(physpassScreenpoints, physpassOrigin, physpassPivot)
+		self.screenPointsObjDirty = false
+	end
 
 	return self.screenPointsObj
 end

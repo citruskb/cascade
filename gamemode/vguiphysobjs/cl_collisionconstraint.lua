@@ -13,6 +13,7 @@ function VGUICollisionConstraint:__Create(objA, objB, screenPoint, normal, penet
 	self.restitution = math.Sqrt(objA.restitution * objB.restitution)
 	self.accuNormalLambda = 0
 	self.accuFrictionLambda = 0
+	self.lastNormalLambda = 0
 
 	local objAStatic, objBStatic = objA.isStatic, objB.isStatic
 	self.invMassA = objAStatic and 0 or 1 / objA.mass
@@ -77,6 +78,16 @@ function meta:Update()
 	self:ApplyImpulses(totalImpulse)
 end
 
+function meta:Asleep() return (self.bodyA.isSleeping or self.bodyA.isStatic) and (self.bodyB.isSleeping or self.bodyB.isStatic) end
+function meta:SleepBodies()
+	self.bodyA.isSleeping = true
+	self.bodyB.isSleeping = true
+end
+function meta:WakeBodies()
+	self.bodyA.isSleeping = false
+	self.bodyB.isSleeping = false
+end
+
 function meta:Solve(dt)
 	self:SolveContact(dt)
 	self:SolveFriction()
@@ -127,6 +138,7 @@ function meta:SolveContact(dt)
 	self.accuNormalLambda = math.Max(oldAccum + lambda, 0)
 	lambda = self.accuNormalLambda - oldAccum
 
+	self.lastNormalLambda = lambda
 	if lambda == 0 then return end
 
 	local impulse = self.normal * lambda

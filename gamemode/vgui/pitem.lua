@@ -12,6 +12,8 @@ function PANEL:Init()
 
 	self.ID = itemCount
 	itemCount = itemCount + 1
+
+	self:NoClipping(true)
 end
 
 function PANEL:InitPhysbox()
@@ -37,10 +39,8 @@ function PANEL:SetupModel(modelPath)
 end
 
 function PANEL:Think()
-	if not IsValid(self.ModPan) then return end
-	self.ModPan.rotation = math.Ang(self.Physbox.rotation)
+	if not self:IsVisible() then print("Parent invisible.") end
 end
-
 function PANEL:Paint() end
 
 function PANEL:OnRemove()

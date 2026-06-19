@@ -13,13 +13,14 @@ camPos
 -- Make sure item is postioned correctly?
 function PANEL:Init()
 	self.fov = 60
-	self.camPos = Vector(1, 0, 0)
+	self.camPosOffset = Vector(1, 0, 0)
 	self.rotation = 0
+
+	self:NoClipping(true)
 end
 
 -- ?
 function PANEL:Think()
-
 end
 
 function PANEL:OnRemove()
@@ -27,6 +28,10 @@ function PANEL:OnRemove()
 end
 
 function PANEL:LayoutEntity(ent) end
+
+function PANEL:Think()
+	if not self:IsVisible() then print("NOT VISIBLE!!!!!") end
+end
 
 -- Handle the camera
 function PANEL:Paint()
@@ -37,16 +42,19 @@ function PANEL:Paint()
 	cam.IgnoreZ(true)
 
 	local mins, maxs = ent:OBBMins(), ent:OBBMaxs()
-	local campos = mins:Distance(maxs) * self.camPos
-	local lookat = (mins + maxs) / 2
+
+	--local campos = mins:Distance(maxs) * self.camPos
+	local center = ent:OBBCenter()
+	local campos = center + self.camPosOffset * mins:Distance(maxs)
+	local lookat = center
 	local towards = lookat - campos
 	local ang = towards:Angle()
-	ang:RotateAroundAxis(towards, self.rotation)
+	ang:RotateAroundAxis(towards:GetNormalized(), math.Ang(self.rotation))
 
 	local x, y = self:LocalToScreen(0, 0)
 	local w, h = self:GetSize()
 
-	cam.Start3D(campos, ang, self.FOV, x, y, w, h, 8, 4096)
+	cam.Start3D(campos, ang, self.fov, x, y, w, h, 8, 4096)
 		render.OverrideDepthEnable(true, false)
 		ent:DrawModel()
 		render.OverrideDepthEnable(false)
