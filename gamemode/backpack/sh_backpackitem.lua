@@ -15,7 +15,7 @@ function BackpackItem:__Create(data)
 
 	self.clEnt = ClientsideModel(self.model)
 
-	self.id = string.Lower(string.Replace(data.name, " ", ""))
+	self.id = string.Lower(string.Replace(data.name, " ", "_"))
 
 	GAMEMODE.BackpackItems[self.id] = self
 end

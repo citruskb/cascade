@@ -219,7 +219,7 @@ function VGUIPhysbox:ToString() return "[VGUIPhysbox] #" .. self.id end
 function VGUIPhysbox:Eq(other)
 	if not IsTable(other) then return false end
 	if not other.VGUIPhysbox then return false end
-	return self.parent == other.parent
+	return self.id == other.id
 end
 
 function meta:AddHitbox(points, noResize)
@@ -230,10 +230,6 @@ function meta:AddHitbox(points, noResize)
 	GAMEMODE.DebugObjects[parent] = true
 
 	if noResize then return end
-
-	-- Adjust the parent size to accomodate rotation of our hitboxes around their center point.
-	-- But only if our parent is an item.
-	if not parent.isItem then return end
 
 	-- First we find the furthest point from all our hitbox centers.
 	local allpoints = self:GetAllHitboxPoints()
