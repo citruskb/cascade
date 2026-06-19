@@ -13,6 +13,8 @@ function BackpackItem:__Create(data)
 	self.gridPoints = data.gridPoints
 	self.DoActivate = data.DoActivate
 
+	self.clEnt = ClientsideModel(self.model)
+
 	self.id = string.Lower(string.Replace(data.name, " ", ""))
 
 	GAMEMODE.BackpackItems[self.id] = self

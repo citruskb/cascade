@@ -8,18 +8,35 @@ local math_IsNearlyEqual = math.IsNearlyEqual
 --	//////////////////////
 
 if not PhysicsObject2D then
-	GM.PhysicsObject2D = {}
+	countPhysicsObjects2D = 0
+	GM.PhysicsObjects2D = {}
 	PhysicsObject2D = Class:Create(nil, "PhysicsObject2D")
 end
 
 local meta = FindMetaTable("PhysicsObject2D")
 
-function PhysicsObject2D:__Create(position, rotation, itemData, velocity, angularVelocity, isStatic)
+function PhysicsObject2D:__Create(position, rotation, itemDataID, velocity, angularVelocity, isStatic)
 	self.position = position
 	self.rotation = rotation
-	self.itemData = itemData
+	self.itemDataID = itemDataID
 
 	self:InitPhysbox(velocity, angularVelocity, isStatic)
+
+	-- We don't use the size of the table because these objects can be removed.
+	countPhysicsObjects2D = countPhysicsObjects2D + 1
+	self.id = countPhysicsObjects2D
+	GAMEMODE.PhysicsObjects2D[self.id] = self
+
+	self.isPhysicsObject2D = true
+
+	return self
+end
+
+function PhysicsObject2D:ToString() return "PhysicsObject2D #" .. self.id end
+function PhysicsObject2D:Eq(other)
+	if not IsTable(other) then return false end
+	if not other.isPhysicsObject2D then return false end
+	return self.id == other.id
 end
 
 function meta:InitPhysbox(velocity, angularVelocity, isStatic)
@@ -33,6 +50,8 @@ function meta:InitPhysbox(velocity, angularVelocity, isStatic)
 
 	self:AddHitboxesToPhysbox()
 end
+
+function meta:GetItemData() return self.itemDataID and GAMEMODE[self.itemDataID] end
 
 function meta:AddHitboxesToPhysbox()
 	if not self.itemData then return end
@@ -55,6 +74,15 @@ end
 
 function meta:EnablePhysics() self.physbox:EnablePhysics() end
 function meta:DisablePhysics() self.physbox:DisablePhysics() end
+
+function meta:Remove()
+	GAMEMODE.PhysicsObjects2D[self.id] = nil
+	table.Empty(self)
+end
+
+function GM:NewPhysicsObject2D(position, rotation, itemDataID, velocity, angularVelocity, isStatic)
+	return PhysicsObject2D:Create(position, rotation, itemDataID, velocity, angularVelocity, isStatic)
+end
 
 --	//////////////////////////
 --	[[	End PhysicsObject2D	]]

@@ -19,9 +19,26 @@ end
 
 function PANEL:Think() end
 
+function PANEL:PaintPhysObj2D(obj)
+	local data = obj:GetItemData()
+	if not data then return end
+
+	local ent = data.clEnt
+	if not IsValid(ent) then Error("[PhysObj2D] - Invalid client entity") end
+
+	local model = data.model
+	local fov = data.fov
+	local camPos = data.camPos
+
+	-- TODO
+
+end
+
 function PANEL:Paint()
 	-- TODO: Paint all the 2d phys objs using clientside models
-
+	for k, obj in pairs(GAMEMODE.PhysicsObjects2D) do
+		self:PaintPhysObj2D(obj)
+	end
 end
 
 vgui.Register("PPhysObj2DOverlay", PANEL, "DPanel")
