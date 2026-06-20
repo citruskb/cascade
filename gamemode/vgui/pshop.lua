@@ -82,51 +82,23 @@ function PANEL:Init()
 	floorcontainer:SetPos(w * 0.4, h * 0.9)
 	floorcontainer:SetBackgroundColor(Color(0, 67, 167, GAMEMODE.Debug and 0 or 200))
 
-	--[[
-	local physbox = VGUIPhysbox:Create(floorcontainer)
-	physbox:AddHitbox(Points({
-		Vector2(0, 0),
-		Vector2(w * 0.25, 0),
-		Vector2(w * 0.25, h * 0.1),
-		Vector2(0, h * 0.1),
-	}), true)
-	physbox.isStatic = true
-	floorcontainer.Physbox = physbox
-	]]
+	local function MakeWall(screenOrigin, fW, fH)
+		gamemode.Call("NewPhysicsObject2D",
+			screenOrigin + Vector2(fW * 0.5, fH * 0.5),
+			0,
+			Points({
+				Vector2(0, 0),
+				Vector2(fW, 0),
+				Vector2(fW, fH),
+				Vector2(0, fH),
+			}),
+			nil, nil, true)
+	end
 
-	--gamemode.Call("NewPhysicsObject2D", Vector2(w * 0.25), rad, GAMEMODE.BackpackItems["wooden_crate"], vel)
-
-	--[[
-	local invleftwall = vgui.Create("DPanel", self)
-	invleftwall:SetSize(w * 0.05, h)
-	invleftwall:SetPos(w * 0.35, 0)
-	invleftwall:SetBackgroundColor(Color(0, 67, 167, GAMEMODE.Debug and 0 or 200))
-	physbox = VGUIPhysbox:Create(invleftwall)
-	physbox:AddHitbox(Points({
-		Vector2(0, -h * 4),
-		Vector2(w * 0.05, -h * 4),
-		Vector2(w * 0.05, h),
-		Vector2(0, h),
-	}), true)
-	physbox.isStatic = true
-	invleftwall.Physbox = physbox
-	]]
-
-	--[[
-	local invrightwall = vgui.Create("DPanel", self)
-	invrightwall:SetSize(w * 0.05, h)
-	invrightwall:SetPos(w * 0.65, 0)
-	invrightwall:SetBackgroundColor(Color(0, 67, 167, GAMEMODE.Debug and 0 or 200))
-	physbox = VGUIPhysbox:Create(invrightwall)
-	physbox:AddHitbox(Points({
-		Vector2(0, -h * 4),
-		Vector2(w * 0.05, -h * 4),
-		Vector2(w * 0.05, h),
-		Vector2(0, h),
-	}), true)
-	physbox.isStatic = true
-	invrightwall.Physbox = physbox
-	]]
+	MakeWall(Vector2(w * 0.4, h * 0.9), w * 0.25, h * 0.1)			-- Floor collision
+	MakeWall(Vector2(w * 0.35, -h), w * 0.05, 2 * h)				-- Left side wall
+	MakeWall(Vector2(w * 0.65, -h), w * 0.05, 2 * h)				-- Right side wall
+	MakeWall(Vector2(w * 0.4, -h + 0.1 * h), w * 0.05, h * 0.1)		-- Cap, out of view. just in case.
 	--
 
 
@@ -160,7 +132,8 @@ function PANEL:Init()
 	-- Test items
 	local function MakeBox(origin, vel, rad)
 		--GM:NewPhysicsObject2D(position, rotation, itemDataID, velocity, angularVelocity, isStatic)
-		gamemode.Call("NewPhysicsObject2D", origin, rad, "wooden_crate", vel)
+		local obj = gamemode.Call("NewPhysicsObject2D", origin, rad, "wooden_crate", vel)
+		obj:EnablePhysics()
 	end
 
 	local function OneBox() MakeBox(Vector2(0.5 * w, 0.5 * h)) end
@@ -170,8 +143,8 @@ function PANEL:Init()
 		for i = 1, num do
 			MakeBox(
 			Vector2(
-				w * 0.5 + math.Random(-size * 4, size * 4),
-				h * 0.5 + math.Random(-size * 4, size * 4)
+				w * 0.5 + math.Random(-40 * 4, 40 * 4),
+				h * 0.5 + math.Random(-40 * 4, 40 * 4)
 			)
 			,Vector2(
 				math.Rand(-VGUIPHYS_TERMINAL_VELOCITY, VGUIPHYS_TERMINAL_VELOCITY),
@@ -191,81 +164,17 @@ function PANEL:Init()
 		high = math.Clamp(math.Floor(high), 1, 5)
 		for i = 1, high do
 			MakeBox(
-				Vector2(w * 0.5 + math.Random(-size * offset, size * offset), 0.3 + h * (0.1 * i)),
+				Vector2(w * 0.5 + math.Random(-offset, offset), 0.3 + h * (0.1 * i)),
 				Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
 			)
 		end
 	end
 
 	-- /// THE TEST ZONE /// --
-	OneBox()								-- Spawn a regular box.
+	--OneBox()								-- Spawn a regular box.
 	--StackOfBoxes(5)						-- Plain stacked boxes.
-	--StackOfOffsetTossedBoxes(5, 0.5)		-- Offset stacked boxes.
-	--TossBoxes(32)							-- Toss a load of boxes everywhere.
-
-	--[[ Irregular shape
-	item.Physbox:AddHitbox(Points({
-		Vector2(0, 0),
-		Vector2(size * 2, size * 1),
-		Vector2(size * 3, size * 2),
-		Vector2(size * 2, size * 3),
-		Vector2(size * 1, size * 4),
-	}))
-	]]
-
-	--[[ Make a circle
-	local points = {}
-	local radius = 24
-	for i = 1, 16 do
-		local angle = math.rad((i / 16) * 360)
-		local x = math.cos(angle) * radius
-		local y = math.sin(angle) * radius
-		points[i] = Vector2(x, y)
-	end
-	local offset = Vector2(radius, radius)
-	points = Points(points):Translate(offset)
-	item.Physbox:AddHitbox(points)
-	]]
-
-
-	--item.Physbox:EnablePhysics()
-
-	--[[
-	-- Box falls directly on other box
-	MakeBox(50, w * 0.5, h * 0.6, -VGUIPHYS_TERMINAL_VELOCITY)
-	MakeBox(50, w * 0.5, h * 0.5, -VGUIPHYS_TERMINAL_VELOCITY)
-	]]
-
-	-- four box stack
-	--local size = 50
-	--MakeBox(size, Vector2(), math.Random(-VGUIPHYS_TERMINAL_VELOCITY, 0))
-	--MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.2), -size * 2), math.Random(-VGUIPHYS_TERMINAL_VELOCITY, 0))
-	--MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.2), -size * 4), math.Random(-VGUIPHYS_TERMINAL_VELOCITY, 0))
-	--MakeBox(size, Vector2(math.Random(-size * 0.2, size * 0.2), -size * 6), math.Random(-VGUIPHYS_TERMINAL_VELOCITY, 0))
-
-	-- Angled box
-	--size = 50
-	--MakeAngledBox(size, Vector2(0, 200), 0, 25)
-
-
-	--[[
-	-- Three boxes fall in a pyramid shape
-	local size = 50
-	MakeBox(size, w * 0.5, h * 0.5, -VGUIPHYS_TERMINAL_VELOCITY)
-	MakeBox(size, w * 0.5 + size * 1.5, h * 0.5, -VGUIPHYS_TERMINAL_VELOCITY)
-	MakeBox(size, w * 0.5 + size * 0.75, h * 0.5 - size * 1.25, -VGUIPHYS_TERMINAL_VELOCITY)
-	]]
-
-	--[[
-	MakeBox(50, w * 0.535, h * 0.45, -VGUIPHYS_TERMINAL_VELOCITY)
-	MakeBox(50, w * 0.5, h * 0.45, -VGUIPHYS_TERMINAL_VELOCITY)
-	MakeBox(50, w * 0.465, h * 0.45, -VGUIPHYS_TERMINAL_VELOCITY)
-	]]
-
-	--MakeBox(50, w * 0.48, h * 0.35, -VGUIPHYS_TERMINAL_VELOCITY)
-	--MakeBox(50, w * 0.52, h * 0.35, -VGUIPHYS_TERMINAL_VELOCITY)
-
-	--MakeBox(50, w * 0.5, h * 0.25, -VGUIPHYS_TERMINAL_VELOCITY)
+	--StackOfOffsetTossedBoxes(5, 30)		-- Offset stacked boxes.
+	TossBoxes(32)							-- Toss a load of boxes everywhere.
 
 end
 
@@ -277,6 +186,11 @@ vgui.Register("PShop", PANEL, "DPanel")
 function GM:ShowHelp(pl)
 	if IsValid(self.pShop) then
 		self.pShop:Remove()
+
+		for k, v in pairs(GAMEMODE.PhysicsObjects2D) do
+			v:Remove()
+		end
+
 		return
 	end
 

@@ -182,14 +182,11 @@ local function DrawDebug()
 	end
 
 	for _, obj in pairs(GAMEMODE.PhysicsObjects2D) do
-		if detailed then DrawItemDebug(obj) end
+		--if detailed then DrawItemDebug(obj) end
 
 		local physbox = obj.physbox
-		if detailed then DrawPhysboxDebug(physbox) end
+		--if detailed then DrawPhysboxDebug(physbox) end
 
-		--print(physbox)
-		--print("table:")
-		--PrintTable(physbox)
 		for __, hitbox in pairs(physbox.hitboxes) do
 			DrawHitboxDebug(hitbox)
 		end

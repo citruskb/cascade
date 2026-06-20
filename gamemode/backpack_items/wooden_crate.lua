@@ -8,11 +8,13 @@ ITEM.camPos = Vector(1, 0, 0)
 
 ITEM.triggerDelay = 4
 ITEM.retriggerable = true
+
+local s = 60
 ITEM.hitboxPoints = {
 	[1] = Points({	Vector2(0, 0),
-			Vector2(30, 0),
-			Vector2(30, 30),
-			Vector2(0, 30)}),
+			Vector2(s, 0),
+			Vector2(s, s),
+			Vector2(0, s)}),
 }
 
 ITEM.gridPoints = Points({Vector2(0, 0), Vector2(1, 0), Vector2(0, 1), Vector2(1, 1)})

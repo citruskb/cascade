@@ -38,11 +38,12 @@ function meta:AddRotation(num)
 	self.rotation = self.rotation + num
 end
 
+function meta:GetSize() return self.w, self.h end
+
 function VGUIPhysbox:__Create(parent)
 	-- Makes sure we have a unique ID for contact persistence.
 	VGUIPhysboxCount = VGUIPhysboxCount + 1
 	self.id = VGUIPhysboxCount
-	print("new physbox!", self.id)
 
 	self.parent = parent
 
@@ -51,8 +52,10 @@ function VGUIPhysbox:__Create(parent)
 	self.hitboxes = {}
 	self.isStatic = false
 	self.density = 1
-	self.mass = 10
+	self.mass = 1
 	self.momentOfInertia = 1
+	self.w = 0
+	self.h = 0
 	self.friction = 0.6
 	self.restitution = 0.05
 
@@ -74,7 +77,6 @@ function VGUIPhysbox:__Create(parent)
 end
 
 function VGUIPhysbox:ToString()
-	print("my id:", self.id)
 	return "[VGUIPhysbox] #" --.. self.id
 end
 
@@ -88,41 +90,11 @@ function meta:AddHitbox(points, noResize)
 	local id = #self.hitboxes + 1
 	self.hitboxes[id] = VGUIHitbox:Create(self, points, id)
 
-	print("added hitbox!", #self.hitboxes)
-
+	self:RecalculateSize()
 	self:RecalculateMassAndInertia()
 
-	--[[
-	-- First we find the furthest point from all our hitbox centers.
-	local allpoints = self:GetAllHitboxPoints()
-	local center = allpoints:GetCenter()
-	local fDistsq, fPoint
-
-	local pointsTab = allpoints:GetPoints()
-	for i = 1, #pointsTab do
-		local point = pointsTab[i]
-		local distsq = center:DistanceSqr(point) -- DistanceSqr is faster.
-
-		if fDistsq and distsq < fDistsq then continue end
-		fDistsq = distsq
-		fPoint = point
-	end
-
-	-- Now that we know the furthest dist, get the actual distance.
-	local fDist = center:Distance(fPoint)
-
-	-- Next, our size is twice this plus a small buffer
-	-- Setting our parent size also sets our "size"
-	local siz = (fDist * 2) + 2
-	parent:SetSize(siz, siz)
-	]]
-
-	-- The center of our hitbox points must align with the center of our item.
-	-- If we make the assumption that the top left of all our points grids is 0,0 ...
-	-- our grid origin is the center minus half the max x and half the max y.
-	--PrintTable(self.hitboxes)
-	local allpoints = self:GetAllHitboxPoints()
-	self.originCenterOffset = Vector2(-allpoints:GetMaxX() * 0.5, -allpoints:GetMaxY() * 0.5)
+	local w, h = self:GetSize()
+	self.originCenterOffset = -Vector2(w * 0.5, h * 0.5)
 end
 
 function meta:GetAllHitboxPoints()
@@ -147,40 +119,35 @@ function meta:GetAABB(raw)
 	return aabb
 end
 
+
+function meta:RecalculateSize()
+	local aabb = self:GetAABB(true)
+	local min, max = aabb.min, aabb.max
+	self.w = max.x - min.x
+	self.h = max.y - min.y
+end
+
 -- TODO better estimates.
 -- Possibly calculate these for all hitboxes then add together?
 function meta:RecalculateMassAndInertia()
-	local w, h = 1, 1--self.parent:GetSize()
+	local w, h = self:GetSize()
 	self.mass = self.isStatic and math.HUGE or self.density * w / 100 * h / 100
 	self.momentOfInertia = self.isStatic and math.HUGE or (self.mass * (w * w + h * h)) / 12
 end
 
 -- The center of our physbox, relative to screenspace.
 function meta:GetCenterScreenPoint()
-	local w, h
-	if self.parent.isItem then
-		w, h = self.parent:GetSize()
-	else
-		local aabb = self:GetAABB(true)
-		local min, max = aabb.min, aabb.max
-		w, h = max.x - min.x, max.y - min.y
-	end
-
-	return self.position + Vector2(w * 0.5, h * 0.5)
+	return self.position
 end
 
 -- (0,0) of the grid the hitbox's points draw on.
 function meta:GetScreenHitboxPointsOrigin()
-	if self.parent.isItem then
-		return self:GetCenterScreenPoint() + self.originCenterOffset
-	else
-		return self.position
-	end
+	local w, h = self:GetSize()
+	return self.position - Vector2(w * 0.5, h * 0.5)
 end
 
 -- For now, we need to handle what happens if our parent panel gets removed.
 function meta:Remove()
-	print("do remove?")
 	GAMEMODE.VGUIPhysboxes[self] = nil
 
 	for _, hitbox in pairs(self.hitboxes) do hitbox:Remove() end
@@ -204,12 +171,8 @@ function meta:Step(dt)
 		self:AddRotation(self.angularVelocity * dt)
 
 		-- Update our parent's position based on our's
-		self.parent:SetPos(self.position:Unpack())
-	end
-
-	-- Rotate our parent's model to match us.
-	if IsValid(self.parent.ModPan) then
-		self.parent.ModPan.rotation = -self.rotation
+		self.parent.position:Set(self.position)
+		self.parent.rotation = self.rotation
 	end
 end
 
