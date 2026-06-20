@@ -98,10 +98,10 @@ function PANEL:Init()
 			nil, nil, true, true)
 	end
 
-	MakeWall(Vector2(w * 0.4, h * 0.9), w * 0.25, h * 0.1)			-- Floor collision
+	MakeWall(Vector2(w * 0.4, h * 0.95), w * 0.25, h * 0.05)		-- Floor collision
 	MakeWall(Vector2(w * 0.35, -h), w * 0.05, 2 * h)				-- Left side wall
 	MakeWall(Vector2(w * 0.65, -h), w * 0.05, 2 * h)				-- Right side wall
-	MakeWall(Vector2(w * 0.4, -h + 0.1 * h), w * 0.05, h * 0.1)		-- Cap, out of view. just in case.
+	MakeWall(Vector2(w * 0.4, -h + 0.05 * h), w * 0.25, h * 0.05)	-- Cap, out of view. just in case.
 	--
 
 
@@ -133,18 +133,17 @@ function PANEL:Init()
 
 
 	-- Test items
-	local function MakeBox(origin, vel, rad)
-		--GM:NewPhysicsObject2D(position, rotation, itemDataID, velocity, angularVelocity, isStatic)
-		local obj = gamemode.Call("NewPhysicsObject2D", origin, rad, "wooden_crate", vel)
+	local function MakeItem(id, origin, vel, rad)
+		local obj = gamemode.Call("NewPhysicsObject2D", origin, rad, id, vel)
 		obj:EnablePhysics()
 	end
 
-	local function OneBox() MakeBox(Vector2(0.5 * w, 0.5 * h)) end
+	local function OneBox() MakeItem("wooden_crate", Vector2(0.5 * w, 0.5 * h)) end
 
 	local function TossBoxes(num)
 		num = math.Clamp(math.Floor(num), 1, 64)
 		for i = 1, num do
-			MakeBox(
+			MakeItem("wooden_crate",
 			Vector2(
 				w * 0.5 + math.Random(-40 * 4, 40 * 4),
 				h * 0.5 + math.Random(-40 * 4, 40 * 4)
@@ -159,14 +158,14 @@ function PANEL:Init()
 	local function StackOfBoxes(high)
 		high = math.Clamp(math.Floor(high), 1, 5)
 		for i = 1, high do
-			MakeBox(Vector2(w * 0.5, 0.3 + h * (0.1 * i)))
+			MakeItem("wooden_crate", Vector2(w * 0.5, 0.3 + h * (0.1 * i)))
 		end
 	end
 
 	local function StackOfOffsetTossedBoxes(high, offset)
 		high = math.Clamp(math.Floor(high), 1, 5)
 		for i = 1, high do
-			MakeBox(
+			MakeItem("wooden_crate",
 				Vector2(w * 0.5 + math.Random(-offset, offset), 0.3 + h * (0.1 * i)),
 				Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
 			)
@@ -174,10 +173,13 @@ function PANEL:Init()
 	end
 
 	-- /// THE TEST ZONE /// --
-	OneBox()								-- Spawn a regular box.
+	--OneBox()								-- Spawn a regular box.
 	--StackOfBoxes(5)						-- Plain stacked boxes.
 	--StackOfOffsetTossedBoxes(5, 30)		-- Offset stacked boxes.
-	--TossBoxes(32)							-- Toss a load of boxes everywhere.
+	--TossBoxes(48)							-- Toss a load of boxes everywhere.
+
+	--MakeItem("blast_door", Vector2(w * 0.5, h * 0.5))
+	MakeItem("hula_doll", Vector2(w * 0.5, h * 0.5))
 
 end
 

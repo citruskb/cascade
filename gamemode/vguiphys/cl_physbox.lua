@@ -59,6 +59,9 @@ function VGUIPhysbox:__Create(parent)
 	self.friction = 0.6
 	self.restitution = 0.05
 
+	self.fDist = 0
+	self.camXYOffset = Vector2()
+
 	-- Offsets our hitbox point origin to center ourselves inside the item panel.
 	self.originCenterOffset = Vector2()
 
@@ -91,6 +94,27 @@ end
 function meta:AddHitbox(points, noResize)
 	local id = #self.hitboxes + 1
 	self.hitboxes[id] = VGUIHitbox:Create(self, points, id)
+
+
+	-- We need to find the furthest point from all our hitbox centers.
+	local allpoints = self:GetAllHitboxPoints()
+	local center = allpoints:GetCenter()
+	local fDistsq, fPoint
+
+	local pointsTab = allpoints:GetPoints()
+	for i = 1, #pointsTab do
+		local point = pointsTab[i]
+		local distsq = center:DistanceSqr(point) -- DistanceSqr is faster.
+
+		if fDistsq and distsq < fDistsq then continue end
+		fDistsq = distsq
+		fPoint = point
+	end
+
+	-- Now that we know the furthest dist, get the actual distance.
+	local fDist = center:Distance(fPoint)
+	self.fDist = (fDist * 2) + 2
+	self.camXYOffset = -Vector2(self.fDist * 0.5, self.fDist * 0.5)
 
 	self:RecalculateSize()
 	self:RecalculateMassAndInertia()

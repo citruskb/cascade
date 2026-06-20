@@ -13,7 +13,6 @@ function PhysicsObject2D:__Create(position, rotation, itemDataID, velocity, angu
 
 
 	self.isScreenScaled = not isStatic
-	print("screenscaled?", self.isScreenScaled)
 
 	self.position = position
 	self.rotation = rotation or 0
@@ -61,7 +60,6 @@ function meta:AddHitboxesToPhysbox()
 		local scaledPointsTab = {}
 		for j = 1, #pointsTab do
 			scaledPointsTab[j] = pointsTab[j] * (self.isScreenScaled and GAMEMODE.UncappedScreenScale or 1)
-			print((self.isScreenScaled and GAMEMODE.UncappedScreenScale or 1))
 		end
 
 		self.physbox:AddHitbox(Points(scaledPointsTab))

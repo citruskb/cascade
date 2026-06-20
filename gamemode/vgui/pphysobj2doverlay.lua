@@ -14,41 +14,60 @@ function PANEL:Init()
 	self:SetSize(w, h)
 	self:Center()
 
+	self.paintVars = {}
+
 	self:SetVisible(true)
 end
 
 function PANEL:Think() end
 
-function PANEL:PaintPhysObj2D(obj)
+function PANEL:SetupPaintVars(obj)
+	local vars = {}
+
 	local data = obj.itemData
 	if not data then return end
 
 	local ent = data.clEnt
 	if not IsValid(ent) then Error("[PhysObj2D] - Invalid client entity") end
 
-	local x, y = obj.physbox:GetScreenHitboxPointsOrigin():Unpack()
+	-- Our size needs to be large enough to handle however our object is rotated. 
+	-- Our X and Y originates based on this as well.
+	local posVec = obj.physbox:GetCenterScreenPoint()
+	local adjPos = posVec + obj.physbox.camXYOffset
+	local x, y = adjPos:Unpack()
+	local w, h = obj.physbox.fDist, obj.physbox.fDist
+
 	local objAng = math.Ang(-obj.rotation)
 	local fov = data.fov
 	local camPosOffset = data.camPos
 
-	--if obj.isScreenScaled then
-	--	fov = fov / GAMEMODE.UncappedScreenScale
-	--end
-
-	render.SuppressEngineLighting(true)
-	cam.IgnoreZ(true)
-
 	local mins, maxs = ent:OBBMins(), ent:OBBMaxs()
 	local center = ent:OBBCenter()
-	local camPos = center + camPosOffset * mins:Distance(maxs)
+	local camPos, zsqr
+	camPos, x, y, zsqr = self:EvaluateCameraPos(center, camPosOffset, mins:Distance(maxs), x, y)
+
 	local lookat = center
 	local towards = lookat - camPos
 	local ang = towards:Angle()
 	ang:RotateAroundAxis(towards:GetNormalized(), objAng)
 
-	local w, h = obj.physbox:GetSize()
+	vars.camPos = camPos
+	vars.ang = ang
+	vars.fov = fov
+	vars.x = x
+	vars.y = y
+	vars.w = w
+	vars.h = h
 
-	cam.Start3D(camPos, ang, fov, x, y, w, h, 8, 4096)
+	vars.clEnt = ent
+	vars.zsqr = zsqr
+
+	table.insert(self.paintVars, vars)
+
+	render.SuppressEngineLighting(true)
+	cam.IgnoreZ(true)
+
+	cam.Start3D(camPos, ang, fov, x, y, w, h, 8, 256)
 		render.OverrideDepthEnable(true, false)
 		ent:DrawModel()
 		render.OverrideDepthEnable(false)
@@ -58,9 +77,76 @@ function PANEL:PaintPhysObj2D(obj)
 	render.SuppressEngineLighting(false)
 end
 
+function PANEL:EvaluateCameraPos(center, camPosOffset, dist, x, y)
+	local negativeX = math.Min(x, 0)
+	local negativeY = math.Min(y, 0)
+	local adjust = Vector(0, -negativeX, negativeY)
+	return center + adjust + camPosOffset * dist, math.Max(x, 0), math.Max(y, 0), adjust:LengthSqr()
+end
+
+function PANEL:PaintPhysObj2D(vars)
+	render.SuppressEngineLighting(true)
+	cam.IgnoreZ(true)
+
+	cam.Start3D(vars.camPos, vars.ang, vars.fov, vars.x, vars.y, vars.w, vars.h, 8, 512)
+		render.OverrideDepthEnable(true, false)
+		vars.clEnt:DrawModel()
+		render.OverrideDepthEnable(false)
+	cam.End3D()
+
+	cam.IgnoreZ(false)
+	render.SuppressEngineLighting(false)
+
+	--[[
+	local data = obj.itemData
+	if not data then return end
+
+	local ent = data.clEnt
+	if not IsValid(ent) then Error("[PhysObj2D] - Invalid client entity") end
+
+	-- Our size needs to be large enough to handle however our object is rotated. 
+	-- Our X and Y originates based on this as well.
+	local posVec = obj.physbox:GetCenterScreenPoint()
+	local adjPos = posVec + obj.physbox.camXYOffset
+	local x, y = adjPos:Unpack()
+	local w, h = obj.physbox.fDist, obj.physbox.fDist
+
+	local objAng = math.Ang(-obj.rotation)
+	local fov = data.fov
+	local camPosOffset = data.camPos
+
+	render.SuppressEngineLighting(true)
+	cam.IgnoreZ(true)
+
+	local mins, maxs = ent:OBBMins(), ent:OBBMaxs()
+	local center = ent:OBBCenter()
+	local camPos, x, y = self:EvaluateCameraPos(center, camPosOffset, mins:Distance(maxs), x, y)
+
+	local lookat = center
+	local towards = lookat - camPos
+	local ang = towards:Angle()
+	ang:RotateAroundAxis(towards:GetNormalized(), objAng)
+
+	cam.Start3D(camPos, ang, fov, x, y, w, h, 8, 256)
+		render.OverrideDepthEnable(true, false)
+		ent:DrawModel()
+		render.OverrideDepthEnable(false)
+	cam.End3D()
+
+	cam.IgnoreZ(false)
+	render.SuppressEngineLighting(false)
+	]]
+end
+
 function PANEL:Paint()
+	self.paintVars = {}
 	for k, obj in pairs(GAMEMODE.PhysicsObjects2D) do
-		self:PaintPhysObj2D(obj)
+		self:SetupPaintVars(obj)
+	end
+
+	table.SortByMember(self.paintVars, "zsqr")
+	for k, vars in pairs(self.paintVars) do
+		self:PaintPhysObj2D(vars)
 	end
 end
 
