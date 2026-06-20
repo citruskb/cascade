@@ -33,7 +33,7 @@ function PANEL:SetupPaintVars(obj)
 	-- Our size needs to be large enough to handle however our object is rotated. 
 	-- Our X and Y originates based on this as well.
 	local posVec = obj.physbox:GetCenterScreenPoint()
-	local adjPos = posVec + obj.physbox.camXYOffset
+	local adjPos = posVec + obj.physbox.camXYOffset + data.camXYOffsetAdj
 	local x, y = adjPos:Unpack()
 	local w, h = obj.physbox.fDist, obj.physbox.fDist
 

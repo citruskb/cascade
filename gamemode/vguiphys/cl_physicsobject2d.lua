@@ -11,7 +11,6 @@ function PhysicsObject2D:__Create(position, rotation, itemDataID, velocity, angu
 	countPhysicsObjects2D = countPhysicsObjects2D + 1
 	self.id = countPhysicsObjects2D
 
-
 	self.isScreenScaled = not isStatic
 
 	self.position = position

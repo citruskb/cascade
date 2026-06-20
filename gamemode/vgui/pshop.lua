@@ -133,9 +133,9 @@ function PANEL:Init()
 
 
 	-- Test items
-	local function MakeItem(id, origin, vel, rad)
+	local function MakeItem(id, origin, vel, rad, physDisabled)
 		local obj = gamemode.Call("NewPhysicsObject2D", origin, rad, id, vel)
-		obj:EnablePhysics()
+		if not physDisabled then obj:EnablePhysics() end
 	end
 
 	local function OneBox() MakeItem("wooden_crate", Vector2(0.5 * w, 0.5 * h)) end
@@ -172,6 +172,21 @@ function PANEL:Init()
 		end
 	end
 
+	local function GoBananas(num)
+		num = math.Clamp(math.Floor(num), 1, 64)
+		for i = 1, num do
+			MakeItem("banana",
+			Vector2(
+				w * 0.5 + math.Random(-40 * 4, 40 * 4),
+				h * 0.5 + math.Random(-40 * 4, 40 * 4)
+			)
+			,Vector2(
+				math.Rand(-VGUIPHYS_TERMINAL_VELOCITY, VGUIPHYS_TERMINAL_VELOCITY),
+				-math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)
+			))
+		end
+	end
+
 	-- /// THE TEST ZONE /// --
 	--OneBox()								-- Spawn a regular box.
 	--StackOfBoxes(5)						-- Plain stacked boxes.
@@ -179,7 +194,9 @@ function PANEL:Init()
 	--TossBoxes(48)							-- Toss a load of boxes everywhere.
 
 	--MakeItem("blast_door", Vector2(w * 0.5, h * 0.5))
-	MakeItem("hula_doll", Vector2(w * 0.5, h * 0.5))
+	--MakeItem("hula_doll", Vector2(w * 0.5, h * 0.5))
+	MakeItem("banana", Vector2(w * 0.5, h * 0.5), nil, nil, true)
+	--GoBananas(32)
 
 end
 

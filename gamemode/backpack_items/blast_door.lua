@@ -2,9 +2,14 @@ ITEM.id = "blast_door"
 ITEM.name = "Blast Door"
 ITEM.description = "Imprenable."
 
+ITEM.massMult = 1
+ITEM.inertiaMult = 1
+
 ITEM.model = "models/props_lab/blastdoor001c.mdl"
 ITEM.fov = 55
 ITEM.camPos = Vector(1, 0, 0)
+ITEM.camScale = 1
+ITEM.camXYOffsetAdj = VECTOR2_ZERO
 
 ITEM.triggerDelay = 0
 ITEM.retriggerable = false

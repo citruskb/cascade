@@ -142,28 +142,27 @@ local function CheckCollision(bodyA, bodyB)
 	-- This is effectively our broad phase, all in one line.
 	--if not bodyA:GetAABB():Overlaps(bodyB:GetAABB()) then return {} end
 
+	print(#bodyA.hitboxes, #bodyB.hitboxes)
+
 	local constr = {}
 	for idxA = 1, #bodyA.hitboxes do
 		local hitboxA = bodyA.hitboxes[idxA]
+		print(hitboxA)
 
 		for idxB = 1, #bodyB.hitboxes do
 			local hitboxB = bodyB.hitboxes[idxB]
+			print(hitboxB)
 
-			benchmark.Start("SAT")
 			local collision = gamemode.Call("VGUIPhysSAT", hitboxA, hitboxB)
-			benchmark.End("SAT")
 			if not collision then continue end
 
-			hitboxA = collision.hbA
-			hitboxB = collision.hbB
+			local hbA = collision.hbA
+			local hbB = collision.hbB
 			bodyA = hitboxA.physbox
 			bodyB = hitboxB.physbox
 
-			benchmark.Start("ClipPoly")
-			local contactPoints = gamemode.Call("ClipPolyToPoly", bodyA, hitboxA, bodyB, hitboxB, collision)
-			benchmark.End("ClipPoly")
+			local contactPoints = gamemode.Call("ClipPolyToPoly", bodyA, hbA, bodyB, hbB, collision)
 
-			benchmark.Start("CreateConstr")
 			-- Create contact constraints
 			for ptIdx = 1, #contactPoints.points do
 				local screenP = contactPoints.points[ptIdx]
@@ -181,7 +180,6 @@ local function CheckCollision(bodyA, bodyB)
 					constr[ToString(fID)] = newC
 				end
 			end
-			benchmark.End("CreateConstr")
 		end
 	end
 
