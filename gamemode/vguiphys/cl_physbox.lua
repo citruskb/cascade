@@ -67,6 +67,8 @@ function VGUIPhysbox:__Create(parent)
 	self.rotation = parent.rotation
 	self:DisablePhysics()
 
+	self.isScreenScaled = parent.isScreenScaled
+
 	GAMEMODE.VGUIPhysboxes[self] = true
 	self.isVGUIPhysbox = true
 

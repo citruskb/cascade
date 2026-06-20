@@ -3,7 +3,7 @@ ITEM.name = "Wooden Crate"
 ITEM.description = "It's just a crate."
 
 ITEM.model = "models/props_junk/wood_crate001a.mdl"
-ITEM.fov = 60
+ITEM.fov = 45
 ITEM.camPos = Vector(1, 0, 0)
 
 ITEM.triggerDelay = 4

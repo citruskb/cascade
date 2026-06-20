@@ -23,7 +23,7 @@ local physboxTxtCol = Color(
 	math.Max(physboxCol.b - 50, 0),
 	math.Min(physboxCol.a + 50, 255))
 
-local hitboxCol = Color(255, 10, 10, 200)
+local hitboxCol = Color(255, 10, 10, 50)
 
 local function DrawOutlinedBox(x, y, w, h, thickness)
 	for i = 1, thickness do

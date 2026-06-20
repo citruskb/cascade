@@ -18,11 +18,14 @@ function VGUIHitbox:__Create(physbox, pointsObj, id)
 
 	-- The local configuration of our points
 	self.pointsObj = pointsObj
+	self:RecalculateScreenScaledPoints()
 
 	-- The actual screen location of our points, accounting for rotation, physbox position, etc
 	-- This is initialized here but recalculated when needed.
 	self.screenPointsObj = pointsObj:Copy()
 	self.screenPointsObjDirty = true
+
+	self.isScreenScaled = physbox.isScreenScaled
 
 	GAMEMODE.VGUIHitboxes[self] = true
 
@@ -42,11 +45,35 @@ end
 
 function meta:GetScreenOriginPoint() return self.physbox:GetScreenHitboxPointsOrigin() end
 
+function meta:GetScreenScaledPoints()
+	if not self.isScreenScaled then return self.pointsObj end
+	return self.pointsObj * (1 / GAMEMODE.UncappedScreenScale)
+end
+
+function meta:RecalculateScreenScaledPoints()
+	if not self.isScreenScaled or self.isScreenScaled and GAMEMODE.UncappedScreenScale == 1 then
+		self.screenScaledPointsObj = self.pointsObj:Copy()
+	else
+		local pointsTab = self.pointsObj:GetPoints()
+		local scaledTab = {}
+		for i = 1, #pointsTab do
+			scaledTab[i] = pointsTab[i] * GAMEMODE.UncappedScreenScale
+		end
+		self.screenScaledPointsObj = Points(scaledTab)
+	end
+end
+
+hook.Add("ScreenScaleChanged", "ScreenScaleChanged.hitboxes", function(old)
+	for hitbox, _ in pairs(GAMEMODE.VGUIHitboxes) do
+		hitbox:RecalculateScreenScaledPoints()
+	end
+end)
+
 function meta:TransformPointsAroundOrigin(inputPoints, origin, pivot)
 	local ret = inputPoints
 
 	inputPoints = inputPoints:GetPoints()
-	local points = self.pointsObj:GetPoints()
+	local points = self.screenScaledPointsObj:GetPoints()
 
 	-- Used for rotation
 	local rad = self.physbox.rotation

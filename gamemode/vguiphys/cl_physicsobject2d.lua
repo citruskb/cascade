@@ -11,6 +11,10 @@ function PhysicsObject2D:__Create(position, rotation, itemDataID, velocity, angu
 	countPhysicsObjects2D = countPhysicsObjects2D + 1
 	self.id = countPhysicsObjects2D
 
+
+	self.isScreenScaled = not isStatic
+	print("screenscaled?", self.isScreenScaled)
+
 	self.position = position
 	self.rotation = rotation or 0
 
@@ -49,14 +53,15 @@ function meta:InitPhysbox(velocity, angularVelocity, isStatic)
 end
 
 function meta:AddHitboxesToPhysbox()
-	local screenscale = BetterScreenScale()
+	-- We assume we need to scale based on screenscale if it's an item, and that we've already scaled based on screenscale if this is a static wall.
 
 	local hitboxPoints = self.hitboxPoints and {self.hitboxPoints} or self.itemData.hitboxPoints
 	for i = 1, #hitboxPoints do
 		local pointsTab = hitboxPoints[i]:GetPoints() -- TODO maybe add a shortcut for this in the points obj.
 		local scaledPointsTab = {}
 		for j = 1, #pointsTab do
-			scaledPointsTab[j] = pointsTab[j] * screenscale
+			scaledPointsTab[j] = pointsTab[j] * (self.isScreenScaled and GAMEMODE.UncappedScreenScale or 1)
+			print((self.isScreenScaled and GAMEMODE.UncappedScreenScale or 1))
 		end
 
 		self.physbox:AddHitbox(Points(scaledPointsTab))

@@ -2,7 +2,13 @@ function GM:RegisterBackpackItem(id, tab)
 	self.BackpackItems[id] = tab
 	if tab.hidden then return end
 
-	if CLIENT then tab.clEnt = ClientsideModel(tab.model) end
+	if CLIENT then
+		local ent = ClientsideModel(tab.model, RENDERGROUP_OTHER)
+		if not IsValid(ent) then return end
+
+		ent:SetNoDraw(true)
+		tab.clEnt = ent
+	end
 	-- Do other things here.
 end
 

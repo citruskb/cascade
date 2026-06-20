@@ -89,6 +89,8 @@ function LocalPlayerFound()
 	gm_.SetupWorldFog = gm_._SetupWorldFog
 
 	if render.GetDXLevel() >= 80 then gm_.RenderScreenspaceEffects = gm_._RenderScreenspaceEffects end
+
+	gm_.UncappedScreenScale = ScreenScale(true)
 end
 hook.Add("InitPostEntity", "InitPostEntity.LocalPlayerFound", LocalPlayerFound)
 hook.Add("OnReloaded", "OnReloaded.LocalPlayerFound", LocalPlayerFound)
@@ -108,6 +110,8 @@ function GM:_Think()
 		local pl = allPlayers[i]
 		gamemode.Call("PlayerThink", pl)
 	end
+
+	self.UncappedScreenScale = ScreenScale(true)
 end
 function GM:PlayerThink(pl) end
 

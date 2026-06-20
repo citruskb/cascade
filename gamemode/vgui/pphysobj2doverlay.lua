@@ -20,18 +20,20 @@ end
 function PANEL:Think() end
 
 function PANEL:PaintPhysObj2D(obj)
-	if true then return end -- disable for now
-
 	local data = obj.itemData
 	if not data then return end
 
 	local ent = data.clEnt
 	if not IsValid(ent) then Error("[PhysObj2D] - Invalid client entity") end
 
-	local x, y = obj.position:Unpack()
+	local x, y = obj.physbox:GetScreenHitboxPointsOrigin():Unpack()
 	local objAng = math.Ang(-obj.rotation)
 	local fov = data.fov
 	local camPosOffset = data.camPos
+
+	--if obj.isScreenScaled then
+	--	fov = fov / GAMEMODE.UncappedScreenScale
+	--end
 
 	render.SuppressEngineLighting(true)
 	cam.IgnoreZ(true)
@@ -44,10 +46,7 @@ function PANEL:PaintPhysObj2D(obj)
 	local ang = towards:Angle()
 	ang:RotateAroundAxis(towards:GetNormalized(), objAng)
 
-	-- TODO: Just cache this on the physbox.
-	local aabb = obj.physbox.GetAABB(true)
-	local w = aabb.max.x - aabb.min.x
-	local h = aabb.max.y - aabb.min.y
+	local w, h = obj.physbox:GetSize()
 
 	cam.Start3D(camPos, ang, fov, x, y, w, h, 8, 4096)
 		render.OverrideDepthEnable(true, false)

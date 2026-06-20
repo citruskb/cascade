@@ -8,8 +8,6 @@ PANEL = {}
 
 function PANEL:Init()
 	self:SetZPos(GM_ZPOS_PSHOP)
-
-	--local screenscale = BetterScreenScale()
 	local w, h = ScrW(), ScrH()
 
 	self:SetSize(w, h)
@@ -82,17 +80,22 @@ function PANEL:Init()
 	floorcontainer:SetPos(w * 0.4, h * 0.9)
 	floorcontainer:SetBackgroundColor(Color(0, 67, 167, GAMEMODE.Debug and 0 or 200))
 
+	--position, rotation, itemDataID, velocity, angularVelocity, isStatic, notScreenScaled
 	local function MakeWall(screenOrigin, fW, fH)
-		gamemode.Call("NewPhysicsObject2D",
-			screenOrigin + Vector2(fW * 0.5, fH * 0.5),
-			0,
-			Points({
+
+		local actualOrigin = screenOrigin + Vector2(fW * 0.5, fH * 0.5)
+		local pointsObj = Points({
 				Vector2(0, 0),
 				Vector2(fW, 0),
 				Vector2(fW, fH),
 				Vector2(0, fH),
-			}),
-			nil, nil, true)
+			})
+
+		gamemode.Call("NewPhysicsObject2D",
+			actualOrigin,
+			0,
+			pointsObj,
+			nil, nil, true, true)
 	end
 
 	MakeWall(Vector2(w * 0.4, h * 0.9), w * 0.25, h * 0.1)			-- Floor collision
@@ -171,10 +174,10 @@ function PANEL:Init()
 	end
 
 	-- /// THE TEST ZONE /// --
-	--OneBox()								-- Spawn a regular box.
+	OneBox()								-- Spawn a regular box.
 	--StackOfBoxes(5)						-- Plain stacked boxes.
 	--StackOfOffsetTossedBoxes(5, 30)		-- Offset stacked boxes.
-	TossBoxes(32)							-- Toss a load of boxes everywhere.
+	--TossBoxes(32)							-- Toss a load of boxes everywhere.
 
 end
 
@@ -191,11 +194,13 @@ function GM:ShowHelp(pl)
 			v:Remove()
 		end
 
+		if IsValid(self.pPhysObj2DOverlay) then self.pPhysObj2DOverlay:SetVisible(false) end
+
 		return
 	end
 
 	if IsValid(self.pPhysObj2DOverlay) then
-		self.pPhysObj2DOverlay:SetVisible(not self.pPhysObj2DOverlay:IsVisible())
+		self.pPhysObj2DOverlay:SetVisible(true)
 	else
 		self.pPhysObj2DOverlay = vgui.Create("PPhysObj2DOverlay")
 	end
