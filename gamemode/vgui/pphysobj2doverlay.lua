@@ -7,7 +7,7 @@
 PANEL = {}
 
 function PANEL:Init()
-	self.SetZPos(GM_ZPOS_POVERLAY)
+	self:SetZPos(GM_ZPOS_POVERLAY)
 	self:SetPos(0, 0)
 
 	local w, h = ScrW(), ScrH()
@@ -20,7 +20,9 @@ end
 function PANEL:Think() end
 
 function PANEL:PaintPhysObj2D(obj)
-	local data = obj:GetItemData()
+	if true then return end -- disable for now
+
+	local data = obj.itemData
 	if not data then return end
 
 	local ent = data.clEnt

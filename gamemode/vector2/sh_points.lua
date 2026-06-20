@@ -16,7 +16,7 @@ function __points:__Create(tab)
 
 	Rawset(self, "_points", tab)
 	Rawset(self, "_center", Vector2())
-	Rawset(self, "IsPoints", true)
+	Rawset(self, "isPointsObj", true)
 
 	return self
 end
@@ -35,10 +35,10 @@ end
 function __points:Add(other)
 	local pointstab = Rawget(self, "_points")
 
-	if other.IsVector2 then
+	if other.isVector2 then
 		table.Insert(pointstab, other)
 		return self
-	elseif other.IsPoints then
+	elseif other.isPointsObj then
 		local ret = {}
 		table.Add(ret, pointstab)
 

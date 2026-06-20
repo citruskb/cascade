@@ -7,6 +7,7 @@ DEBUG_MODE_DETAILED = 2
 
 GM.Debug = true -- TODO move to a convar.
 GM.DebugMode = DEBUG_MODE_MINIMAL
+GM.DebugObjects = {}
 
 local itemCol = Color(255, 255, 0, 60)
 local itemTxtCol = Color(
@@ -22,7 +23,7 @@ local physboxTxtCol = Color(
 	math.Max(physboxCol.b - 50, 0),
 	math.Min(physboxCol.a + 50, 255))
 
-local hitboxCol = Color(255, 10, 10, 50)
+local hitboxCol = Color(255, 10, 10, 200)
 
 local function DrawOutlinedBox(x, y, w, h, thickness)
 	for i = 1, thickness do
@@ -180,16 +181,16 @@ local function DrawDebug()
 		table.insert(cps, cobj.screenPoint)
 	end
 
-	local temp = {}
-	for pan, _ in pairs(GAMEMODE.DebugObjects) do
-		if not IsValid(pan) then continue end
+	for _, obj in pairs(GAMEMODE.PhysicsObjects2D) do
+		if detailed then DrawItemDebug(obj) end
 
-		if detailed then DrawItemDebug(pan) end
-
-		local physbox = pan.Physbox
+		local physbox = obj.physbox
 		if detailed then DrawPhysboxDebug(physbox) end
 
-		for _, hitbox in pairs(physbox.hitboxes) do
+		--print(physbox)
+		--print("table:")
+		--PrintTable(physbox)
+		for __, hitbox in pairs(physbox.hitboxes) do
 			DrawHitboxDebug(hitbox)
 		end
 
@@ -200,12 +201,7 @@ local function DrawDebug()
 		for k, line in pairs(refLines) do DrawRefLine(line) end
 		for k, line in pairs(incLines) do DrawIncLine(line) end
 		for k, data in pairs(normals) do DrawNormal(data) end
-
-		temp[pan] = true
 	end
-
-	-- Done to clear invalid panelsw.
-	GAMEMODE.DebugObjects = temp
 end
 
 hook.Add("DrawOverlay", "DrawOverlay.Debug", DrawDebug)

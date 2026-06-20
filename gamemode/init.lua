@@ -2,15 +2,16 @@ AddCSLuaFile("shared.lua")
 AddCSLuaFile("cl_init.lua")
 
 AddCSLuaFile("sh_convars.lua")
+AddCSLuaFile("sh_registeritems.lua")
 
 AddCSLuaFile("cl_debug.lua")
 
-AddCSLuaFile("vgui/ditemmodel.lua")
-AddCSLuaFile("vgui/pitem.lua")
 AddCSLuaFile("vgui/pshop.lua")
+AddCSLuaFile("vgui/pphysobj2doverlay.lua")
 
 include("shared.lua")
 include("sh_convars.lua")
+include("sh_registeritems.lua")
 
 include("sv_spawnlogic.lua")
 

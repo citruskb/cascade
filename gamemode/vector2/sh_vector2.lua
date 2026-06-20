@@ -27,13 +27,13 @@ function v2:__Create(x, y)
 
 	Rawset(self, "x", x)
 	Rawset(self, "y", y)
-	Rawset(self, "IsVector2", true)
+	Rawset(self, "isVector2", true)
 
 	return self
 end
 function v2:Add(other)		return Vector2(Rawget(self, "x") + Rawget(other, "x"), Rawget(self, "y") + Rawget(other, "y")) end
 function v2:Div(other)		return Vector2(Rawget(self, "x") / other, Rawget(self, "y") / other) end
-function v2:Eq(other)		return other.IsVector2 and Rawget(self, "x") == Rawget(other, "x") and Rawget(self, "y") == Rawget(other, "y") end
+function v2:Eq(other)		return other.isVector2 and Rawget(self, "x") == Rawget(other, "x") and Rawget(self, "y") == Rawget(other, "y") end
 function v2:Mul(other)		return Vector2(Rawget(self, "x") * other, Rawget(self, "y") * other) end
 function v2:Sub(other)		return Vector2(Rawget(self, "x") - Rawget(other, "x"), Rawget(self, "y") - Rawget(other, "y")) end
 function v2:Unm()			return Vector2(-Rawget(self, "x"), -Rawget(self, "y")) end

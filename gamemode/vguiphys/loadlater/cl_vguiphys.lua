@@ -49,7 +49,7 @@ function GM:VGUIPhysicsStep()
 
 	while self.VGUIPhysAccuStepTime > dt do
 		for physbox, _ in pairs(self.VGUIPhysboxes) do
-			if IsValid(physbox.parent) then continue end
+			if physbox.parent and physbox.parent.isPhysicsObject2D then continue end
 			physbox:Remove()
 		end
 
@@ -62,19 +62,9 @@ end
 
 function GM:VGUIPhysicsPass(dt, iter)
 	gamemode.Call("VGUIPhysApplyGravity", dt)			-- Gravity.
-
-	--benchmark.Start("HashGridCollisions")
 	gamemode.Call("VGUIPhysHashGridCollisions")			-- Broad phase. Drastic performance increase.
-	--benchmark.End("HashGridCollisions")
-
-	--benchmark.Start("DetectCollisions")
 	gamemode.Call("VGUIPhysDetectCollisions")			-- Detect collisions. Build & update collision constraints.
-	--benchmark.End("DetectCollisions")
-
-	--benchmark.Start("SolveConstraints")
 	gamemode.Call("VGUIPhysSolveConstraints", dt, iter)	-- Iteratively solve collision constraints.
-	--benchmark.End("SolveConstraints")
-
 	gamemode.Call("VGUIPhysStepPhysboxes", dt)			-- Update our physbox pos and rot based on velocities.
 end
 

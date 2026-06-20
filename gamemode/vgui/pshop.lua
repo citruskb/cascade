@@ -7,7 +7,7 @@ end
 PANEL = {}
 
 function PANEL:Init()
-	self.SetZPos(GM_ZPOS_PSHOP)
+	self:SetZPos(GM_ZPOS_PSHOP)
 
 	--local screenscale = BetterScreenScale()
 	local w, h = ScrW(), ScrH()
@@ -94,8 +94,9 @@ function PANEL:Init()
 	floorcontainer.Physbox = physbox
 	]]
 
-	gamemode.Call("NewPhysicsObject2D", Vector2(w * 0.25), rad, GAMEMODE.BackpackItems["wooden_crate"], vel)
+	--gamemode.Call("NewPhysicsObject2D", Vector2(w * 0.25), rad, GAMEMODE.BackpackItems["wooden_crate"], vel)
 
+	--[[
 	local invleftwall = vgui.Create("DPanel", self)
 	invleftwall:SetSize(w * 0.05, h)
 	invleftwall:SetPos(w * 0.35, 0)
@@ -109,7 +110,9 @@ function PANEL:Init()
 	}), true)
 	physbox.isStatic = true
 	invleftwall.Physbox = physbox
+	]]
 
+	--[[
 	local invrightwall = vgui.Create("DPanel", self)
 	invrightwall:SetSize(w * 0.05, h)
 	invrightwall:SetPos(w * 0.65, 0)
@@ -123,6 +126,7 @@ function PANEL:Init()
 	}), true)
 	physbox.isStatic = true
 	invrightwall.Physbox = physbox
+	]]
 	--
 
 
@@ -156,7 +160,7 @@ function PANEL:Init()
 	-- Test items
 	local function MakeBox(origin, vel, rad)
 		--GM:NewPhysicsObject2D(position, rotation, itemDataID, velocity, angularVelocity, isStatic)
-		gamemode.Call("NewPhysicsObject2D", origin, rad, GAMEMODE.BackpackItems["wooden_crate"], vel)
+		gamemode.Call("NewPhysicsObject2D", origin, rad, "wooden_crate", vel)
 	end
 
 	local function OneBox() MakeBox(Vector2(0.5 * w, 0.5 * h)) end
@@ -277,7 +281,7 @@ function GM:ShowHelp(pl)
 	end
 
 	if IsValid(self.pPhysObj2DOverlay) then
-		self.pPhysObj2DOverlay:SetVisible(not self.pPhysObj2DOverlay:GetVisible())
+		self.pPhysObj2DOverlay:SetVisible(not self.pPhysObj2DOverlay:IsVisible())
 	else
 		self.pPhysObj2DOverlay = vgui.Create("PPhysObj2DOverlay")
 	end
