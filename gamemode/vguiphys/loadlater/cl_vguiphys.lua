@@ -32,7 +32,7 @@ VGUIPHYS_HASHGRID_SIZE = 180	-- vgui position divided by this to determine grid 
 
 VGUIPHYS_GRAVITY = 240
 VGUIPHYS_GRAVITY_VEC2 = Vector2(0, VGUIPHYS_GRAVITY)
-VGUIPHYS_TERMINAL_VELOCITY = 500 -- Stop applying gravity after reaching this velocity.
+VGUIPHYS_TERMINAL_VELOCITY = 240 -- Stop applying gravity after reaching this velocity.
 
 VGUIPHYS_SLEEP_VEL_THRESHOLD = 3
 VGUIPHYS_SLEEP_ANGVEL_THRESHOLD = 0.1
@@ -142,26 +142,22 @@ local function CheckCollision(bodyA, bodyB)
 	-- This is effectively our broad phase, all in one line.
 	--if not bodyA:GetAABB():Overlaps(bodyB:GetAABB()) then return {} end
 
-	print(#bodyA.hitboxes, #bodyB.hitboxes)
-
 	local constr = {}
 	for idxA = 1, #bodyA.hitboxes do
 		local hitboxA = bodyA.hitboxes[idxA]
-		print(hitboxA)
 
 		for idxB = 1, #bodyB.hitboxes do
 			local hitboxB = bodyB.hitboxes[idxB]
-			print(hitboxB)
 
 			local collision = gamemode.Call("VGUIPhysSAT", hitboxA, hitboxB)
 			if not collision then continue end
 
 			local hbA = collision.hbA
 			local hbB = collision.hbB
-			bodyA = hitboxA.physbox
-			bodyB = hitboxB.physbox
+			local bA = hbA.physbox
+			local bB = hbB.physbox
 
-			local contactPoints = gamemode.Call("ClipPolyToPoly", bodyA, hbA, bodyB, hbB, collision)
+			local contactPoints = gamemode.Call("ClipPolyToPoly", bA, hbA, bB, hbB, collision)
 
 			-- Create contact constraints
 			for ptIdx = 1, #contactPoints.points do
@@ -176,7 +172,7 @@ local function CheckCollision(bodyA, bodyB)
 					constr[fID] = existingContact
 				else
 					-- But if not found, make a new one!
-					local newC = VGUICollisionConstraint:Create(bodyA, bodyB, screenP, collision.normal, collision.penetration, fID)
+					local newC = VGUICollisionConstraint:Create(bA, bB, screenP, collision.normal, collision.penetration, fID)
 					constr[ToString(fID)] = newC
 				end
 			end
@@ -293,7 +289,7 @@ end
 
 function GM:VGUIPhysSAT(hbA, hbB)
 	local pointsTabA, pointsTabB = hbA:GetHBScreenPointsObj():GetPoints(), hbB:GetHBScreenPointsObj():GetPoints()
-	local smallestOverlap, finalNormal, relativeTo, refEdgeA, refEdgeB
+	local smallestOverlap, finalNormal, relativeTo
 
 	for i = 1, #pointsTabA do
 		local normalA = GetNormal(pointsTabA, i)
@@ -307,7 +303,6 @@ function GM:VGUIPhysSAT(hbA, hbB)
 		smallestOverlap = overlap
 		finalNormal = Vector2(normalA:Unpack()) -- A new Vector2 because we cache the normal above, but also manipulate this later on.
 		relativeTo = hbA
-		refEdgeA = i
 	end
 
 	for i = 1, #pointsTabB do
@@ -323,7 +318,6 @@ function GM:VGUIPhysSAT(hbA, hbB)
 		smallestOverlap = overlap
 		finalNormal = Vector2(normalB:Unpack())
 		relativeTo = hbB
-		refEdgeB = i
 	end
 
 	-- Orient our MTV correctly so that it points from A -----> B

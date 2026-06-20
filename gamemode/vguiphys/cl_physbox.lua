@@ -156,13 +156,9 @@ end
 -- TODO better estimates.
 -- Possibly calculate these for all hitboxes then add together?
 function meta:RecalculateMassAndInertia()
-	local data = self.parent.itemData
-	local massMult = data and data.massMult
-	local inertiaMult = data and data.inertiaMult
-
 	local w, h = self:GetSize()
-	self.mass = self.isStatic and math.HUGE or self.density * massMult * w / 100 * h / 100
-	self.momentOfInertia = self.isStatic and math.HUGE or inertiaMult * (self.mass * (w * w + h * h)) / 12
+	self.mass = self.isStatic and math.HUGE or self.density * w / 100 * h / 100
+	self.momentOfInertia = self.isStatic and math.HUGE or (self.mass * (w * w + h * h)) / 12
 end
 
 -- The center of our physbox, relative to screenspace.

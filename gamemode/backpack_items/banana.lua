@@ -2,14 +2,11 @@ ITEM.id = "banana"
 ITEM.name = "Banana"
 ITEM.description = "Go bananas."
 
-ITEM.massMult = 1
-ITEM.inertiaMult = 1
-
 ITEM.model = "models/props/cs_italy/bananna.mdl"
-ITEM.fov = 60
+ITEM.fov = 51
 ITEM.camPos = Vector(1, 0, 0)
 ITEM.camScale = 1
-ITEM.camXYOffsetAdj = VECTOR2_ZERO
+ITEM.camXYOffsetAdj = Vector2(0, 3)
 
 ITEM.triggerDelay = 0
 ITEM.retriggerable = false
@@ -25,36 +22,77 @@ end
 print(Points(new))
 ]]
 
+local rescale = 0.35
 
+local shape = {
+	[1] = Points({ Vector2(36, 240),
+		Vector2(0, 152),
+		Vector2(8, 88),
+		Vector2(40, 88),
+		Vector2(99, 176),
+	}),
+	[2] = Points({ Vector2(8, 88),
+		Vector2(8, 0),
+		Vector2(40, 0),
+		Vector2(40, 88),
+	}),
+	[3] = Points({ Vector2(36, 240),
+		Vector2(99, 176),
+		Vector2(156, 208),
+		Vector2(132, 295),
+	}),
+	[4] = Points({ Vector2(132, 295),
+		Vector2(156, 208),
+		Vector2(229, 221),
+		Vector2(232, 306),
+	}),
+	[5] = Points({ Vector2(232, 306),
+		Vector2(229, 221),
+		Vector2(334, 216),
+		Vector2(356, 228),
+		Vector2(369, 248),
+		Vector2(357, 278)
+	})
+}
 
+--[[
+local all
+for i = 1, #shape do
+	local points = shape[i]
+	all = not all and points or all + points
+end
 
+local adjust = Vector2(all:GetMinX(), all:GetMinY())
+for i = 1, #shape do
+	local points = shape[i]:GetPoints()
+
+	local temp = {}
+	for j = 1, #points do
+		temp[j] = points[j] - adjust
+	end
+end
+]]
+
+local newShape = {}
+for i = 1, #shape do
+	local points = shape[i]:GetPoints()
+	local newPoints = {}
+	for j = 1, #points do
+		newPoints[j] = points[j] * rescale
+	end
+
+	newShape[i] = Points(newPoints)
+end
+
+ITEM.camXYOffsetAdj = ITEM.camXYOffsetAdj * rescale
 
 
 --[[ Template
-[1] = Points({	Vector2(0, 0),
-			Vector2(500, 0),
-			Vector2(500, 500),
-			Vector2(0, 500)}),
-[2] = Points({	Vector2(65, 355),
-	Vector2(20, 245),
-	Vector2(30, 55),
-	Vector2(70, 55),
-	Vector2(70, 165),
-	Vector2(150, 280),
-	Vector2(215, 315),
-	Vector2(305, 335),
-	Vector2(440, 325),
-	Vector2(485, 360),
-	Vector2(470, 405),
-	Vector2(325, 435),
-	Vector2(190, 425)}),
-]]
-
-ITEM.hitboxPoints = {
 	[1] = Points({ Vector2(0, 0),
-			Vector2(400, 0),
-			Vector2(400, 400),
-			Vector2(0, 400)}),
+		Vector2(400, 0),
+		Vector2(400, 400),
+		Vector2(0, 400)}),
+
 	[2] = Points({ Vector2(52, 284),
 		Vector2(16, 196),
 		Vector2(24, 132),
@@ -83,7 +121,9 @@ ITEM.hitboxPoints = {
 		Vector2(385, 292),
 		Vector2(373, 322)
 	})
-}
+]]
+
+ITEM.hitboxPoints = newShape
 
 ITEM.gridPoints = Points({Vector2(0, 0), Vector2(0, 1), Vector2(1, 1)})
 
@@ -113,4 +153,24 @@ for i = 1, #shape do
 end
 
 ITEM.camXYOffsetAdj = ITEM.camXYOffsetAdj * rescale
+]]
+
+--[[
+local all
+for i = 1, #shape do
+	local points = shape[i]
+	all = not all and points or all + points
+end
+
+local adjust = Vector2(all:GetMinX(), all:GetMinY())
+for i = 1, #shape do
+	local points = shape[i]:GetPoints()
+
+	local temp = {}
+	for j = 1, #points do
+		temp[j] = points[j] - adjust
+	end
+	print(i)
+	print(Points(temp))
+end
 ]]

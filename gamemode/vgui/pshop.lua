@@ -187,16 +187,50 @@ function PANEL:Init()
 		end
 	end
 
+	local function HulaTime(num)
+		num = math.Clamp(math.Floor(num), 1, 64)
+		for i = 1, num do
+			MakeItem("hula_doll",
+			Vector2(
+				w * 0.5 + math.Random(-40 * 4, 40 * 4),
+				h * 0.5 + math.Random(-40 * 4, 40 * 4)
+			)
+			,Vector2(
+				math.Rand(-VGUIPHYS_TERMINAL_VELOCITY, VGUIPHYS_TERMINAL_VELOCITY),
+				-math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)
+			))
+		end
+	end
+
+	local function DoorBlast(num)
+		num = math.Clamp(math.Floor(num), 1, 64)
+		for i = 1, num do
+			MakeItem("blast_door",
+			Vector2(
+				w * 0.5 + math.Random(-40 * 4, 40 * 4),
+				h * 0.5 + math.Random(-40 * 4, 40 * 4)
+			)
+			,Vector2(
+				math.Rand(-VGUIPHYS_TERMINAL_VELOCITY, VGUIPHYS_TERMINAL_VELOCITY),
+				-math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)
+			))
+		end
+	end
+
 	-- /// THE TEST ZONE /// --
 	--OneBox()								-- Spawn a regular box.
 	--StackOfBoxes(5)						-- Plain stacked boxes.
 	--StackOfOffsetTossedBoxes(5, 30)		-- Offset stacked boxes.
-	--TossBoxes(48)							-- Toss a load of boxes everywhere.
+	--TossBoxes(32)							-- Toss a load of boxes everywhere.
 
 	--MakeItem("blast_door", Vector2(w * 0.5, h * 0.5))
 	--MakeItem("hula_doll", Vector2(w * 0.5, h * 0.5))
-	MakeItem("banana", Vector2(w * 0.5, h * 0.5), nil, nil, true)
-	--GoBananas(32)
+	--MakeItem("banana", Vector2(w * 0.5, h * 0.5))
+
+	TossBoxes(32)
+	GoBananas(6)
+	DoorBlast(2)
+	HulaTime(4)
 
 end
 

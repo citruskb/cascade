@@ -2,9 +2,6 @@ ITEM.id = "wooden_crate"
 ITEM.name = "Wooden Crate"
 ITEM.description = "It's just a crate."
 
-ITEM.massMult = 1
-ITEM.inertiaMult = 1
-
 ITEM.model = "models/props_junk/wood_crate001a.mdl"
 ITEM.fov = 60
 ITEM.camPos = Vector(1, 0, 0)

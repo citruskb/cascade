@@ -2,9 +2,6 @@ ITEM.id = "hula_doll"
 ITEM.name = "Hula Doll"
 ITEM.description = "It's all in the hips."
 
-ITEM.massMult = 1
-ITEM.inertiaMult = 1
-
 ITEM.model = "models/props_lab/huladoll.mdl"
 ITEM.fov = 47
 ITEM.camPos = Vector(1, 0, 0)
