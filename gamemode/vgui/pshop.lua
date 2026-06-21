@@ -225,7 +225,7 @@ function PANEL:Init()
 	end
 
 	-- /// THE TEST ZONE /// --
-	--OneBox()								-- Spawn a regular box.
+	OneBox()								-- Spawn a regular box.
 	--StackOfBoxes(5)						-- Plain stacked boxes.
 	--StackOfOffsetTossedBoxes(5, 30)		-- Offset stacked boxes.
 	--TossBoxes(32)							-- Toss a load of boxes everywhere.
@@ -236,7 +236,7 @@ function PANEL:Init()
 
 	--TossBoxes(32)
 	--GoBananas(6)
-	DoorBlast(1)
+	--DoorBlast(1)
 	--HulaTime(4)
 
 	-- Free the mouse.

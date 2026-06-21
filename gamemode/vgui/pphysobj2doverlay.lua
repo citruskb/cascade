@@ -46,7 +46,7 @@ function PANEL:SetupPaintVars(obj)
 	local dist = mins:Distance(maxs)
 	local sizeAdjust = math.Clamp(dist / 64, 0.1, 2)
 	local camPos, zsqr
-	center, camPos, x, y, zsqr = self:EvaluateCameraPos(center, camPosOffset, dist, x, y, data.camOffScreenAdjScale, sizeAdjust, objAng)
+	center, camPos, x, y, zsqr = self:EvaluateCameraPos(center, camPosOffset, dist, x, y, data.camOffScreenAdjScale, sizeAdjust, objAng, obj.physbox)
 
 	local lookat = center
 	local towards = lookat - camPos
@@ -64,6 +64,9 @@ function PANEL:SetupPaintVars(obj)
 	vars.clEnt = ent
 	vars.zsqr = zsqr
 	vars.sizeAdjust = sizeAdjust
+	vars.camOrthoAdjScale = data.camOrthoAdjScale
+
+	vars.isOrtho = obj.physbox:IsInsideInventoryBounds()
 
 	table.insert(self.paintVars, vars)
 
@@ -82,14 +85,33 @@ function PANEL:SetupPaintVars(obj)
 	]]
 end
 
-function PANEL:EvaluateCameraPos(center, camPosOffset, dist, x, y, camOffScreenAdjScale, adjustSkew, objAng)
+function PANEL:EvaluateCameraPos(center, camPosOffset, dist, x, y, camOffScreenAdjScale, adjustSkew, objAng, physbox)
 
 	-- Do nothing, basically
 	--return center, center + camPosOffset * dist, math.Max(x, 0), math.Max(y, 0), 0
 
+	if physbox:IsInsideInventoryBounds() then
+		local negativeX = math.Min(x, 0)
+		local negativeY = math.Min(y, 0)
+		local adjust = Vector(0, -negativeX, negativeY)
+		return center, center + adjust * adjustSkew + camPosOffset * dist, math.Max(x, 0), math.Max(y, 0), adjust:LengthSqr()
+	else
+		if x >= 0 and y >= 0 then
+			return center, center + camPosOffset * dist, x, y, 0
+		end
 
-	-- Tried to adjust by angling the camera and such.
+		local xMag = x < 0 and -x or 0
+		local yMag = y < 0 and -y or 0
+		local adjustDir = Vector(0, xMag, -yMag)
+		local adjust = adjustDir * (camOffScreenAdjScale or 1)
+		adjust:Rotate(Angle(0, 0, -objAng))
 
+		return center + adjust, center + adjust + camPosOffset * dist, math.Max(x, 0), math.Max(y, 0), adjust:LengthSqr()
+	end
+
+
+	--[[
+	-- Try to adjust by angling the camera and such.
 	if x >= 0 and y >= 0 then
 		return center, center + camPosOffset * dist, x, y, 0
 	end
@@ -100,14 +122,8 @@ function PANEL:EvaluateCameraPos(center, camPosOffset, dist, x, y, camOffScreenA
 	local adjust = adjustDir * (camOffScreenAdjScale or 1)
 	adjust:Rotate(Angle(0, 0, -objAng))
 
-	--[[
-	local dir = adjust:Angle()
-	dir:RotateAroundAxis(Vector(1, 0, 0), objAng)
-	adjust = dir:Forward() * adjust:Length()
-	]]
-
 	return center + adjust, center + adjust + camPosOffset * dist, math.Max(x, 0), math.Max(y, 0), adjust:LengthSqr()
-
+	]]
 
 	-- Current, fly-off-the-top behavior
 
@@ -120,8 +136,15 @@ function PANEL:EvaluateCameraPos(center, camPosOffset, dist, x, y, camOffScreenA
 end
 
 function PANEL:PaintPhysObj2D(vars)
-	render.SuppressEngineLighting(true)
-	cam.IgnoreZ(true)
+	cam.Start3D(vars.camPos, vars.ang, vars.fov, vars.x, vars.y, vars.w, vars.h, 8, 512 * vars.sizeAdjust)
+		render.OverrideDepthEnable(true, false)
+			vars.clEnt:DrawModel()
+		render.OverrideDepthEnable(false)
+	cam.End3D()
+end
+
+function PANEL:PaintOrthoPhysObj2D(vars)
+	local orthoAdj = vars.camOrthoAdjScale
 
 	local camData = {
 		x = vars.x,
@@ -137,32 +160,19 @@ function PANEL:PaintPhysObj2D(vars)
 		znear = 8,
 		subrect = false,
 		bloomtone = false,
-		offcenter = {
-			left = 0,
-			right = 0,
-			bottom = 0,
-			top = 0,
-		},
+		offcenter = nil,
 		ortho = {
-			left = -100,
-			right = 100,
-			bottom = 100,
-			top = -100
+			left = -1 * orthoAdj,
+			right = 1 * orthoAdj,
+			bottom = 1 * orthoAdj,
+			top = -1 * orthoAdj,
 		},
 	}
 	cam.Start(camData)
-
-
-	--cam.Start3D(vars.camPos, vars.ang, vars.fov, vars.x, vars.y, vars.w, vars.h, 8, 512 * vars.sizeAdjust)
-		--cam.StartOrthoView(-100, 100, -100, 100)
-			render.OverrideDepthEnable(true, false)
-				vars.clEnt:DrawModel()
-			render.OverrideDepthEnable(false)
-		--cam.EndOrthoView()
+		render.OverrideDepthEnable(true, false)
+			vars.clEnt:DrawModel()
+		render.OverrideDepthEnable(false)
 	cam.End3D()
-
-	cam.IgnoreZ(false)
-	render.SuppressEngineLighting(false)
 end
 
 function PANEL:Paint()
@@ -172,9 +182,21 @@ function PANEL:Paint()
 	end
 
 	table.SortByMember(self.paintVars, "zsqr")
+
+
+	render.SuppressEngineLighting(true)
+	cam.IgnoreZ(true)
+
 	for k, vars in pairs(self.paintVars) do
-		self:PaintPhysObj2D(vars)
+		if self.paintVars.isOrtho then
+			self:PaintOrthoPhysObj2D(vars)
+		else
+			self:PaintPhysObj2D(vars)
+		end
 	end
+
+	cam.IgnoreZ(false)
+	render.SuppressEngineLighting(false)
 end
 
 vgui.Register("PPhysObj2DOverlay", PANEL, "DPanel")

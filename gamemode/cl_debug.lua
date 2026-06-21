@@ -5,7 +5,7 @@ normals = {}
 DEBUG_MODE_MINIMAL = 1
 DEBUG_MODE_DETAILED = 2
 
-GM.Debug = false -- TODO move to a convar.
+GM.Debug = true -- TODO move to a convar.
 GM.DebugMode = DEBUG_MODE_MINIMAL
 GM.DebugObjects = {}
 
