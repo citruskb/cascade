@@ -30,9 +30,12 @@ VGUIPHYS_SOFT_CONTACTSPEED = 150
 
 VGUIPHYS_HASHGRID_SIZE = 180	-- vgui position divided by this to determine grid position for VGUI collisions hashing.
 
+-- TODO: These velocities probably ought to go through a screenscale check.
 VGUIPHYS_GRAVITY = 240
 VGUIPHYS_GRAVITY_VEC2 = Vector2(0, VGUIPHYS_GRAVITY)
 VGUIPHYS_TERMINAL_VELOCITY = 500 -- Stop applying gravity after reaching this velocity.
+
+VGUIPHYS_PUSH_VELOCITY = 700 -- Flat velocity applied to objects dropped outside of bounds, as they move back into bounds.
 
 VGUIPHYS_SLEEP_VEL_THRESHOLD = 3
 VGUIPHYS_SLEEP_ANGVEL_THRESHOLD = 0.1
@@ -96,6 +99,7 @@ function GM:VGUIPhysHashGridCollisions()
 
 	local objects = {}
 	for physbox, _ in pairs(self.VGUIPhysboxes) do
+		if physbox.isPickedUp then continue end
 		table.Insert(objects, physbox)
 	end
 

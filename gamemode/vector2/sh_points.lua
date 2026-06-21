@@ -49,7 +49,7 @@ function __points:Add(other)
 	end
 end
 
-function meta:GetCenter() return Vector2(self:GetMinX() + self:GetMaxX() * 0.5, self:GetMinY() + self:GetMaxY() * 0.5) end
+function meta:GetCenter() return Vector2((self:GetMinX() + self:GetMaxX()) * 0.5, (self:GetMinY() + self:GetMaxY()) * 0.5) end
 
 function meta:GetTable()
 	local tab = {}

@@ -4,6 +4,7 @@ AddCSLuaFile("cl_init.lua")
 AddCSLuaFile("sh_convars.lua")
 AddCSLuaFile("sh_registeritems.lua")
 
+AddCSLuaFile("cl_handlemouse.lua")
 AddCSLuaFile("cl_debug.lua")
 
 AddCSLuaFile("vgui/pshop.lua")

@@ -1,6 +1,7 @@
 local math_Sqrt = math.Sqrt
 local math_Atan2 = math.Atan2
 local math_Rand = math.Rand
+local math_Clamp = math.Clamp
 local math_Cos = math.Cos
 local math_Sin = math.Sin
 local math_Min = math.Min
@@ -246,3 +247,12 @@ function meta:Zero() Rawset(self, "x", 0) Rawset(self, "y", 0) end
 
 function Vector2(x, y) return v2:Create(x or 0, y or 0) end
 VECTOR2_ZERO = Vector2()
+
+function LerpVector2(fraction, from, to)
+	fraction = math_Clamp(fraction, 0, 1)
+	local fromX, fromY = from:Unpack()
+	local toX, toY = to:Unpack()
+
+	local deltaX, deltaY = (toX - fromX) * fraction, (toY - fromY) * fraction
+	return Vector2(fromX + deltaX, fromY + deltaY)
+end

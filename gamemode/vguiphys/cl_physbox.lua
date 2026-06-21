@@ -71,6 +71,10 @@ function VGUIPhysbox:__Create(parent)
 	self:DisablePhysics()
 
 	self.isScreenScaled = parent.isScreenScaled
+	self.isPickedUp = false
+
+	self.isBeingPushed = false
+	self.pushTo = Vector2()
 
 	GAMEMODE.VGUIPhysboxes[self] = true
 	self.isVGUIPhysbox = true
@@ -186,6 +190,12 @@ end
 
 -- TODO may need to recode a bit
 function meta:Step(dt)
+	self:StepPhysics(dt)
+	self:StepPickup(dt)
+	self:StepPush(dt)
+end
+
+function meta:StepPhysics(dt)
 	if not self.isPhysicsEnabled then return end
 
 	if self.isSleeping then
@@ -196,10 +206,47 @@ function meta:Step(dt)
 		self:AddPosition(self.velocity * dt)
 		self:AddRotation(self.angularVelocity * dt)
 
-		-- Update our parent's position based on our's
-		self.parent.position:Set(self.position)
-		self.parent.rotation = self.rotation
+		self:UpdateParentPosAndRot()
 	end
+end
+
+function meta:StepPickup(dt)
+	if not self.isPickedUp then return end
+
+	local mousePos = GAMEMODE.CachedMousePos
+	--local ft = FrameTime()
+	--print(ft * 100)
+	self.position = LerpVector2(0.7, self.position, mousePos)
+
+	self:UpdateParentPosAndRot()
+end
+
+-- TODO: Cache. Refresh if we detect a screenscale change.
+function meta:GetPushTo()
+	local w, h = ScrW(), ScrH()
+	return Vector2(w * 0.55, h * 0.5)
+end
+
+function meta:StepPush(dt)
+	if not self.isBeingPushed then return end
+
+	local pushMagdt = VGUIPHYS_PUSH_VELOCITY * dt
+	self.position:DoAdd(self.pushDir * pushMagdt)
+	--VGUIPHYS_PUSH_VELOCITY
+
+	self:UpdateParentPosAndRot()
+
+	-- Check if we've reached our destination.
+	if self.position:DistanceSqr(self:GetPushTo()) >= pushMagdt * pushMagdt then return end
+	self:EnablePhysics()
+	self.isSleeping = false
+	self.isBeingPushed = false
+	self.velocity = self.pushDir * VGUIPHYS_PUSH_VELOCITY
+end
+
+function meta:UpdateParentPosAndRot()
+	self.parent.position:Set(self.position)
+	self.parent.rotation = self.rotation
 end
 
 function meta:ApplyImpulse(impulse, screenPoint)
@@ -208,4 +255,38 @@ function meta:ApplyImpulse(impulse, screenPoint)
 
 	self:AddVelocity(impulse / self.mass)
 	self:AddAngularVelocity(angularImpulse / self.momentOfInertia)
+end
+
+function meta:MousePickup()
+	self:DisablePhysics()
+	self.isSleeping = false
+	self.isPickedUp = true
+end
+
+function meta:MouseDrop()
+	self.isPickedUp = false
+
+	if self:IsInsideInventoryBounds() then
+		self:EnablePhysics()
+		self:AddVelocity(GAMEMODE.CachedMouseVelocity)
+		--self:ApplyImpulse(mouseVelocity / self.mass / self.momentOfInertia, GAMEMODE.CachedMousePos)
+	else
+		self.isBeingPushed = true
+		self.pushDir = (self:GetPushTo() - self.position):GetNormalized()
+	end
+end
+
+function meta:IsInsideInventoryBounds()
+	local x, y = self.position:Unpack()
+	local floorAABB = GAMEMODE.InventoryFloor.physbox:GetAABB()
+	local leftWallAABB = GAMEMODE.InventoryLeftWall.physbox:GetAABB()
+	local rightWallAABB = GAMEMODE.InventoryRightWall.physbox:GetAABB()
+
+	-- Remember, positive Y is down.
+	local isInsideBounds =
+		y < floorAABB.min.y and -- Our center point is above the floor.
+		x > leftWallAABB.max.x and -- Our center point is right of the left wall.
+		x < rightWallAABB.min.x	-- Our center point is left of the right wall.
+
+	return isInsideBounds
 end

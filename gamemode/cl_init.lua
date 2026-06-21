@@ -2,6 +2,7 @@ include("shared.lua")
 include("sh_convars.lua")
 include("sh_registeritems.lua")
 
+include("cl_handlemouse.lua")
 include("cl_debug.lua")
 
 include("vgui/pshop.lua")
@@ -33,6 +34,7 @@ end
 
 local M_Player = FindMetaTable("Player")
 local P_Team = M_Player.Team
+
 function GM:PlayerBindPress(pl, bind, pressed)
 	local pTeam = P_Team(MySelf)
 
@@ -44,8 +46,9 @@ function GM:PlayerBindPress(pl, bind, pressed)
 		if pressed then self:ShowHelp() end
 		return true
 	end
-end
 
+	--if bind == "+attack" then gamemode.Call("MousePressed", pl) end
+end
 
 -- Validity hack
 
@@ -100,6 +103,7 @@ local nextTick = 0
 function GM:_Think()
 	local ct = CurTime()
 
+	gamemode.Call("HandleMousePress")
 	gamemode.Call("VGUIPhysicsStep")
 
 	if nextTick > ct then return end

@@ -26,3 +26,11 @@ function meta:Overlaps(other)
 		self.min.y <= other.max.y and
 		self.max.y >= other.min.y
 end
+
+function meta:Contains(other)
+	return
+		self.min.x <= other.min.x and
+		self.max.x >= other.max.x and
+		self.min.y <= other.min.y and
+		self.max.y >= other.max.y
+end

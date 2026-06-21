@@ -105,7 +105,6 @@ end
 
 local function DrawHitboxDebug(hitbox)
 	local screenpoints = hitbox:GetHBScreenPointsObj()
-
 	local poly = screenpoints:ToTable()
 
 	surface.SetDrawColor(hitboxCol)

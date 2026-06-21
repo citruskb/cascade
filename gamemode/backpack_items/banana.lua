@@ -19,7 +19,6 @@ for i = 1, #shape:GetPoints() do
 	local point = shape:GetPoints()[i]
 	new[i] = point - adjust
 end
-print(Points(new))
 ]]
 
 local rescale = 0.35
@@ -170,7 +169,5 @@ for i = 1, #shape do
 	for j = 1, #points do
 		temp[j] = points[j] - adjust
 	end
-	print(i)
-	print(Points(temp))
 end
 ]]

@@ -7,11 +7,6 @@ end
 PANEL = {}
 
 function PANEL:Init()
-	self:MakePopup(true)
-	self:SetKeyboardInputEnabled(false)
-	self:RequestFocus()
-	print(self:HasFocus())
-
 	self:SetZPos(GM_ZPOS_PSHOP)
 	local w, h = ScrW(), ScrH()
 
@@ -96,17 +91,17 @@ function PANEL:Init()
 				Vector2(0, fH),
 			})
 
-		gamemode.Call("NewPhysicsObject2D",
-			actualOrigin,
-			0,
-			pointsObj,
-			nil, nil, true, true)
+		return gamemode.Call("NewPhysicsObject2D",
+				actualOrigin,
+				0,
+				pointsObj,
+				nil, nil, true, true)
 	end
 
-	MakeWall(Vector2(w * 0.4, h * 0.95), w * 0.25, h * 0.05)		-- Floor collision
-	MakeWall(Vector2(w * 0.35, -h), w * 0.05, 2 * h)				-- Left side wall
-	MakeWall(Vector2(w * 0.65, -h), w * 0.05, 2 * h)				-- Right side wall
-	MakeWall(Vector2(w * 0.4, -h + 0.05 * h), w * 0.25, h * 0.05)	-- Cap, out of view. just in case.
+	GAMEMODE.InventoryFloor = MakeWall(Vector2(w * 0.4, h * 0.95), w * 0.25, h * 0.2)		-- Floor collision
+	GAMEMODE.InventoryLeftWall = MakeWall(Vector2(w * 0.35, -h), w * 0.05, 2 * h)			-- Left side wall
+	GAMEMODE.InventoryRightWall = MakeWall(Vector2(w * 0.65, -h), w * 0.05, 2 * h)			-- Right side wall
+	GAMEMODE.InventoryTop = MakeWall(Vector2(w * 0.4, -h + 0.05 * h), w * 0.25, h * 0.05)	-- Cap, out of view. just in case.
 	--
 
 
@@ -237,17 +232,19 @@ function PANEL:Init()
 	DoorBlast(2)
 	HulaTime(4)
 
-end
-
-function PANEL:OnMousePressed()
-	print("pressed", input.GetCursorPos())
-end
-
-function PANEL:OnMouseReleased()
-	print("released", input.GetCursorPos())
+	-- Free the mouse.
+	gui.EnableScreenClicker(true)
+	--[[
+	self:MakePopup(true)
+	self:SetKeyboardInputEnabled(false)
+	]]
 end
 
 function PANEL:Paint()
+end
+
+function PANEL:OnRemove()
+	gui.EnableScreenClicker(false)
 end
 
 vgui.Register("PShop", PANEL, "DPanel")
