@@ -43,8 +43,10 @@ function PANEL:SetupPaintVars(obj)
 
 	local mins, maxs = ent:OBBMins(), ent:OBBMaxs()
 	local center = ent:OBBCenter()
+	local dist = mins:Distance(maxs)
+	local sizeAdjust = math.Clamp(dist / 64, 0.1, 2)
 	local camPos, zsqr
-	camPos, x, y, zsqr = self:EvaluateCameraPos(center, camPosOffset, mins:Distance(maxs), x, y)
+	camPos, x, y, zsqr = self:EvaluateCameraPos(center, camPosOffset, dist, x, y, sizeAdjust)
 
 	local lookat = center
 	local towards = lookat - camPos
@@ -61,6 +63,7 @@ function PANEL:SetupPaintVars(obj)
 
 	vars.clEnt = ent
 	vars.zsqr = zsqr
+	vars.sizeAdjust = sizeAdjust
 
 	table.insert(self.paintVars, vars)
 
@@ -77,18 +80,18 @@ function PANEL:SetupPaintVars(obj)
 	render.SuppressEngineLighting(false)
 end
 
-function PANEL:EvaluateCameraPos(center, camPosOffset, dist, x, y)
+function PANEL:EvaluateCameraPos(center, camPosOffset, dist, x, y, adjustMag)
 	local negativeX = math.Min(x, 0)
 	local negativeY = math.Min(y, 0)
 	local adjust = Vector(0, -negativeX, negativeY)
-	return center + adjust + camPosOffset * dist, math.Max(x, 0), math.Max(y, 0), adjust:LengthSqr()
+	return center + adjust * adjustMag + camPosOffset * dist, math.Max(x, 0), math.Max(y, 0), adjust:LengthSqr()
 end
 
 function PANEL:PaintPhysObj2D(vars)
 	render.SuppressEngineLighting(true)
 	cam.IgnoreZ(true)
 
-	cam.Start3D(vars.camPos, vars.ang, vars.fov, vars.x, vars.y, vars.w, vars.h, 8, 512)
+	cam.Start3D(vars.camPos, vars.ang, vars.fov, vars.x, vars.y, vars.w, vars.h, 8, 512 * vars.sizeAdjust)
 		render.OverrideDepthEnable(true, false)
 		vars.clEnt:DrawModel()
 		render.OverrideDepthEnable(false)
@@ -96,46 +99,6 @@ function PANEL:PaintPhysObj2D(vars)
 
 	cam.IgnoreZ(false)
 	render.SuppressEngineLighting(false)
-
-	--[[
-	local data = obj.itemData
-	if not data then return end
-
-	local ent = data.clEnt
-	if not IsValid(ent) then Error("[PhysObj2D] - Invalid client entity") end
-
-	-- Our size needs to be large enough to handle however our object is rotated. 
-	-- Our X and Y originates based on this as well.
-	local posVec = obj.physbox:GetCenterScreenPoint()
-	local adjPos = posVec + obj.physbox.camXYOffset
-	local x, y = adjPos:Unpack()
-	local w, h = obj.physbox.fDist, obj.physbox.fDist
-
-	local objAng = math.Ang(-obj.rotation)
-	local fov = data.fov
-	local camPosOffset = data.camPos
-
-	render.SuppressEngineLighting(true)
-	cam.IgnoreZ(true)
-
-	local mins, maxs = ent:OBBMins(), ent:OBBMaxs()
-	local center = ent:OBBCenter()
-	local camPos, x, y = self:EvaluateCameraPos(center, camPosOffset, mins:Distance(maxs), x, y)
-
-	local lookat = center
-	local towards = lookat - camPos
-	local ang = towards:Angle()
-	ang:RotateAroundAxis(towards:GetNormalized(), objAng)
-
-	cam.Start3D(camPos, ang, fov, x, y, w, h, 8, 256)
-		render.OverrideDepthEnable(true, false)
-		ent:DrawModel()
-		render.OverrideDepthEnable(false)
-	cam.End3D()
-
-	cam.IgnoreZ(false)
-	render.SuppressEngineLighting(false)
-	]]
 end
 
 function PANEL:Paint()

@@ -7,6 +7,11 @@ end
 PANEL = {}
 
 function PANEL:Init()
+	self:MakePopup(true)
+	self:SetKeyboardInputEnabled(false)
+	self:RequestFocus()
+	print(self:HasFocus())
+
 	self:SetZPos(GM_ZPOS_PSHOP)
 	local w, h = ScrW(), ScrH()
 
@@ -29,7 +34,7 @@ function PANEL:Init()
 	-- Inventory
 	local grid = vgui.Create("DPanel", left)
 	grid:SetSize(w * 0.4, h * 0.6)
-	grid:SetBackgroundColor(Color(255, 0, 0, 10))
+	grid:SetBackgroundColor(Color(255, 0, 0, GAMEMODE.Debug and 0 or 120))
 	grid:Dock(TOP)
 	local lab = EasyLabel(grid, "Grid Inventory", "SFontLarger")
 	DockCenter(lab, grid)
@@ -45,7 +50,7 @@ function PANEL:Init()
 	-- Playermodel
 	local model = vgui.Create("DPanel", botLeft)
 	model:SetSize(w * 0.2, h * 0.4)
-	model:SetBackgroundColor(Color(0, 0, 255, 10))
+	model:SetBackgroundColor(Color(0, 0, 255, GAMEMODE.Debug and 0 or 120))
 	model:Dock(LEFT)
 	lab = EasyLabel(model, "Player Model", "SFontLarger")
 	DockCenter(lab, model)
@@ -55,7 +60,7 @@ function PANEL:Init()
 	-- Stats & options
 	local stats = vgui.Create("DPanel", botLeft)
 	stats:SetSize(w * 0.2, h * 0.4)
-	stats:SetBackgroundColor(Color(0, 255, 0, 10))
+	stats:SetBackgroundColor(Color(0, 255, 0, GAMEMODE.Debug and 0 or 120))
 	stats:Dock(LEFT)
 	lab = EasyLabel(stats, "Stats", "SFontLarger")
 	DockCenter(lab, stats)
@@ -76,8 +81,8 @@ function PANEL:Init()
 	DockCenter(lab, inventory)
 
 	local floorcontainer = vgui.Create("DPanel", self)
-	floorcontainer:SetSize(w * 0.25, h * 0.1)
-	floorcontainer:SetPos(w * 0.4, h * 0.9)
+	floorcontainer:SetSize(w * 0.25, h * 0.05)
+	floorcontainer:SetPos(w * 0.4, h * 0.95)
 	floorcontainer:SetBackgroundColor(Color(0, 67, 167, GAMEMODE.Debug and 0 or 200))
 
 	--position, rotation, itemDataID, velocity, angularVelocity, isStatic, notScreenScaled
@@ -115,7 +120,7 @@ function PANEL:Init()
 	-- Shop area
 	local shop = vgui.Create("DPanel", right)
 	shop:SetSize(0, h * 0.6)
-	shop:SetBackgroundColor(Color(255, 0, 255, 10))
+	shop:SetBackgroundColor(Color(255, 0, 255, GAMEMODE.Debug and 0 or 120))
 	shop:Dock(TOP)
 	lab = EasyLabel(shop, "Shop", "SFontLarger")
 	DockCenter(lab, right)
@@ -124,7 +129,7 @@ function PANEL:Init()
 	-- Shopkeep
 	local shopkeep = vgui.Create("DPanel", right)
 	shopkeep:SetSize(0, h * 0.4)
-	shopkeep:SetBackgroundColor(Color(0, 255, 255, 10))
+	shopkeep:SetBackgroundColor(Color(0, 255, 255, GAMEMODE.Debug and 0 or 120))
 	shopkeep:Dock(TOP)
 	lab = EasyLabel(shopkeep, "Shopkeep", "SFontLarger")
 	DockCenter(lab, right)
@@ -232,6 +237,14 @@ function PANEL:Init()
 	DoorBlast(2)
 	HulaTime(4)
 
+end
+
+function PANEL:OnMousePressed()
+	print("pressed", input.GetCursorPos())
+end
+
+function PANEL:OnMouseReleased()
+	print("released", input.GetCursorPos())
 end
 
 function PANEL:Paint()

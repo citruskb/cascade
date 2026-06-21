@@ -32,7 +32,7 @@ VGUIPHYS_HASHGRID_SIZE = 180	-- vgui position divided by this to determine grid 
 
 VGUIPHYS_GRAVITY = 240
 VGUIPHYS_GRAVITY_VEC2 = Vector2(0, VGUIPHYS_GRAVITY)
-VGUIPHYS_TERMINAL_VELOCITY = 240 -- Stop applying gravity after reaching this velocity.
+VGUIPHYS_TERMINAL_VELOCITY = 500 -- Stop applying gravity after reaching this velocity.
 
 VGUIPHYS_SLEEP_VEL_THRESHOLD = 3
 VGUIPHYS_SLEEP_ANGVEL_THRESHOLD = 0.1
