@@ -26,13 +26,20 @@ function PANEL:Init()
 	left:Dock(LEFT)
 
 
-	-- Inventory
-	local grid = vgui.Create("DPanel", left)
-	grid:SetSize(w * 0.4, h * 0.6)
-	grid:SetBackgroundColor(Color(255, 0, 0, GAMEMODE.Debug and 0 or 120))
-	grid:Dock(TOP)
-	local lab = EasyLabel(grid, "Grid Inventory", "SFontLarger")
-	DockCenter(lab, grid)
+	-- GridInventory
+	local leftTop = vgui.Create("DPanel", left)
+	leftTop:SetSize(w * 0.4, h * 0.6)
+	leftTop:SetBackgroundColor(Color(0, 0, 0, 0))
+	leftTop:Dock(TOP)
+	--[[
+	local lab = EasyLabel(leftTop, "Grid Inventory", "SFontLarger")
+	DockCenter(lab, leftTop)
+	]]
+
+	-- TODO to move to combat we likely need to decouple this from the shop eventually.
+	local gridInventory = vgui.Create("DGridInventory", leftTop)
+	gridInventory:SetSize(leftTop:GetSize())
+	GAMEMODE.GridInventory = gridInventory
 	--
 
 
@@ -227,17 +234,13 @@ function PANEL:Init()
 	--MakeItem("hula_doll", Vector2(w * 0.5, h * 0.5))
 	--MakeItem("banana", Vector2(w * 0.5, h * 0.5))
 
-	TossBoxes(32)
-	GoBananas(6)
-	DoorBlast(2)
-	HulaTime(4)
+	--TossBoxes(32)
+	--GoBananas(6)
+	DoorBlast(1)
+	--HulaTime(4)
 
 	-- Free the mouse.
 	gui.EnableScreenClicker(true)
-	--[[
-	self:MakePopup(true)
-	self:SetKeyboardInputEnabled(false)
-	]]
 end
 
 function PANEL:Paint()

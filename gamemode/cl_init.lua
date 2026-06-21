@@ -5,6 +5,8 @@ include("sh_registeritems.lua")
 include("cl_handlemouse.lua")
 include("cl_debug.lua")
 
+include("vgui/dgridcell.lua")
+include("vgui/dgridinventory.lua")
 include("vgui/pshop.lua")
 include("vgui/pphysobj2doverlay.lua")
 

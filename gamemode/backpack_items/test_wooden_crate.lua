@@ -7,6 +7,7 @@ ITEM.fov = 60
 ITEM.camPos = Vector(1, 0, 0)
 ITEM.camScale = 1
 ITEM.camXYOffsetAdj = VECTOR2_ZERO
+ITEM.camOffScreenAdjScale = 0.6
 
 ITEM.triggerDelay = 4
 ITEM.retriggerable = true

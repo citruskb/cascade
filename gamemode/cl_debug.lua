@@ -121,6 +121,17 @@ local function DrawCollisionPoint(cpoint)
 	surface.DrawRect(cx - s * 0.5, cy - s * 0.5, s, s)
 end
 
+local function DrawBackpackBindPoints()
+	local backpack = GAMEMODE.GridInventory
+	if not IsValid(backpack) then return end
+
+	local s = 6
+	surface.SetDrawColor(COLOR_BLACK)
+	for i = 1, #backpack.bindPoints do
+		local x, y = backpack.bindPoints[i]:Unpack()
+		surface.DrawRect(x - s * 0.5, y - s * 0.5, s, s)
+	end
+end
 
 local function DrawAux(physbox, hitbox)
 	-- Box at the center
@@ -198,6 +209,8 @@ local function DrawDebug()
 		for k, line in pairs(incLines) do DrawIncLine(line) end
 		for k, data in pairs(normals) do DrawNormal(data) end
 	end
+
+	DrawBackpackBindPoints()
 end
 
 hook.Add("DrawOverlay", "DrawOverlay.Debug", DrawDebug)
