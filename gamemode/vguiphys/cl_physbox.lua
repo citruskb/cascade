@@ -142,13 +142,22 @@ function meta:GetAllHitboxPoints()
 end
 
 function meta:GetAABB(raw)
+	if raw and self.aabbRaw then return self.aabbRaw end
+	if self.aabb then return self.aabb end
+
 	local aabb = VGUIAABB:Create(Vector2(math.HUGE, math.HUGE), -Vector2(math.HUGE, math.HUGE))
 	for _, hitbox in pairs(self.hitboxes) do
 		aabb:Expand(raw and hitbox.pointsObj or hitbox:GetHBScreenPointsObj())
 	end
+
+	if raw then
+		self.aabbRaw = aabb
+	else
+		self.aabb = aabb
+	end
+
 	return aabb
 end
-
 
 function meta:RecalculateSize()
 	local aabb = self:GetAABB(true)
@@ -190,6 +199,9 @@ end
 
 -- TODO may need to recode a bit
 function meta:Step(dt)
+	self.aabb = nil
+	self.aabbRaw = nil
+
 	self:StepPhysics(dt)
 	self:StepPickup(dt)
 	self:StepPush(dt)
