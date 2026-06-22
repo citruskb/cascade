@@ -103,5 +103,9 @@ function GM:MouseReleased()
 	gamemode.Call("InventoryItemDropped", self.HeldItem.parent, insideBounds)
 end
 
-function GM:InventoryItemDropped(obj, isInInventoryBounds) end
-function GM:InventoryItemPickedUp(obj, isInInventoryBounds) end
+function GM:InventoryItemDropped(obj, isInInventoryBounds)
+	-- TODO drop effect?
+end
+function GM:InventoryItemPickedUp(obj, isInInventoryBounds)
+	-- TODO pickup effect?
+end

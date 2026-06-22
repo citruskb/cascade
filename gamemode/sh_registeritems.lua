@@ -17,7 +17,7 @@ function GM:RegisterBackpackItems()
 
 	local included = {}
 
-	local itemfiles, itemdirectories = file.Find(self.FolderName .. "/gamemode/backpack_items/*", "LUA")
+	local itemfiles, itemdirectories = file.Find(self.FolderName .. "/gamemode/itemregistry/*", "LUA")
 	table.sort(itemfiles)
 	--table.sort(itemdirectories)
 
@@ -26,8 +26,8 @@ function GM:RegisterBackpackItems()
 
 		ITEM = {}
 
-		AddCSLuaFile("backpack_items/" .. filename)
-		include("backpack_items/" .. filename)
+		AddCSLuaFile("itemregistry/" .. filename)
+		include("itemregistry/" .. filename)
 
 		self:RegisterBackpackItem(ITEM.id, ITEM)
 
