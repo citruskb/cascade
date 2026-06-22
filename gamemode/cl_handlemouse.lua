@@ -98,9 +98,9 @@ function GM:MouseReleased()
 
 	local insideBounds = self.HeldItem:IsInsideInventoryBounds()
 	self.HeldItem:MouseDrop(insideBounds)
-	self.HeldItem = nil
-
 	gamemode.Call("InventoryItemDropped", self.HeldItem.parent, insideBounds)
+
+	self.HeldItem = nil
 end
 
 function GM:InventoryItemDropped(obj, isInInventoryBounds)

@@ -3,10 +3,9 @@
 	https://github.com/majikayogames/physics-tutorial/blob/main/simple_phys.js
 ]]
 
-PhysObj2D = {}
-
 -- Handle Lua refresh.
 if not physObj2DLoaded then
+	PhysObj2D = {}
 	PhysObj2D.physboxes = {}
 	PhysObj2D.hitboxes = {}
 	PhysObj2D.collisionConstraints = {}
