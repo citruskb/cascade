@@ -4,7 +4,6 @@ local math_Sin = math.Sin
 local math_IsNearlyEqual = math.IsNearlyEqual
 
 if not VGUIHitbox then
-	GM.VGUIHitboxes = {}
 	VGUIHitbox = Class:Create(nil, "VGUIHitbox")
 end
 
@@ -27,7 +26,7 @@ function VGUIHitbox:__Create(physbox, pointsObj, id)
 
 	self.isScreenScaled = physbox.isScreenScaled
 
-	GAMEMODE.VGUIHitboxes[self] = true
+	PhysObj2D.hitboxes[self] = true
 
 	self.isVGUIHitbox = true
 
@@ -64,7 +63,7 @@ function meta:RecalculateScreenScaledPoints()
 end
 
 hook.Add("ScreenScaleChanged", "ScreenScaleChanged.hitboxes", function(old)
-	for hitbox, _ in pairs(GAMEMODE.VGUIHitboxes) do
+	for hitbox, _ in pairs(PhysObj2D.hitboxes) do
 		hitbox:RecalculateScreenScaledPoints()
 	end
 end)
@@ -123,6 +122,6 @@ function meta:GetHBScreenPointsObj()
 end
 
 function meta:Remove()
-	GAMEMODE.VGUIHitboxes[self] = nil
+	PhysObj2D.hitboxes[self] = nil
 	table.Empty(self)
 end

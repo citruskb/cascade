@@ -17,7 +17,7 @@ function LookForClosestPickup()
 	local closestDist = math.HUGE
 	local rangeLimit = gamemode.Call("GetItemPickupRangeSqr")
 	local closest
-	for hitbox, _ in pairs(GAMEMODE.VGUIHitboxes) do
+	for hitbox, _ in pairs(PhysObj2D.hitboxes) do
 		local physbox = hitbox.physbox
 		if not physbox:MouseCanGrab() then continue end
 

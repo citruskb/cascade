@@ -46,7 +46,7 @@ function GM:VGUIPhysSAT(hbA, hbB)
 		local overlap = GetRangeOverlap(projRangeA, projRangeB)
 
 		if overlap <= 0 then return end -- No collision.
-		if smallestOverlap and overlap >= smallestOverlap - VGUI_EPSILON_OVERLAP then continue end
+		if smallestOverlap and overlap >= smallestOverlap - PHYS2D_EPSILON_OVERLAP then continue end
 
 		smallestOverlap = overlap
 		finalNormal = Vector2(normalA:Unpack()) -- A new Vector2 because we cache the normal above, but also manipulate this later on.
@@ -61,7 +61,7 @@ function GM:VGUIPhysSAT(hbA, hbB)
 		local overlap = GetRangeOverlap(projRangeB, projRangeA)
 
 		if overlap <= 0 then return end
-		if smallestOverlap and overlap >= smallestOverlap - VGUI_EPSILON_OVERLAP then continue end
+		if smallestOverlap and overlap >= smallestOverlap - PHYS2D_EPSILON_OVERLAP then continue end
 
 		smallestOverlap = overlap
 		finalNormal = Vector2(normalB:Unpack())

@@ -1,6 +1,5 @@
 if not VGUIPhysbox then
 	VGUIPhysboxCount = 0
-	GM.VGUIPhysboxes = {}
 	GM.DebugObjects = {}
 	VGUIPhysbox = Class:Create(nil, "VGUIPhysbox")
 end
@@ -78,7 +77,7 @@ function VGUIPhysbox:__Create(parent)
 	self.isBeingPushed = false
 	self.pushTo = Vector2()
 
-	GAMEMODE.VGUIPhysboxes[self] = true
+	PhysObj2D.physboxes[self] = true
 	self.isVGUIPhysbox = true
 
 	self.checkStartSleep = 0
@@ -192,7 +191,7 @@ end
 
 -- For now, we need to handle what happens if our parent panel gets removed.
 function meta:Remove()
-	GAMEMODE.VGUIPhysboxes[self] = nil
+	PhysObj2D.physboxes[self] = nil
 
 	for _, hitbox in pairs(self.hitboxes) do hitbox:Remove() end
 
@@ -247,9 +246,9 @@ end
 function meta:StepPush(dt)
 	if not self.isBeingPushed then return end
 
-	local pushMagdt = VGUIPHYS_PUSH_VELOCITY * dt
+	local pushMagdt = PHYS2D_PUSH_VELOCITY * dt
 	self.position:DoAdd(self.pushDir * pushMagdt)
-	--VGUIPHYS_PUSH_VELOCITY
+	--PHYS2D_PUSH_VELOCITY
 
 	self:UpdateParentPosAndRot()
 
@@ -258,7 +257,7 @@ function meta:StepPush(dt)
 	self:EnablePhysics()
 	self.isSleeping = false
 	self.isBeingPushed = false
-	self.velocity = self.pushDir * VGUIPHYS_PUSH_VELOCITY
+	self.velocity = self.pushDir * PHYS2D_PUSH_VELOCITY
 end
 
 function meta:UpdateParentPosAndRot()
@@ -281,7 +280,7 @@ function meta:MousePickup()
 end
 
 function meta:RerollRandomAirborneRotation()
-	self.randomAirborneRotation = math.Rand(-VGUIPHYS_RANDOM_AIRBORNE_ROTATION, VGUIPHYS_RANDOM_AIRBORNE_ROTATION)
+	self.randomAirborneRotation = math.Rand(-PHYS2D_RANDOM_AIRBORNE_ROTATION, PHYS2D_RANDOM_AIRBORNE_ROTATION)
 end
 
 function meta:MouseDrop()

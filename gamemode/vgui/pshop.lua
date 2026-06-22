@@ -156,8 +156,8 @@ function PANEL:Init()
 				h * 0.5 + math.Random(-40 * 4, 40 * 4)
 			)
 			,Vector2(
-				math.Rand(-VGUIPHYS_TERMINAL_VELOCITY, VGUIPHYS_TERMINAL_VELOCITY),
-				-math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)
+				math.Rand(-PHYS2D_TERMINAL_VELOCITY, PHYS2D_TERMINAL_VELOCITY),
+				-math.Rand(0, PHYS2D_TERMINAL_VELOCITY)
 			))
 		end
 	end
@@ -174,7 +174,7 @@ function PANEL:Init()
 		for i = 1, high do
 			MakeItem("wooden_crate",
 				Vector2(w * 0.5 + math.Random(-offset, offset), 0.3 + h * (0.1 * i)),
-				Vector2(0, -math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY))
+				Vector2(0, -math.Rand(0, PHYS2D_TERMINAL_VELOCITY))
 			)
 		end
 	end
@@ -188,8 +188,8 @@ function PANEL:Init()
 				h * 0.5 + math.Random(-40 * 4, 40 * 4)
 			)
 			,Vector2(
-				math.Rand(-VGUIPHYS_TERMINAL_VELOCITY, VGUIPHYS_TERMINAL_VELOCITY),
-				-math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)
+				math.Rand(-PHYS2D_TERMINAL_VELOCITY, PHYS2D_TERMINAL_VELOCITY),
+				-math.Rand(0, PHYS2D_TERMINAL_VELOCITY)
 			))
 		end
 	end
@@ -203,8 +203,8 @@ function PANEL:Init()
 				h * 0.5 + math.Random(-40 * 4, 40 * 4)
 			)
 			,Vector2(
-				math.Rand(-VGUIPHYS_TERMINAL_VELOCITY, VGUIPHYS_TERMINAL_VELOCITY),
-				-math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)
+				math.Rand(-PHYS2D_TERMINAL_VELOCITY, PHYS2D_TERMINAL_VELOCITY),
+				-math.Rand(0, PHYS2D_TERMINAL_VELOCITY)
 			))
 		end
 	end
@@ -218,8 +218,8 @@ function PANEL:Init()
 				h * 0.5 + math.Random(-40 * 4, 40 * 4)
 			)
 			,Vector2(
-				math.Rand(-VGUIPHYS_TERMINAL_VELOCITY, VGUIPHYS_TERMINAL_VELOCITY),
-				-math.Rand(0, VGUIPHYS_TERMINAL_VELOCITY)
+				math.Rand(-PHYS2D_TERMINAL_VELOCITY, PHYS2D_TERMINAL_VELOCITY),
+				-math.Rand(0, PHYS2D_TERMINAL_VELOCITY)
 			))
 		end
 	end

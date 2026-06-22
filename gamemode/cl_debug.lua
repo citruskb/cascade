@@ -185,7 +185,7 @@ local function DrawDebug()
 
 	local detailed = GAMEMODE.DebugMode == DEBUG_MODE_DETAILED
 
-	local constraints = GAMEMODE.VGUICollisionConstraints
+	local constraints = PhysObj2D.collisionConstraints
 	local cps = {}
 	for fID, cobj in pairs(constraints) do
 		table.insert(cps, cobj.screenPoint)

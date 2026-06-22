@@ -3,62 +3,65 @@
 	https://github.com/majikayogames/physics-tutorial/blob/main/simple_phys.js
 ]]
 
+PhysObj2D = {}
+
 -- Handle Lua refresh.
-if not vguiPhysLoaded then
-	GM.VGUIPhysboxes = {}
-	GM.VGUIHitboxes = {}
-	GM.VGUICollisionConstraints = {}
-	GM.VGUICollisionCandidates = {}
-	GM.VGUIPhysLastStepTime = 0
-	GM.VGUIPhysAccuStepTime = 0
-	vguiPhysLoaded = true
+if not physObj2DLoaded then
+	PhysObj2D.physboxes = {}
+	PhysObj2D.hitboxes = {}
+	PhysObj2D.collisionConstraints = {}
+	PhysObj2D.collisionCandidates = {}
+	PhysObj2D.lastStepTime = 0
+	PhysObj2D.accuStepTime = 0
+
+	physObj2DLoaded = true
 end
 
 -- Physics timestep length. 1 / x = called x times per second.
-VGUIPHYS_DT = 1 / 80
-VGUIPHYS_MAXSTEPS = 10
-VGUIPHYS_CONSTRAINT_ITERATIONS = 3
-VGUI_EPSILON_OVERLAP = 0.05 -- Make sure our new better overlap is smaller by at least this much.
-VGUIPHYS_SLOP_LINEAR = 1.4 -- Allow some degree of overlap between objects without taking collision corrective action.
-VGUIPHYS_SLOP_COL = 0.002 -- Allow some degree of leniency deciding collision points.
-VGUIPHYS_SOFT_HERTZ = 30
-VGUIPHYS_SOFT_DAMPINGRATIO = 10
-VGUIPHYS_SOFT_CONTACTSPEED = 150
+PHYS2D_DT = 1 / 80
+PHYS2D_MAXSTEPS = 10
+PHYS2D_CONSTRAINT_ITERATIONS = 3
+PHYS2D_EPSILON_OVERLAP = 0.05 -- Make sure our new better overlap is smaller by at least this much.
+PHYS2D_SLOP_LINEAR = 1.4 -- Allow some degree of overlap between objects without taking collision corrective action.
+PHYS2D_SLOP_COL = 0.002 -- Allow some degree of leniency deciding collision points.
+PHYS2D_SOFT_HERTZ = 30
+PHYS2D_SOFT_DAMPINGRATIO = 10
+PHYS2D_SOFT_CONTACTSPEED = 150
 
-VGUIPHYS_HASHGRID_SIZE = 180	-- vgui position divided by this to determine grid position for VGUI collisions hashing.
+PHYS2D_HASHGRID_SIZE = 180	-- vgui position divided by this to determine grid position for VGUI collisions hashing.
 
 -- TODO: These velocities probably ought to go through a screenscale check.
-VGUIPHYS_GRAVITY = 240
-VGUIPHYS_GRAVITY_VEC2 = Vector2(0, VGUIPHYS_GRAVITY)
-VGUIPHYS_TERMINAL_VELOCITY = 500 -- Stop applying gravity after reaching this velocity.
-VGUIPHYS_RANDOM_AIRBORNE_ROTATION = 1
+PHYS2D_GRAVITY = 240
+PHYS2D_GRAVITY_VEC2 = Vector2(0, PHYS2D_GRAVITY)
+PHYS2D_TERMINAL_VELOCITY = 500 -- Stop applying gravity after reaching this velocity.
+PHYS2D_RANDOM_AIRBORNE_ROTATION = 1
 
-VGUIPHYS_PUSH_VELOCITY = 700 -- Flat velocity applied to objects dropped outside of bounds, as they move back into bounds.
+PHYS2D_PUSH_VELOCITY = 700 -- Flat velocity applied to objects dropped outside of bounds, as they move back into bounds.
 
-VGUIPHYS_SLEEP_VEL_THRESHOLD = 3
-VGUIPHYS_SLEEP_ANGVEL_THRESHOLD = 0.1
+PHYS2D_SLEEP_VEL_THRESHOLD = 3
+PHYS2D_SLEEP_ANGVEL_THRESHOLD = 0.1
 
 function GM:VGUIPhysicsStep()
-	local dt = VGUIPHYS_DT
-	local iter = VGUIPHYS_CONSTRAINT_ITERATIONS
+	local dt = PHYS2D_DT
+	local iter = PHYS2D_CONSTRAINT_ITERATIONS
 
 	local ct = CurTime()
-	self.VGUIPhysAccuStepTime = self.VGUIPhysAccuStepTime + ct - self.VGUIPhysLastStepTime
+	self.accuStepTime = self.accuStepTime + ct - PhysObj2D.lastStepTime
 
 	-- Clamp number of steps to prevent a runaway lag situation.
-	self.VGUIPhysAccuStepTime = math.Min(self.VGUIPhysAccuStepTime, dt * VGUIPHYS_MAXSTEPS)
+	self.accuStepTime = math.Min(self.accuStepTime, dt * PHYS2D_MAXSTEPS)
 
-	while self.VGUIPhysAccuStepTime > dt do
+	while self.accuStepTime > dt do
 		for physbox, _ in pairs(self.VGUIPhysboxes) do
 			if physbox.parent and physbox.parent.isPhysicsObject2D then continue end
 			physbox:Remove()
 		end
 
 		gamemode.Call("VGUIPhysicsPass", dt, iter)
-		self.VGUIPhysAccuStepTime = self.VGUIPhysAccuStepTime - dt
+		self.accuStepTime = self.accuStepTime - dt
 	end
 
-	self.VGUIPhysLastStepTime = CurTime()
+	PhysObj2D.lastStepTime = CurTime()
 end
 
 function GM:VGUIPhysicsPass(dt, iter)
@@ -82,9 +85,9 @@ function GM:VGUIPhysApplyGravity(dt)
 		end
 
 		local _, vy = physbox.velocity:Unpack()
-		if vy >= VGUIPHYS_TERMINAL_VELOCITY then continue end
+		if vy >= PHYS2D_TERMINAL_VELOCITY then continue end
 
-		physbox:AddVelocity(VGUIPHYS_GRAVITY_VEC2 * dt)
+		physbox:AddVelocity(PHYS2D_GRAVITY_VEC2 * dt)
 	end
 end
 -- 	[[	]]
@@ -105,7 +108,7 @@ function GM:VGUIPhysHashGridCollisions()
 	end
 
 	-- Get all our objects hashed into grids.
-	local gridSize = VGUIPHYS_HASHGRID_SIZE
+	local gridSize = PHYS2D_HASHGRID_SIZE
 	for i = 1, #objects do
 		local obj = objects[i]
 		local aabb = obj:GetAABB()
@@ -134,7 +137,7 @@ function GM:VGUIPhysHashGridCollisions()
 		end
 	end
 
-	self.VGUICollisionCandidates = potentialSATCandidates
+	PhysObj2D.collisionCandidates = potentialSATCandidates
 end
 --	[[	]]
 
@@ -170,7 +173,7 @@ local function CheckCollision(bodyA, bodyB)
 				local fID = contactPoints.fIDs[ptIdx]
 
 				-- Try to re-use existing contact
-				local existingContact = GAMEMODE.VGUICollisionConstraints[fID]
+				local existingContact = PhysObj2D.collisionConstraints[fID]
 				if existingContact then
 					existingContact.isReused = true
 					existingContact:SetCollisionData(screenP, collision.normal, collision.penetration)
@@ -193,7 +196,7 @@ function GM:VGUIPhysDetectCollisions()
 	end
 
 	local rebuildCollisionConstraints = {}
-	for pairID, objects in pairs(self.VGUICollisionCandidates) do
+	for pairID, objects in pairs(PhysObj2D.collisionCandidates) do
 		local tab = CheckCollision(objects.bodyA, objects.bodyB)
 		for fID, const in pairs(tab) do
 			rebuildCollisionConstraints[fID] = const
@@ -219,7 +222,7 @@ end
 
 --	[[ SolveConstraints ]]
 function GM:VGUIPhysSolveConstraints(dt, iter)
-	local contactConstraints = GAMEMODE.VGUICollisionConstraints
+	local contactConstraints = PhysObj2D.collisionConstraints
 
 	-- Update our constraint's info.
 	-- Also apply warmstarting in persistent contacts!
@@ -238,8 +241,8 @@ function GM:VGUIPhysSolveConstraints(dt, iter)
 			if i ~= iter then continue end
 
 			if math.IsNearlyEqual(constr.lastNormalLambda, 0, 0.5) then
-				if constr.bodyA.velocity:LengthSqr() < VGUIPHYS_SLEEP_VEL_THRESHOLD and math.Abs(constr.bodyA.angularVelocity) < VGUIPHYS_SLEEP_ANGVEL_THRESHOLD and 
-					constr.bodyB.velocity:LengthSqr() < VGUIPHYS_SLEEP_VEL_THRESHOLD and math.Abs(constr.bodyB.angularVelocity) < VGUIPHYS_SLEEP_ANGVEL_THRESHOLD then
+				if constr.bodyA.velocity:LengthSqr() < PHYS2D_SLEEP_VEL_THRESHOLD and math.Abs(constr.bodyA.angularVelocity) < PHYS2D_SLEEP_ANGVEL_THRESHOLD and 
+					constr.bodyB.velocity:LengthSqr() < PHYS2D_SLEEP_VEL_THRESHOLD and math.Abs(constr.bodyB.angularVelocity) < PHYS2D_SLEEP_ANGVEL_THRESHOLD then
 						constr:SleepBodies()
 				end
 			else

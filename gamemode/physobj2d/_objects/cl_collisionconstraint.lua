@@ -116,16 +116,16 @@ function meta:SolveContact(dt)
 	if effectiveMass < 0.0000001 then return end -- Prevent divide by zero.
 
 	-- using "soft" constaint settings
-	local allowedPenetration = VGUIPHYS_SLOP_LINEAR
+	local allowedPenetration = PHYS2D_SLOP_LINEAR
 	local velocityBias = 0
 	local massScale = 1
 	local impulseScale = 0
 
 	local maxHertz = 0.25 / dt
-	local hz = math.Min(VGUIPHYS_SOFT_HERTZ, maxHertz)
-	local soft = GetSoftConstraintParams(hz, VGUIPHYS_SOFT_DAMPINGRATIO, dt)
+	local hz = math.Min(PHYS2D_SOFT_HERTZ, maxHertz)
+	local soft = GetSoftConstraintParams(hz, PHYS2D_SOFT_DAMPINGRATIO, dt)
 	local separation = math.Min(0, -self.penetration + allowedPenetration)
-	velocityBias = math.Max(soft.biasRate * separation, -VGUIPHYS_SOFT_CONTACTSPEED)
+	velocityBias = math.Max(soft.biasRate * separation, -PHYS2D_SOFT_CONTACTSPEED)
 	massScale = soft.massScale
 	impulseScale = soft.impulseScale
 
@@ -205,6 +205,6 @@ function meta:ApplyRestitution()
 end
 
 function meta:Remove()
-	GAMEMODE.VGUICollisionConstraints[self.fID] = nil
+	PhysObj2D.collisionConstraints[self.fID] = nil
 	table.Empty(self)
 end
