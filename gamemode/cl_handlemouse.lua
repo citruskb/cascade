@@ -86,11 +86,22 @@ function GM:MousePressed()
 	if not vgui.CursorVisible() then return end
 
 	self.HeldItem = LookForClosestPickup()
-	if self.HeldItem then self.HeldItem:MousePickup() end
+	if not self.HeldItem then return end
+
+	local insideBounds = self.HeldItem:IsInsideInventoryBounds()
+	self.HeldItem:MousePickup(insideBounds)
+	gamemode.Call("InventoryItemPickedUp", self.HeldItem.parent, insideBounds)
 end
 
 function GM:MouseReleased()
 	if not self.HeldItem then return end
-	self.HeldItem:MouseDrop()
+
+	local insideBounds = self.HeldItem:IsInsideInventoryBounds()
+	self.HeldItem:MouseDrop(insideBounds)
 	self.HeldItem = nil
+
+	gamemode.Call("InventoryItemDropped", self.HeldItem.parent, insideBounds)
 end
+
+function GM:InventoryItemDropped(obj, isInInventoryBounds) end
+function GM:InventoryItemPickedUp(obj, isInInventoryBounds) end

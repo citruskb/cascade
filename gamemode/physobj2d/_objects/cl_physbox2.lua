@@ -270,7 +270,7 @@ function meta:ApplyImpulse(impulse, screenPoint)
 	self:AddAngularVelocity(angularImpulse / self.momentOfInertia)
 end
 
-function meta:MousePickup()
+function meta:MousePickup(isInsideInventoryBounds)
 	self:DisablePhysics()
 	self.isSleeping = false
 	self.isPickedUp = true
@@ -280,12 +280,12 @@ function meta:RerollRandomAirborneRotation()
 	self.randomAirborneRotation = math.Rand(-PHYS2D_RANDOM_AIRBORNE_ROTATION, PHYS2D_RANDOM_AIRBORNE_ROTATION)
 end
 
-function meta:MouseDrop()
+function meta:MouseDrop(isInsideInventoryBounds)
 	self.isPickedUp = false
 	self.isCamOrthoLocked = true
 	self:RerollRandomAirborneRotation()
 
-	if self:IsInsideInventoryBounds() then
+	if isInsideInventoryBounds then
 		self:EnablePhysics()
 
 		-- Mitigate tossing the ortho view upwards.

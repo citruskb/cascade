@@ -1,15 +1,15 @@
-if not PhysicsObject2D then
-	countPhysicsObjects2D = 0
+if not PhysObj2 then
+	countPhysObj2 = 0
 	GM.PhysicsObjects2D = {}
-	PhysicsObject2D = Class:Create(nil, "PhysicsObject2D")
+	PhysObj2 = Class:Create(nil, "PhysObj2")
 end
 
-local meta = FindMetaTable("PhysicsObject2D")
+local meta = FindMetaTable("PhysObj2")
 
-function PhysicsObject2D:__Create(position, rotation, itemDataID, velocity, angularVelocity, isStatic)
+function PhysObj2:__Create(position, rotation, itemDataID, velocity, angularVelocity, isStatic)
 	-- We don't use the size of the table because these objects can be removed.
-	countPhysicsObjects2D = countPhysicsObjects2D + 1
-	self.id = countPhysicsObjects2D
+	countPhysObj2 = countPhysObj2 + 1
+	self.id = countPhysObj2
 
 	self.isScreenScaled = not isStatic
 
@@ -26,15 +26,15 @@ function PhysicsObject2D:__Create(position, rotation, itemDataID, velocity, angu
 
 	GAMEMODE.PhysicsObjects2D[self.id] = self
 
-	self.isPhysicsObject2D = true
+	self.isPhysObj2 = true
 
 	return self
 end
 
-function PhysicsObject2D:ToString() return "PhysicsObject2D #" .. self.id end
-function PhysicsObject2D:Eq(other)
+function PhysObj2:ToString() return "[PhysObj2] #" .. self.id end
+function PhysObj2:Eq(other)
 	if not IsTable(other) then return false end
-	if not other.isPhysicsObject2D then return false end
+	if not other.isPhysObj2 then return false end
 	return self.id == other.id
 end
 
@@ -73,6 +73,6 @@ function meta:Remove()
 	table.Empty(self)
 end
 
-function GM:NewPhysicsObject2D(position, rotation, itemDataID, velocity, angularVelocity, isStatic)
-	return PhysicsObject2D:Create(position, rotation, itemDataID, velocity, angularVelocity, isStatic)
+function GM:NewPhysObj2(position, rotation, itemDataID, velocity, angularVelocity, isStatic)
+	return PhysObj2:Create(position, rotation, itemDataID, velocity, angularVelocity, isStatic)
 end
