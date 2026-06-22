@@ -6,9 +6,9 @@ ITEM.model = "models/props/cs_italy/bananna.mdl"
 ITEM.fov = 51
 ITEM.camPos = Vector(1, 0, 0)
 ITEM.camScale = 1
-ITEM.camXYOffsetAdj = Vector2(0, 3)
-ITEM.camOffScreenAdjScale = 1
-ITEM.camOrthoAdjScale = 1
+ITEM.camXYOffsetAdj = Vector2(0, 0)--Vector2(0, 3)
+ITEM.camOffScreenAdjScale = 0.095
+ITEM.camOrthoAdjScale = 7.7
 
 ITEM.triggerDelay = 0
 ITEM.retriggerable = false

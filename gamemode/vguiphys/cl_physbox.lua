@@ -61,6 +61,7 @@ function VGUIPhysbox:__Create(parent)
 
 	self.fDist = 0
 	self.camXYOffset = Vector2()
+	self.isCamOrthoLocked = false
 
 	-- Offsets our hitbox point origin to center ourselves inside the item panel.
 	self.originCenterOffset = Vector2()
@@ -68,6 +69,7 @@ function VGUIPhysbox:__Create(parent)
 	-- Initializes physics values.
 	self.position = parent.position
 	self.rotation = parent.rotation
+	self:RerollRandomAirborneRotation()
 	self:DisablePhysics()
 
 	self.isScreenScaled = parent.isScreenScaled
@@ -98,7 +100,6 @@ end
 function meta:AddHitbox(points, noResize)
 	local id = #self.hitboxes + 1
 	self.hitboxes[id] = VGUIHitbox:Create(self, points, id)
-
 
 	-- We need to find the furthest point from all our hitbox centers.
 	local allpoints = self:GetAllHitboxPoints()
@@ -160,10 +161,14 @@ function meta:GetAABB(raw)
 end
 
 function meta:RecalculateSize()
+	self.aabb = nil
+	self.aabbRaw = nil
+
 	local aabb = self:GetAABB(true)
 	local min, max = aabb.min, aabb.max
 	self.w = max.x - min.x
 	self.h = max.y - min.y
+	print(self.w, self.h)
 end
 
 -- TODO better estimates.
@@ -275,17 +280,36 @@ function meta:MousePickup()
 	self.isPickedUp = true
 end
 
+function meta:RerollRandomAirborneRotation()
+	self.randomAirborneRotation = math.Rand(-VGUIPHYS_RANDOM_AIRBORNE_ROTATION, VGUIPHYS_RANDOM_AIRBORNE_ROTATION)
+end
+
 function meta:MouseDrop()
 	self.isPickedUp = false
+	self.isCamOrthoLocked = true
+	self:RerollRandomAirborneRotation()
 
 	if self:IsInsideInventoryBounds() then
 		self:EnablePhysics()
-		self:AddVelocity(GAMEMODE.CachedMouseVelocity)
-		--self:ApplyImpulse(mouseVelocity / self.mass / self.momentOfInertia, GAMEMODE.CachedMousePos)
+
+		-- Mitigate tossing the ortho view upwards.
+		local _, y = self:GetAdjCamPosition():Unpack()
+		self:AddVelocity(GAMEMODE.CachedMouseVelocity * (y < 0 and 0.1 or 1))
 	else
 		self.isBeingPushed = true
 		self.pushDir = (self:GetPushTo() - self.position):GetNormalized()
 	end
+end
+
+function meta:MouseCanGrab()
+	return
+		not self.isStatic and
+		not self.isBeingPushed and
+		not self.isCamOrthoLocked
+end
+
+function meta:GetAdjCamPosition()
+	return self:GetCenterScreenPoint() + self.camXYOffset + self.parent.itemData.camXYOffsetAdj
 end
 
 function meta:IsInsideInventoryBounds()

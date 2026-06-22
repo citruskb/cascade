@@ -32,9 +32,7 @@ function PANEL:SetupPaintVars(obj)
 
 	-- Our size needs to be large enough to handle however our object is rotated. 
 	-- Our X and Y originates based on this as well.
-	local posVec = obj.physbox:GetCenterScreenPoint()
-	local adjPos = posVec + obj.physbox.camXYOffset + data.camXYOffsetAdj
-	local x, y = adjPos:Unpack()
+	local x, y = obj.physbox:GetAdjCamPosition():Unpack()
 	local w, h = obj.physbox.fDist, obj.physbox.fDist
 
 	local objAng = math.Ang(-obj.rotation)
@@ -44,14 +42,24 @@ function PANEL:SetupPaintVars(obj)
 	local mins, maxs = ent:OBBMins(), ent:OBBMaxs()
 	local center = ent:OBBCenter()
 	local dist = mins:Distance(maxs)
-	local sizeAdjust = math.Clamp(dist / 64, 0.1, 2)
+	local sizeAdjust = 1 --math.Clamp(dist / 64, 0.1, 4)
 	local camPos, zsqr
-	center, camPos, x, y, zsqr = self:EvaluateCameraPos(center, camPosOffset, dist, x, y, data.camOffScreenAdjScale, sizeAdjust, objAng, obj.physbox)
+
+	self:EvaluateOrthoLock(x, y, obj.physbox)
+	local isOrtho = obj.physbox.isCamOrthoLocked
+	if not isOrtho then
+		local inBounds = obj.physbox:IsInsideInventoryBounds()
+		isOrtho = not inBounds or inBounds and (obj.physbox.isPickedUp or obj.physbox.isBeingPushed)
+	end
+
+	center, camPos, x, y, zsqr = self:EvaluateCameraPos(center, camPosOffset, dist, x, y, data.camOffScreenAdjScale, sizeAdjust, objAng, isOrtho)
 
 	local lookat = center
 	local towards = lookat - camPos
 	local ang = towards:Angle()
 	ang:RotateAroundAxis(towards:GetNormalized(), objAng)
+
+	vars.isOrtho = isOrtho
 
 	vars.camPos = camPos
 	vars.ang = ang
@@ -66,31 +74,22 @@ function PANEL:SetupPaintVars(obj)
 	vars.sizeAdjust = sizeAdjust
 	vars.camOrthoAdjScale = data.camOrthoAdjScale
 
-	vars.isOrtho = obj.physbox:IsInsideInventoryBounds()
-
 	table.insert(self.paintVars, vars)
-
-	--[[
-	render.SuppressEngineLighting(true)
-	cam.IgnoreZ(true)
-
-	cam.Start3D(camPos, ang, fov, x, y, w, h, 8, 256)
-		render.OverrideDepthEnable(true, false)
-		ent:DrawModel()
-		render.OverrideDepthEnable(false)
-	cam.End3D()
-
-	cam.IgnoreZ(false)
-	render.SuppressEngineLighting(false)
-	]]
 end
 
-function PANEL:EvaluateCameraPos(center, camPosOffset, dist, x, y, camOffScreenAdjScale, adjustSkew, objAng, physbox)
+-- idea of this is to lock ourselves into ortho view  if we are dropped near the top of the screen in inventory until we fall to normal drawing range.
+function PANEL:EvaluateOrthoLock(x, y, physbox)
+	if not physbox.isCamOrthoLocked then return end
+	if y < 0 then return end
+	physbox.isCamOrthoLocked = false
+end
+
+function PANEL:EvaluateCameraPos(center, camPosOffset, dist, x, y, camOffScreenAdjScale, adjustSkew, objAng, isOrtho, physbox)
 
 	-- Do nothing, basically
 	--return center, center + camPosOffset * dist, math.Max(x, 0), math.Max(y, 0), 0
 
-	if physbox:IsInsideInventoryBounds() then
+	if not isOrtho then
 		local negativeX = math.Min(x, 0)
 		local negativeY = math.Min(y, 0)
 		local adjust = Vector(0, -negativeX, negativeY)
@@ -188,7 +187,7 @@ function PANEL:Paint()
 	cam.IgnoreZ(true)
 
 	for k, vars in pairs(self.paintVars) do
-		if self.paintVars.isOrtho then
+		if vars.isOrtho then
 			self:PaintOrthoPhysObj2D(vars)
 		else
 			self:PaintPhysObj2D(vars)

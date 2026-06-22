@@ -34,6 +34,7 @@ VGUIPHYS_HASHGRID_SIZE = 180	-- vgui position divided by this to determine grid 
 VGUIPHYS_GRAVITY = 240
 VGUIPHYS_GRAVITY_VEC2 = Vector2(0, VGUIPHYS_GRAVITY)
 VGUIPHYS_TERMINAL_VELOCITY = 500 -- Stop applying gravity after reaching this velocity.
+VGUIPHYS_RANDOM_AIRBORNE_ROTATION = 1
 
 VGUIPHYS_PUSH_VELOCITY = 700 -- Flat velocity applied to objects dropped outside of bounds, as they move back into bounds.
 
@@ -78,7 +79,10 @@ function GM:VGUIPhysApplyGravity(dt)
 	for physbox, _ in pairs(self.VGUIPhysboxes) do
 		if physbox.isStatic then continue end
 
-		--physbox:AddRotation(dt)
+		local _, y = physbox.position:Unpack()
+		if y < 0 then
+			physbox:AddRotation(physbox.randomAirborneRotation * dt)
+		end
 
 		local _, vy = physbox.velocity:Unpack()
 		if vy >= VGUIPHYS_TERMINAL_VELOCITY then continue end

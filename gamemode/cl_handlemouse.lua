@@ -19,7 +19,7 @@ function LookForClosestPickup()
 	local closest
 	for hitbox, _ in pairs(GAMEMODE.VGUIHitboxes) do
 		local physbox = hitbox.physbox
-		if physbox.isStatic then continue end
+		if not physbox:MouseCanGrab() then continue end
 
 		local pointsObj = hitbox:GetHBScreenPointsObj()
 		local center = pointsObj:GetCenter()
