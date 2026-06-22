@@ -8,9 +8,6 @@ local meta = FindMetaTable("Physbox2")
 
 function meta:EnablePhysics() self.isPhysicsEnabled = true end
 function meta:DisablePhysics()
-	-- We update our position by updating our parent's position.
-	-- We accumulate changes via. deltaPosition then apply the net change when needed.
-	-- Done this way mainly because absolute VGUI Panel positions are always whole numbers, so fractional changes are lost.
 	self.velocity = Vector2()
 	self.angularVelocity = 0
 

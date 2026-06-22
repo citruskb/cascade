@@ -5,10 +5,10 @@ if not handleMouseLoaded then
 	handleMouseLoaded = true
 end
 
-VGUIPHYS_PICKUP_DIST_SQR = 4096 -- 64^2
+ITEM_PICKUP_DIST_SQR = 4096 -- 64^2
 
 function GM:GetItemPickupRangeSqr()
-	return VGUIPHYS_PICKUP_DIST_SQR * ScreenScale() * ScreenScale()
+	return ITEM_PICKUP_DIST_SQR * ScreenScale() * ScreenScale()
 end
 
 function LookForClosestPickup()

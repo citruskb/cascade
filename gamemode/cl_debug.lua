@@ -1,6 +1,8 @@
+--[[
 refLines = {}
 incLines = {}
 normals = {}
+]]
 
 DEBUG_MODE_MINIMAL = 1
 DEBUG_MODE_DETAILED = 2
@@ -146,6 +148,7 @@ local function DrawAux(physbox, hitbox)
 	surface.DrawRect(xp - s * 0.5, yp - s * 0.5, s, s)
 end
 
+--[[
 local function DrawRefLine(line)
 	local points = line:GetPoints()
 	local x1, y1 = points[1].x, points[1].y
@@ -178,6 +181,7 @@ local function DrawNormal(data)
 	surface.SetDrawColor(COLOR_BLUE)
 	surface.DrawLine(startPos.x, startPos.y, endPos.x, endPos.y)
 end
+]]
 
 
 local function DrawDebug()
@@ -205,9 +209,11 @@ local function DrawDebug()
 
 		if detailed then DrawAux(physbox, hitbox) end
 
+		--[[
 		for k, line in pairs(refLines) do DrawRefLine(line) end
 		for k, line in pairs(incLines) do DrawIncLine(line) end
 		for k, data in pairs(normals) do DrawNormal(data) end
+		]]
 	end
 
 	DrawBackpackBindPoints()
@@ -215,8 +221,10 @@ end
 
 hook.Add("DrawOverlay", "DrawOverlay.Debug", DrawDebug)
 
+--[[
 hook.Add("VGUIPhysDetectCollisions", "VGUIPhysDetectCollisions.Debug", function()
 	refLines = {}
 	incLines = {}
 	normals = {}
 end)
+]]

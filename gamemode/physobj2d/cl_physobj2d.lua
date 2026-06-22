@@ -28,7 +28,7 @@ PHYS2D_SOFT_HERTZ = 30
 PHYS2D_SOFT_DAMPINGRATIO = 10
 PHYS2D_SOFT_CONTACTSPEED = 150
 
-PHYS2D_HASHGRID_SIZE = 180	-- vgui position divided by this to determine grid position for VGUI collisions hashing.
+PHYS2D_HASHGRID_SIZE = 180	-- vgui position divided by this to determine grid position for collisions hashing.
 
 -- TODO: These velocities probably ought to go through a screenscale check.
 PHYS2D_GRAVITY = 240
@@ -99,7 +99,6 @@ local function GetGridIDX(x, y) return ToString(x) .. "x" .. ToString(y) end
 local function HashPairID(objA, objB) return ToString(math.Min(objA.id, objB.id)) .. ":" .. ToString(math.Max(objA.id, objB.id)) end
 function PhysObj2D:HashGridCollisions()
 	local newGrid = {}
-	--self.VGUICollisionHashGrid = {}
 
 	local objects = {}
 	for physbox, _ in pairs(self.physboxes) do
