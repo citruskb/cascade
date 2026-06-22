@@ -41,7 +41,7 @@ PHYS2D_PUSH_VELOCITY = 700 -- Flat velocity applied to objects dropped outside o
 PHYS2D_SLEEP_VEL_THRESHOLD = 3
 PHYS2D_SLEEP_ANGVEL_THRESHOLD = 0.1
 
-function GM:VGUIPhysicsStep()
+function PhysObj2D:PhysicsStep()
 	local dt = PHYS2D_DT
 	local iter = PHYS2D_CONSTRAINT_ITERATIONS
 
@@ -52,31 +52,31 @@ function GM:VGUIPhysicsStep()
 	self.accuStepTime = math.Min(self.accuStepTime, dt * PHYS2D_MAXSTEPS)
 
 	while self.accuStepTime > dt do
-		for physbox, _ in pairs(self.VGUIPhysboxes) do
-			if physbox.parent and physbox.parent.isPhysicsObject2D then continue end
+		for physbox, _ in pairs(self.physboxes) do
+			if physbox.parent and physbox.parent.isPhysObj2 then continue end
 			physbox:Remove()
 		end
 
-		gamemode.Call("VGUIPhysicsPass", dt, iter)
+		self:PhysicsPass(dt, iter)
 		self.accuStepTime = self.accuStepTime - dt
 	end
 
 	PhysObj2D.lastStepTime = CurTime()
 end
 
-function GM:VGUIPhysicsPass(dt, iter)
-	gamemode.Call("VGUIPhysApplyGravity", dt)			-- Gravity.
-	gamemode.Call("VGUIPhysHashGridCollisions")			-- Broad phase. Drastic performance increase.
-	gamemode.Call("VGUIPhysDetectCollisions")			-- Detect collisions. Build & update collision constraints.
-	gamemode.Call("VGUIPhysSolveConstraints", dt, iter)	-- Iteratively solve collision constraints.
-	gamemode.Call("VGUIPhysStepPhysboxes", dt)			-- Update our physbox pos and rot based on velocities.
+function PhysObj2D:PhysicsPass(dt, iter)
+	self:ApplyGravity(dt)
+	self:HashGridCollisions() 		-- Broad phase. Drastic performance increase.
+	self:DetectCollisions()			-- Detect collisions. Build & update collision constraints.
+	self:SolveConstraints(dt, iter)	-- Iteratively solve collision constraints.
+	self:StepPhysboxes(dt)			-- Update our physbox pos and rot based on velocities.
 end
 
 
 
 --	[[ ApplyGravity ]]
-function GM:VGUIPhysApplyGravity(dt)
-	for physbox, _ in pairs(self.VGUIPhysboxes) do
+function PhysObj2D:ApplyGravity(dt)
+	for physbox, _ in pairs(self.physboxes) do
 		if physbox.isStatic then continue end
 
 		local _, y = physbox.position:Unpack()
@@ -97,12 +97,12 @@ end
 --	[[ Hash Collisions ]]
 local function GetGridIDX(x, y) return ToString(x) .. "x" .. ToString(y) end
 local function HashPairID(objA, objB) return ToString(math.Min(objA.id, objB.id)) .. ":" .. ToString(math.Max(objA.id, objB.id)) end
-function GM:VGUIPhysHashGridCollisions()
+function PhysObj2D:HashGridCollisions()
 	local newGrid = {}
 	--self.VGUICollisionHashGrid = {}
 
 	local objects = {}
-	for physbox, _ in pairs(self.VGUIPhysboxes) do
+	for physbox, _ in pairs(self.physboxes) do
 		if physbox.isPickedUp then continue end
 		table.Insert(objects, physbox)
 	end
@@ -157,7 +157,7 @@ local function CheckCollision(bodyA, bodyB)
 		for idxB = 1, #bodyB.hitboxes do
 			local hitboxB = bodyB.hitboxes[idxB]
 
-			local collision = gamemode.Call("VGUIPhysSAT", hitboxA, hitboxB)
+			local collision = PhysObj2D:SAT(hitboxA, hitboxB)
 			if not collision then continue end
 
 			local hbA = collision.hbA
@@ -165,7 +165,7 @@ local function CheckCollision(bodyA, bodyB)
 			local bA = hbA.physbox
 			local bB = hbB.physbox
 
-			local contactPoints = gamemode.Call("ClipPolyToPoly", bA, hbA, bB, hbB, collision)
+			local contactPoints = PhysObj2D:Clip(bA, hbA, bB, hbB, collision)
 
 			-- Create contact constraints
 			for ptIdx = 1, #contactPoints.points do
@@ -180,7 +180,7 @@ local function CheckCollision(bodyA, bodyB)
 					constr[fID] = existingContact
 				else
 					-- But if not found, make a new one!
-					local newC = VGUICollisionConstraint:Create(bA, bB, screenP, collision.normal, collision.penetration, fID)
+					local newC = CollisionConstraint:Create(bA, bB, screenP, collision.normal, collision.penetration, fID)
 					constr[ToString(fID)] = newC
 				end
 			end
@@ -190,39 +190,28 @@ local function CheckCollision(bodyA, bodyB)
 	return constr
 end
 
-function GM:VGUIPhysDetectCollisions()
-	for hitbox, _ in pairs(self.VGUIHitboxes) do
+function PhysObj2D:DetectCollisions()
+	for hitbox, _ in pairs(self.hitboxes) do
 		hitbox.screenPointsObjDirty = true
 	end
 
 	local rebuildCollisionConstraints = {}
-	for pairID, objects in pairs(PhysObj2D.collisionCandidates) do
+	for pairID, objects in pairs(self.collisionCandidates) do
 		local tab = CheckCollision(objects.bodyA, objects.bodyB)
 		for fID, const in pairs(tab) do
 			rebuildCollisionConstraints[fID] = const
 		end
 	end
 
-	self.VGUICollisionConstraints = rebuildCollisionConstraints
-end
---	[[	]]
-
-
-
---	[[ StepPhysboxes ]]
-function GM:VGUIPhysStepPhysboxes(dt)
-	for physbox, _ in pairs(self.VGUIPhysboxes) do
-		if physbox.isStatic then continue end
-		physbox:Step(dt)
-	end
+	self.collisionConstraints = rebuildCollisionConstraints
 end
 --	[[	]]
 
 
 
 --	[[ SolveConstraints ]]
-function GM:VGUIPhysSolveConstraints(dt, iter)
-	local contactConstraints = PhysObj2D.collisionConstraints
+function PhysObj2D:SolveConstraints(dt, iter)
+	local contactConstraints = self.collisionConstraints
 
 	-- Update our constraint's info.
 	-- Also apply warmstarting in persistent contacts!
@@ -257,5 +246,16 @@ function GM:VGUIPhysSolveConstraints(dt, iter)
 		constr:ApplyRestitution()
 	end
 
+end
+--	[[	]]
+
+
+
+--	[[ StepPhysboxes ]]
+function PhysObj2D:StepPhysboxes(dt)
+	for physbox, _ in pairs(self.physboxes) do
+		if physbox.isStatic then continue end
+		physbox:Step(dt)
+	end
 end
 --	[[	]]

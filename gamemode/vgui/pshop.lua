@@ -98,7 +98,7 @@ function PANEL:Init()
 				Vector2(0, fH),
 			})
 
-		return gamemode.Call("NewPhysicsObject2D",
+		return gamemode.Call("NewPhysObj2",
 				actualOrigin,
 				0,
 				pointsObj,
@@ -141,7 +141,7 @@ function PANEL:Init()
 
 	-- Test items
 	local function MakeItem(id, origin, vel, rad, physDisabled)
-		local obj = gamemode.Call("NewPhysicsObject2D", origin, rad, id, vel)
+		local obj = gamemode.Call("NewPhysObj2", origin, rad, id, vel)
 		if not physDisabled then obj:EnablePhysics() end
 	end
 

@@ -1,10 +1,10 @@
-if not VGUICollisionConstraint then
-	VGUICollisionConstraint = Class:Create(nil, "VGUICollisionConstraint")
+if not CollisionConstraint then
+	CollisionConstraint = Class:Create(nil, "CollisionConstraint")
 end
 
-local meta = FindMetaTable("VGUICollisionConstraint")
+local meta = FindMetaTable("CollisionConstraint")
 
-function VGUICollisionConstraint:__Create(objA, objB, screenPoint, normal, penetration, fID)
+function CollisionConstraint:__Create(objA, objB, screenPoint, normal, penetration, fID)
 	self.bodyA = objA
 	self.bodyB = objB
 	self.fID = fID -- Contact persistence -> see cl_warmstarting.lua
@@ -34,7 +34,7 @@ function VGUICollisionConstraint:__Create(objA, objB, screenPoint, normal, penet
 	return self
 end
 
-function VGUICollisionConstraint:ToString() return "[VGUICol] - " .. self.fID end
+function CollisionConstraint:ToString() return "[Collision Constraint] - " .. self.fID end
 
 function meta:SetCollisionData(screenPoint, normal, penetration)
 	self.screenPoint = screenPoint

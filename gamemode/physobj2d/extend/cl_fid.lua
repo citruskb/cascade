@@ -1,6 +1,6 @@
---	Feature ID - make sure that contact points are uniquely trackable frame-to-frame.
+--	FID - make sure that contact points are uniquely trackable frame-to-frame.
 
-function GM:VGUIPhysGetFeatureID(refHitbox, incHitbox, refIDX, incIDX, idx)
+function PhysObj2D:GetFID(refHitbox, incHitbox, refIDX, incIDX, idx)
 	local refPhysbox = refHitbox.physbox
 	local incPhysbox = incHitbox.physbox
 

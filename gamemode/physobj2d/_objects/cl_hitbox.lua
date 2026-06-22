@@ -3,13 +3,13 @@ local math_Cos = math.Cos
 local math_Sin = math.Sin
 local math_IsNearlyEqual = math.IsNearlyEqual
 
-if not VGUIHitbox then
-	VGUIHitbox = Class:Create(nil, "VGUIHitbox")
+if not Hitbox2 then
+	Hitbox2 = Class:Create(nil, "Hitbox2")
 end
 
-local meta = FindMetaTable("VGUIHitbox")
+local meta = FindMetaTable("Hitbox2")
 
-function VGUIHitbox:__Create(physbox, pointsObj, id)
+function Hitbox2:__Create(physbox, pointsObj, id)
 	-- This coupled with the physbox's ID makes a completely unique pairing representing this hitbox for contact persistence.
 	self.id = id
 
@@ -28,16 +28,16 @@ function VGUIHitbox:__Create(physbox, pointsObj, id)
 
 	PhysObj2D.hitboxes[self] = true
 
-	self.isVGUIHitbox = true
+	self.isHitbox2 = true
 
 	return self
 end
 
-function VGUIHitbox:ToString() return "A [VGUIHitbox] of " .. ToString(self.physbox) end
+function Hitbox2:ToString() return "A [Hitbox2] of " .. ToString(self.physbox) end
 
-function VGUIHitbox:Eq(other)
+function Hitbox2:Eq(other)
 	if not IsTable(other) then return false end
-	if not other.isVGUIHitbox then return false end
+	if not other.isHitbox2 then return false end
 	if self.physbox ~= other.physbox then return false end
 	return self.id == other.id
 end

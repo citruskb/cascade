@@ -39,7 +39,7 @@ function PhysicsObject2D:Eq(other)
 end
 
 function meta:InitPhysbox(velocity, angularVelocity, isStatic)
-	self.physbox = VGUIPhysbox:Create(self)
+	self.physbox = Physbox2:Create(self)
 
 	self.physbox.isStatic = isStatic or self.physbox.isStatic
 	if not self.physbox.isStatic then

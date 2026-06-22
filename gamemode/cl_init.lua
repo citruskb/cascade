@@ -106,7 +106,7 @@ function GM:_Think()
 	local ct = CurTime()
 
 	gamemode.Call("HandleMousePress")
-	gamemode.Call("VGUIPhysicsStep")
+	PhysObj2D:PhysicsStep()
 
 	if nextTick > ct then return end
 	nextTick = ct + 1

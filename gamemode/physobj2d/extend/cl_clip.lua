@@ -31,7 +31,8 @@ local function GetNormals(verts)
 	return tab
 end
 
-function GM:ClipPolyToPoly(refBody, refHitbox, incObj, incHitbox, collision)
+-- Clip poly to poly
+function PhysObj2D:Clip(refBody, refHitbox, incObj, incHitbox, collision)
 	local refVerts = refHitbox:GetHBScreenPointsObj():GetPoints()
 	local incVerts = incHitbox:GetHBScreenPointsObj():GetPoints()
 	local refNormals = GetNormals(refVerts)
@@ -80,7 +81,7 @@ function GM:ClipPolyToPoly(refBody, refHitbox, incObj, incHitbox, collision)
 		local point = clippedPoints[i]
 		if n:Dot(point - a1) > PHYS2D_SLOP_COL then continue end
 		table.Insert(finalPoints.points, point)
-		table.Insert(finalPoints.fIDs, gamemode.Call("VGUIPhysGetFeatureID", refHitbox, incHitbox, refIdx, incIdx, i))
+		table.Insert(finalPoints.fIDs, self:GetFID(refHitbox, incHitbox, refIdx, incIdx, i))
 	end
 
 	return finalPoints

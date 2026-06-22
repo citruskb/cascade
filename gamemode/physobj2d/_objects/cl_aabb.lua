@@ -1,10 +1,10 @@
-if not VGUIAABB then
-	VGUIAABB = Class:Create(nil, "VGUIAABB")
+if not AABB2 then
+	AABB2 = Class:Create(nil, "AABB2")
 end
 
-local meta = FindMetaTable("VGUIAABB")
+local meta = FindMetaTable("AABB2")
 
-function VGUIAABB:__Create(min, max)
+function AABB2:__Create(min, max)
 	self.min = min
 	self.max = max
 	return self

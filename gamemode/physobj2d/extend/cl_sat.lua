@@ -35,7 +35,7 @@ local function OrientFinalNormal(hbA, hbB, normal)
 	return centerDir:Dot(normal) <= 0 and -normal or normal
 end
 
-function GM:VGUIPhysSAT(hbA, hbB)
+function PhysObj2D:SAT(hbA, hbB)
 	local pointsTabA, pointsTabB = hbA:GetHBScreenPointsObj():GetPoints(), hbB:GetHBScreenPointsObj():GetPoints()
 	local smallestOverlap, finalNormal, relativeTo
 

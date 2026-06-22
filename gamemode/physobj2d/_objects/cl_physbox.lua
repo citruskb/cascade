@@ -1,10 +1,10 @@
-if not VGUIPhysbox then
-	VGUIPhysboxCount = 0
+if not Physbox2 then
+	Physbox2Count = 0
 	GM.DebugObjects = {}
-	VGUIPhysbox = Class:Create(nil, "VGUIPhysbox")
+	Physbox2 = Class:Create(nil, "Physbox2")
 end
 
-local meta = FindMetaTable("VGUIPhysbox")
+local meta = FindMetaTable("Physbox2")
 
 function meta:EnablePhysics() self.isPhysicsEnabled = true end
 function meta:DisablePhysics()
@@ -39,10 +39,10 @@ end
 
 function meta:GetSize() return self.w, self.h end
 
-function VGUIPhysbox:__Create(parent)
+function Physbox2:__Create(parent)
 	-- Makes sure we have a unique ID for contact persistence.
-	VGUIPhysboxCount = VGUIPhysboxCount + 1
-	self.id = VGUIPhysboxCount
+	Physbox2Count = Physbox2Count + 1
+	self.id = Physbox2Count
 
 	self.parent = parent
 
@@ -78,7 +78,7 @@ function VGUIPhysbox:__Create(parent)
 	self.pushTo = Vector2()
 
 	PhysObj2D.physboxes[self] = true
-	self.isVGUIPhysbox = true
+	self.isPhysbox2 = true
 
 	self.checkStartSleep = 0
 	self.isSleeping = false
@@ -86,19 +86,19 @@ function VGUIPhysbox:__Create(parent)
 	return self
 end
 
-function VGUIPhysbox:ToString()
-	return "[VGUIPhysbox] #" .. self.id
+function Physbox2:ToString()
+	return "[Physbox2] #" .. self.id
 end
 
-function VGUIPhysbox:Eq(other)
+function Physbox2:Eq(other)
 	if not IsTable(other) then return false end
-	if not other.VGUIPhysbox then return false end
+	if not other.isPhysbox2 then return false end
 	return self.id == other.id
 end
 
 function meta:AddHitbox(points, noResize)
 	local id = #self.hitboxes + 1
-	self.hitboxes[id] = VGUIHitbox:Create(self, points, id)
+	self.hitboxes[id] = Hitbox2:Create(self, points, id)
 
 	-- We need to find the furthest point from all our hitbox centers.
 	local allpoints = self:GetAllHitboxPoints()
@@ -145,7 +145,7 @@ function meta:GetAABB(raw)
 	if raw and self.aabbRaw then return self.aabbRaw end
 	if self.aabb then return self.aabb end
 
-	local aabb = VGUIAABB:Create(Vector2(math.HUGE, math.HUGE), -Vector2(math.HUGE, math.HUGE))
+	local aabb = AABB2:Create(Vector2(math.HUGE, math.HUGE), -Vector2(math.HUGE, math.HUGE))
 	for _, hitbox in pairs(self.hitboxes) do
 		aabb:Expand(raw and hitbox.pointsObj or hitbox:GetHBScreenPointsObj())
 	end
