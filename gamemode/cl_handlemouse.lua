@@ -1,5 +1,6 @@
 if not handleMouseLoaded then
-	GM.MouseBeingHeld = false
+	GM.LeftMouseBeingHeld = false
+	GM.RightMouseBeingHeld = false
 	GM.CachedMousePos = Vector2(input.GetCursorPos())
 	GM.CachedMouseVelocity = Vector2()
 	handleMouseLoaded = true
@@ -38,7 +39,7 @@ end
 local numSteps = 6
 local positions = {}
 local function EvaluateAverageMouseVelocity()
-	if not GAMEMODE.MouseBeingHeld then positions = {} return end
+	if not GAMEMODE.LeftMouseBeingHeld then positions = {} return end
 
 	table.Insert(positions, 1, GAMEMODE.CachedMousePos)
 
@@ -62,26 +63,38 @@ end
 
 function GM:HandleMousePress()
 	local newState = input.IsMouseDown(MOUSE_FIRST)
-	local oldState = self.MouseBeingHeld
-	self.MouseBeingHeld = newState
+	local oldState = self.LeftMouseBeingHeld
+	self.LeftMouseBeingHeld = newState
 
-	if self.MouseBeingHeld then
+	if self.LeftMouseBeingHeld then
 		self.CachedMousePos = Vector2(input.GetCursorPos())
 	end
 	EvaluateAverageMouseVelocity()
 
-	if oldState == newState then return end
-
-	local pressed = self.MouseBeingHeld
-	if pressed then
-		gamemode.Call("MousePressed")
-		return
+	if oldState ~= newState then
+		local pressed = self.LeftMouseBeingHeld
+		if pressed then
+			gamemode.Call("LeftMouseClick")
+		else
+			gamemode.Call("LeftMouseRelease")
+		end
 	end
 
-	gamemode.Call("MouseReleased")
+	newState = input.IsMouseDown(MOUSE_RIGHT)
+	oldState = self.RightMouseBeingHeld
+	self.RightMouseBeingHeld = newState
+
+	if oldState ~= newState then
+		local pressed = self.RightMouseBeingHeld
+		if pressed then
+			gamemode.Call("RightMouseClick")
+		else
+			gamemode.Call("RightMouseRelease")
+		end
+	end
 end
 
-function GM:MousePressed()
+function GM:LeftMouseClick()
 	-- Assume we only care our mouse is pressed if it's free and moving around.
 	if not vgui.CursorVisible() then return end
 
@@ -93,7 +106,7 @@ function GM:MousePressed()
 	gamemode.Call("InventoryItemPickedUp", self.HeldItem.parent, insideBounds)
 end
 
-function GM:MouseReleased()
+function GM:LeftMouseRelease()
 	if not self.HeldItem then return end
 
 	local insideBounds = self.HeldItem:IsInsideInventoryBounds()
@@ -101,6 +114,14 @@ function GM:MouseReleased()
 	gamemode.Call("InventoryItemDropped", self.HeldItem.parent, insideBounds)
 
 	self.HeldItem = nil
+end
+
+function GM:RightMouseClick()
+	if not self.HeldItem then return end
+	self.HeldItem:Rotate90CW()
+end
+
+function GM:RightMouseRelease()
 end
 
 function GM:InventoryItemDropped(obj, isInInventoryBounds)

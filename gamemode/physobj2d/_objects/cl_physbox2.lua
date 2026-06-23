@@ -164,7 +164,6 @@ function meta:RecalculateSize()
 	local min, max = aabb.min, aabb.max
 	self.w = max.x - min.x
 	self.h = max.y - min.y
-	print(self.w, self.h)
 end
 
 -- TODO better estimates.
@@ -227,9 +226,9 @@ function meta:StepPickup(dt)
 	if not self.isPickedUp then return end
 
 	local mousePos = GAMEMODE.CachedMousePos
-	--local ft = FrameTime()
-	--print(ft * 100)
 	self.position = LerpVector2(0.7, self.position, mousePos)
+
+	self.rotation = Lerp(0.2, self.rotation, self.desiredRotation)
 
 	self:UpdateParentPosAndRot()
 end
@@ -272,6 +271,7 @@ end
 
 function meta:MousePickup(isInsideInventoryBounds)
 	self:DisablePhysics()
+	self:SnapToNearest90()
 	self.isSleeping = false
 	self.isPickedUp = true
 end
@@ -321,4 +321,31 @@ function meta:IsInsideInventoryBounds()
 		x < rightWallAABB.min.x	-- Our center point is left of the right wall.
 
 	return isInsideBounds
+end
+
+local ROT_STEP = math.PI * 0.5 -- 90 degrees
+function meta:SnapToNearest90()
+	local rot = math.Abs(self.rotation)
+	while rot > ROT_STEP do rot = rot - ROT_STEP end
+
+	-- Are we closer to zero degrees or 90?
+	local closerToZero = rot - ROT_STEP * 0.5 < 0
+
+	local rotCloserToZero = rot
+	local rotFurtherFromZero = ROT_STEP - rot
+
+	-- Turn the opposite way if we are negative.
+	if self.rotation > 0 then
+		self.desiredRotation = self.rotation + (closerToZero and -rotCloserToZero or rotFurtherFromZero)
+	else
+		self.desiredRotation = self.rotation - (closerToZero and -rotCloserToZero or rotFurtherFromZero)
+	end
+end
+
+function meta:Rotate90CW()
+	self.desiredRotation = self.desiredRotation + ROT_STEP
+end
+
+function meta:Rotate90CCW()
+	self.desiredRotation = self.desiredRotation - ROT_STEP
 end

@@ -49,7 +49,14 @@ function GM:PlayerBindPress(pl, bind, pressed)
 		return true
 	end
 
-	--if bind == "+attack" then gamemode.Call("MousePressed", pl) end
+	if bind == "+reload" then
+		if pressed and self.HeldItem then
+			self.HeldItem:Rotate90CCW()
+		end
+		return true
+	end
+
+	--if bind == "+attack" then gamemode.Call("LeftMouseClick", pl) end
 end
 
 -- Validity hack
@@ -71,7 +78,7 @@ GM.CreateMove = GM.Think
 GM.PrePlayerDraw = GM.Think
 GM.PostPlayerDraw = GM.Think
 GM.InputMouseApply = GM.Think
-GM.GUIMousePressed = GM.Think
+GM.GUILeftMouseClick = GM.Think
 GM.HUDWeaponPickedUp = GM.Think
 
 local gm_ = GM
@@ -87,7 +94,7 @@ function LocalPlayerFound()
 	gm_.PrePlayerDraw = gm_._PrePlayerDraw
 	gm_.PostPlayerDraw = gm_._PostPlayerDraw
 	gm_.InputMouseApply = gm_._InputMouseApply
-	gm_.GUIMousePressed = gm_._GUIMousePressed
+	gm_.GUILeftMouseClick = gm_._GUILeftMouseClick
 	gm_.HUDWeaponPickedUp = gm_._HUDWeaponPickedUp
 	gm_.RenderScene = gm_._RenderScene
 	gm_.SetupSkyboxFog = gm_._SetupSkyboxFog
@@ -163,7 +170,7 @@ function GM:_PostPlayerDraw(pl) end
 
 function GM:_InputMouseApply(cmd, x, y, ang) end
 
-function GM:_GUIMousePressed(mc) end
+function GM:_GUILeftMouseClick(mc) end
 
 function GM:_HUDWeaponPickedUp(wep) end
 
