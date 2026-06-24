@@ -16,9 +16,9 @@ function Backpack:__Create(owner)
 	self.owner = owner
 	self.ownerNick = owner and owner:Nick()
 	self.ownerSteamID = owner and owner:SteamID64()
-	self.contents = {}
 
-	self.grid = {}
+	self.cells = {}
+	self:SetupCells()
 
 	return self
 end
@@ -27,15 +27,11 @@ function Backpack:ToString()
 	return self.owner and self.ownerNick .. "'s Backpack" or "Backpack #" .. self.id
 end
 
-function meta:CoordsToGridIDX(x, y)
-	return
-		((x - 1) * GAMEMODE.BackpackGridX) +
-		(x - 1) % GAMEMODE.BackpackGridX +
-		1
-end
-function meta:GridIDXToCoords(idx)
-	local x, y
-	x = ((idx - 1) % GAMEMODE.BackpackGridX) + 1
-	y = ((idx - x) / GAMEMODE.BackpackGridX) + 1
-	return x, y
+function meta:SetupCells()
+	for row = 1, GAMEMODE.BackpackGridY do
+		for col = 1, GAMEMODE.BackpackGridX do
+			local cell = BackpackCell:Create(self, col, row)
+			self.cells[cell.id] = cell
+		end
+	end
 end

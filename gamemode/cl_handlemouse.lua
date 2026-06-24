@@ -62,6 +62,11 @@ local function EvaluateAverageMouseVelocity()
 end
 
 function GM:HandleMousePress()
+	self:HandleMouseFirst()
+	self:HandleMouseRight()
+end
+
+function GM:HandleMouseFirst()
 	local newState = input.IsMouseDown(MOUSE_FIRST)
 	local oldState = self.LeftMouseBeingHeld
 	self.LeftMouseBeingHeld = newState
@@ -71,26 +76,13 @@ function GM:HandleMousePress()
 	end
 	EvaluateAverageMouseVelocity()
 
-	if oldState ~= newState then
-		local pressed = self.LeftMouseBeingHeld
-		if pressed then
-			gamemode.Call("LeftMouseClick")
-		else
-			gamemode.Call("LeftMouseRelease")
-		end
-	end
+	if oldState == newState then return end
 
-	newState = input.IsMouseDown(MOUSE_RIGHT)
-	oldState = self.RightMouseBeingHeld
-	self.RightMouseBeingHeld = newState
-
-	if oldState ~= newState then
-		local pressed = self.RightMouseBeingHeld
-		if pressed then
-			gamemode.Call("RightMouseClick")
-		else
-			gamemode.Call("RightMouseRelease")
-		end
+	local pressed = self.LeftMouseBeingHeld
+	if pressed then
+		gamemode.Call("LeftMouseClick")
+	else
+		gamemode.Call("LeftMouseRelease")
 	end
 end
 
@@ -114,6 +106,21 @@ function GM:LeftMouseRelease()
 	gamemode.Call("InventoryItemDropped", self.HeldItem.parent, insideBounds)
 
 	self.HeldItem = nil
+end
+
+function GM:HandleMouseRight()
+	local newState = input.IsMouseDown(MOUSE_RIGHT)
+	local oldState = self.RightMouseBeingHeld
+	self.RightMouseBeingHeld = newState
+
+	if oldState == newState then return end
+
+	local pressed = self.RightMouseBeingHeld
+	if pressed then
+		gamemode.Call("RightMouseClick")
+	else
+		gamemode.Call("RightMouseRelease")
+	end
 end
 
 function GM:RightMouseClick()
