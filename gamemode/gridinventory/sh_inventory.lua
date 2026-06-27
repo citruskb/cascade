@@ -119,7 +119,7 @@ hook.Add("ScreenScaleChanged", "ScreenScaleChanged.ScreenWideGrid", InitScreenWi
 function GM:GetNearestScreenBindPointXY(vec2)
 	local x, y = vec2:Unpack()
 	local siz = self:GetInventoryGridSize()
-	return math.Round(x / siz, 0) + 1, math.Round(y / siz, 0) + 1
+	return math.Round((x + siz / 2) / siz, 0), math.Round((y + siz / 2) / siz, 0)
 end
 
 function GM:GetNearestScreenBindPoint(vec2)

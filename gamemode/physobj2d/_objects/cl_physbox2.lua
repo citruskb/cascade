@@ -398,11 +398,10 @@ function meta:EvalGridInventoryPlacement()
 
 	-- If we find a bindpoint thats entirely outside the inventory, do nothing.
 	for i = 1, #indexes do
-		print("idx", indexes[i])
-		print("cell", backpack.cells[indexes[i]])
-		if not backpack.cells[indexes[i]] then return end
+		if not backpack.cellsScreenIDX[indexes[i]] then return end
 	end
 
 	-- Bind!
+	self.isPickedUp = false
 	self.isInGridInventory = true
 end

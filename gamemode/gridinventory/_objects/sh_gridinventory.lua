@@ -9,6 +9,7 @@ function GridInventory:__Create(w, h)
 	self.h = h or GAMEMODE.BackpackGridY
 
 	self.cells = {}
+	self.cellsScreenIDX = {}
 	self:SetupCells()
 
 	return self
@@ -26,5 +27,6 @@ end
 function meta:BindToPanel(pan)
 	for i = 1, #pan.grid:GetItems() do
 		self.cells[i].bindPointIndex = pan.bindPointIndexes[i]
+		self.cellsScreenIDX[pan.bindPointIndexes[i]] = self.cells[i]
 	end
 end
