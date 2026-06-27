@@ -1,6 +1,7 @@
 ITEM.id = "blast_door"
 ITEM.name = "Blast Door"
 ITEM.description = "Imprenable."
+ITEM.type = ITEM_TYPE_NORMAL
 
 ITEM.model = "models/props_lab/blastdoor001c.mdl"
 ITEM.fov = 55

@@ -1,6 +1,7 @@
 ITEM.id = "wooden_crate"
 ITEM.name = "Wooden Crate"
 ITEM.description = "It's just a crate."
+ITEM.type = ITEM_TYPE_CONTAINER
 
 ITEM.model = "models/props_junk/wood_crate001a.mdl"
 ITEM.fov = 60

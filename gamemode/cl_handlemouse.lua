@@ -103,8 +103,10 @@ function GM:LeftMouseRelease()
 
 	-- Check if we drop an item in our inventory.
 	self.HeldItem:EvalGridInventoryPlacement()
+
 	if self.HeldItem.isInGridInventory then
 		self.HeldItem = nil
+		self.backpack:PopUncontainedItems()
 		return
 	end
 
@@ -113,6 +115,7 @@ function GM:LeftMouseRelease()
 	gamemode.Call("InventoryItemDropped", self.HeldItem.parent, insideBounds)
 
 	self.HeldItem = nil
+	self.backpack:PopUncontainedItems()
 end
 
 function GM:HandleMouseRight()

@@ -1,3 +1,7 @@
+ITEM_TYPE_CONTAINER = 1
+ITEM_TYPE_NORMAL = 2
+ITEM_TYPE_AUGMENT = 3
+
 function GM:RegisterBackpackItem(id, tab)
 	self.BackpackItems[id] = tab
 	if tab.hidden then return end

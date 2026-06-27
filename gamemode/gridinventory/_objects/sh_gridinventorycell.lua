@@ -19,9 +19,10 @@ end
 function meta:EvaluateID() return gamemode.Call("GridInventoryCoordsToCellID", self.x, self.y) end
 function meta:EvaluateCoords() return gamemode.Call("GridInventoryCellIDToCoords", self.id) end
 
-function meta:IsCompletelyEmpty() return not self.heldBag and not self.heldItem end
-function meta:IsBagButEmpty() return self.heldBag and not self.heldItem end
-function meta:IsFilled() return self.heldBag and self.heldItem end
+function meta:IsCompletelyEmpty() return not self.heldContainer and not self.heldItem end
+function meta:IsContainerButEmpty() return self.heldContainer and not self.heldItem end
+function meta:IsFilled() return self.heldContainer and self.heldItem end
+function meta:IsFilledButShouldntBe() return not self.heldContainer and self.heldItem end
 
 function meta:GetAssocScreenBindPoint()
 	if not self.bindPointIndex then Error("[GridInventoryCell] - Unbound cell.") end

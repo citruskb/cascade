@@ -370,8 +370,15 @@ function meta:RemoveFromInventoryCells()
 	if table.Count(self.boundCells) <= 0 then return end
 
 	for idx, cell in pairs(self.boundCells) do
-		cell.heldItem = nil
+		-- If we are a container, what we were holding needs to pop out.
+		if self.parent.isContainer then
+			--if cell.heldItem then cell.heldItem:Pop() end
+			cell.heldContainer = nil
+		elseif self.parent.isNormalItem then
+			cell.heldItem = nil
+		end
 	end
+
 	table.Empty(self.boundCells)
 	table.Empty(self.bindPointsCellIDX)
 end
@@ -429,11 +436,39 @@ function meta:EvalGridInventoryPlacement()
 		if not backpack.cellsScreenIDX[indexes[i]] then return end
 	end
 
-	-- Check if these indexes contain anything, and if they do prevent this from going in.
+	-- Whether we can place an item depends on what kind of item it is.
 	for i = 1, #indexes do
 		local cell = backpack.cellsScreenIDX[indexes[i]]
-		if cell.heldItem and cell.heldItem ~= self then return end
+
+		-- Containers can only be placed on spots that are entirely empty.
+		if self.parent.isContainer then
+			if cell:IsCompletelyEmpty() then continue end
+			if cell.heldContainer and cell.heldContainer ~= self then return end
+		end
+
+		-- In contrast, normal items can only be placed on containers not holding anything else.
+		if self.parent.isNormalItem then
+			if cell:IsContainerButEmpty() then continue end
+			if not cell.heldContainer then return end
+			if cell.heldItem and cell.heldItem ~= self then return end
+		end
 	end
+	-- TODO augments
+
+	--[[
+	for i = 1, #indexes do
+		local cell = backpack.cellsScreenIDX[indexes[i]--]
+
+		if self.parent.isContainer then
+			if cell.heldContainer and cell.heldContainer ~= self then return end
+		elseif self.parent.isNormalItem then
+			if cell.heldItem and cell.heldItem ~= self then
+				print("different item!", cell.heldItem, self)
+				return
+			end
+		end
+	end
+	]]
 
 	-- Bind!
 	self:RemoveFromInventoryCells()
@@ -442,9 +477,11 @@ function meta:EvalGridInventoryPlacement()
 		self.boundCells[indexes[i]] = cell
 		self.bindPointsCellIDX[i] = indexes[i]
 
-		print("bindPointIDX at", i, "is", indexes[i])
-
-		cell.heldItem = self
+		if self.parent.isContainer then
+			cell.heldContainer = self
+		elseif self.parent.isNormalItem then
+			cell.heldItem = self
+		end
 	end
 
 	self.isPickedUp = false

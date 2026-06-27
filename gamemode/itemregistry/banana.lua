@@ -1,6 +1,7 @@
 ITEM.id = "banana"
 ITEM.name = "Banana"
 ITEM.description = "Go bananas."
+ITEM.type = ITEM_TYPE_NORMAL
 
 ITEM.model = "models/props/cs_italy/bananna.mdl"
 ITEM.fov = 51

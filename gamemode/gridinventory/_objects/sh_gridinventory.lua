@@ -30,3 +30,12 @@ function meta:BindToPanel(pan)
 		self.cellsScreenIDX[pan.bindPointIndexes[i]] = self.cells[i]
 	end
 end
+
+function meta:PopUncontainedItems()
+	for i = 1, #self.cells do
+		local cell = self.cells[i]
+		if not cell:IsFilledButShouldntBe() then continue end
+
+		cell.heldItem:Pop()
+	end
+end

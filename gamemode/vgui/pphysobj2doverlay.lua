@@ -4,6 +4,14 @@
 	We don't do this on the shop or battle screens directly because we may want to be hiding those panels while displaying this one. 
 ]]--
 
+-- lower = drawn later.
+DRAW_LAYER_HELD_ITEM = 1
+DRAW_LAYER_POPPED = 2
+DRAW_LAYER_PLACED_ITEM = 3
+DRAW_LAYER_PLACED_CONTAINER = 4
+DRAW_LAYER_PHYSICS_INVENTORY = 5
+
+
 PANEL = {}
 
 function PANEL:Init()
@@ -74,6 +82,8 @@ function PANEL:SetupPaintVars(obj)
 	vars.sizeAdjust = sizeAdjust
 	vars.camOrthoAdjScale = data.camOrthoAdjScale
 
+	vars.drawLayer = self:EvaluateDrawLayer(obj.physbox, isOrtho)
+
 	table.insert(self.paintVars, vars)
 end
 
@@ -82,6 +92,23 @@ function PANEL:EvaluateOrthoLock(x, y, physbox)
 	if not physbox.isCamOrthoLocked then return end
 	if y < 0 then return end
 	physbox.isCamOrthoLocked = false
+end
+
+function PANEL:EvaluateDrawLayer(physbox, isOrtho)
+	-- This takes precedence over all else. (Drawn last.)
+	if GAMEMODE.HeldItem == physbox then return DRAW_LAYER_HELD_ITEM end
+
+	-- Popped items next.
+	if physbox.isBeingPopped then return DRAW_LAYER_POPPED end
+
+	-- Placed items are drawn below those.
+	if physbox.isInGridInventory and (physbox.parent.isNormalItem or physbox.parent.isAugment) then return DRAW_LAYER_PLACED_ITEM end
+
+	-- Next, we draw placed containers.
+	if physbox.isInGridInventory and physbox.parent.isContainer then return DRAW_LAYER_PLACED_CONTAINER end
+
+	-- Inventory items drawn first.
+	if not isOrtho then return DRAW_LAYER_PHYSICS_INVENTORY end
 end
 
 function PANEL:EvaluateCameraPos(center, camPosOffset, dist, x, y, camOffScreenAdjScale, adjustSkew, objAng, isOrtho, physbox)
@@ -105,33 +132,8 @@ function PANEL:EvaluateCameraPos(center, camPosOffset, dist, x, y, camOffScreenA
 		local adjust = adjustDir * (camOffScreenAdjScale or 1)
 		adjust:Rotate(Angle(0, 0, -objAng))
 
-		return center + adjust, center + adjust + camPosOffset * dist, math.Max(x, 0), math.Max(y, 0), adjust:LengthSqr()
+		return center + adjust, center + adjust + camPosOffset * dist, math.Max(x, 0), math.Max(y, 0), 0 --adjust:LengthSqr()
 	end
-
-
-	--[[
-	-- Try to adjust by angling the camera and such.
-	if x >= 0 and y >= 0 then
-		return center, center + camPosOffset * dist, x, y, 0
-	end
-
-	local xMag = x < 0 and -x or 0
-	local yMag = y < 0 and -y or 0
-	local adjustDir = Vector(0, xMag, -yMag)
-	local adjust = adjustDir * (camOffScreenAdjScale or 1)
-	adjust:Rotate(Angle(0, 0, -objAng))
-
-	return center + adjust, center + adjust + camPosOffset * dist, math.Max(x, 0), math.Max(y, 0), adjust:LengthSqr()
-	]]
-
-	-- Current, fly-off-the-top behavior
-
-	--[[
-	local negativeX = math.Min(x, 0)
-	local negativeY = math.Min(y, 0)
-	local adjust = Vector(0, -negativeX, negativeY)
-	return center, center + adjust * adjustSkew + camPosOffset * dist, math.Max(x, 0), math.Max(y, 0), adjust:LengthSqr()
-	]]
 end
 
 function PANEL:PaintPhysObj2D(vars)
@@ -181,12 +183,12 @@ function PANEL:Paint()
 	end
 
 	table.SortByMember(self.paintVars, "zsqr")
-
+	table.SortByMember(self.paintVars, "drawLayer")
 
 	render.SuppressEngineLighting(true)
 	cam.IgnoreZ(true)
 
-	for k, vars in pairs(self.paintVars) do
+	for k, vars in ipairs(self.paintVars) do
 		if vars.isOrtho then
 			self:PaintOrthoPhysObj2D(vars)
 		else
