@@ -101,6 +101,15 @@ end
 function GM:LeftMouseRelease()
 	if not self.HeldItem then return end
 
+	-- Check if we drop an item in our inventory.
+	--[[
+	self.HeldItem:EvalGridInventoryPlacement()
+	if self.HeldItem.isInGridInventory then
+		self.HeldItem = nil
+		return
+	end
+	]]
+
 	local insideBounds = self.HeldItem:IsInsideInventoryBounds()
 	self.HeldItem:MouseDrop(insideBounds)
 	gamemode.Call("InventoryItemDropped", self.HeldItem.parent, insideBounds)

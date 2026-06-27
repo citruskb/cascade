@@ -126,7 +126,19 @@ ITEM.camXYOffsetAdj = ITEM.camXYOffsetAdj * rescale
 
 ITEM.hitboxPoints = newShape
 
-ITEM.gridPoints = Points({Vector2(0, 0), Vector2(0, 1), Vector2(1, 1)})
+
+ITEM.gridPoints = {
+	[0] = Points({Vector2(0, 0), Vector2(0, 1), Vector2(1, 1)}),
+	[90] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(0, 1)}),
+	[180] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)}),
+	[270] = Points({Vector2(0, 1), Vector2(1, 1), Vector2(1, 0)}),
+}
+ITEM.gridPointsOffsets = {
+	[0] = Vector2(-26, -32),
+	[90] = Vector2(-26, -32),
+	[180] = Vector2(-26, -32),
+	[270] = Vector2(-26, -32),
+}
 
 ITEM.DoActivate = function(me, other) end
 

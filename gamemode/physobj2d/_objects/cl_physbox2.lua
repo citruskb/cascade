@@ -68,11 +68,14 @@ function Physbox2:__Create(parent)
 	self:RerollRandomAirborneRotation()
 	self:DisablePhysics()
 
+	self.bindPoints = {}
+
 	self.isScreenScaled = parent.isScreenScaled
 	self.isPickedUp = false
+	self.isInGridInventory = false
 
-	self.isBeingPushed = false
-	self.pushTo = Vector2()
+	self.isBeingPopped = false
+	self.popTo = Vector2()
 
 	PhysObj2D.physboxes[self] = true
 	self.isPhysbox2 = true
@@ -204,11 +207,11 @@ function meta:Step(dt)
 
 	self:StepPhysics(dt)
 	self:StepPickup(dt)
-	self:StepPush(dt)
+	self:StepPop(dt)
 end
 
 function meta:StepPhysics(dt)
-	if not self.isPhysicsEnabled then return end
+	if (not self.isPhysicsEnabled) or self.isInGridInventory then return end
 
 	if self.isSleeping then
 		self.velocity:Zero()
@@ -234,31 +237,54 @@ function meta:StepPickup(dt)
 end
 
 -- TODO: Cache. Refresh if we detect a screenscale change.
-function meta:GetPushTo()
+function meta:GetPopTo()
 	local w, h = ScrW(), ScrH()
 	return Vector2(w * 0.55, h * 0.5)
 end
 
-function meta:StepPush(dt)
-	if not self.isBeingPushed then return end
+function meta:StepPop(dt)
+	if not self.isBeingPopped then return end
 
-	local pushMagdt = PHYS2D_PUSH_VELOCITY * dt
-	self.position:DoAdd(self.pushDir * pushMagdt)
-	--PHYS2D_PUSH_VELOCITY
+	local popMagdt = PHYS2D_POP_VELOCITY * dt
+	self.position:DoAdd(self.popDir * popMagdt)
 
 	self:UpdateParentPosAndRot()
+	self:EvalBindPoints()
 
 	-- Check if we've reached our destination.
-	if self.position:DistanceSqr(self:GetPushTo()) >= pushMagdt * pushMagdt then return end
+	if self.position:DistanceSqr(self:GetPopTo()) >= popMagdt * popMagdt then return end
 	self:EnablePhysics()
 	self.isSleeping = false
-	self.isBeingPushed = false
-	self.velocity = self.pushDir * PHYS2D_PUSH_VELOCITY
+	self.isBeingPopped = false
+	self.velocity = self.popDir * PHYS2D_POP_VELOCITY
 end
 
 function meta:UpdateParentPosAndRot()
 	self.parent.position:Set(self.position)
 	self.parent.rotation = self.rotation
+end
+
+function meta:EvalBindPoints()
+	local tab = self.parent.itemData.gridPoints
+	if not tab then Error("[PhysObj2D] Unbound gridpoints") end
+
+	local ang = self.physbox:GetNearest90() -- TODO cache somehow?
+	ang = math.Ang(ang)
+	local idx = math.Round(ang, 0) % 360
+
+	local pointsObj = tab[idx]
+	if not pointsObj then Error("[PhysObj2D] No gridpoints for angle: " .. idx) end
+
+	self.bindPoints = {}
+	local pointsTab = pointsObj:GetPoints()
+	local siz = gamemode.Call("GetInventoryGridSize")
+	local origin = self.physbox:GetScreenHitboxPointsOrigin()
+	origin = origin + Vector2(siz * 0.5, siz * 0.5)
+
+	for i = 1, #pointsTab do
+		local point = pointsTab[i]
+		self.bindPoints[i] = origin + self.parent.itemData.gridPointsOffsets[idx] + point * siz
+	end
 end
 
 function meta:ApplyImpulse(impulse, screenPoint)
@@ -273,6 +299,7 @@ function meta:MousePickup(isInsideInventoryBounds)
 	self:DisablePhysics()
 	self:SnapToNearest90()
 	self.isSleeping = false
+	self.isInGridInventory = false
 	self.isPickedUp = true
 end
 
@@ -292,15 +319,14 @@ function meta:MouseDrop(isInsideInventoryBounds)
 		local _, y = self:GetAdjCamPosition():Unpack()
 		self:AddVelocity(GAMEMODE.CachedMouseVelocity * (y < 0 and 0.1 or 1))
 	else
-		self.isBeingPushed = true
-		self.pushDir = (self:GetPushTo() - self.position):GetNormalized()
+		self:Pop()
 	end
 end
 
 function meta:MouseCanGrab()
 	return
 		not self.isStatic and
-		not self.isBeingPushed and
+		not self.isBeingPopped and
 		not self.isCamOrthoLocked
 end
 
@@ -323,8 +349,17 @@ function meta:IsInsideInventoryBounds()
 	return isInsideBounds
 end
 
+-- Move from where it is back to inventory.
+function meta:Pop()
+	if self.isStatic then return end
+
+	self.isInGridInventory = false
+	self.isBeingPopped = true
+	self.popDir = (self:GetPopTo() - self.position):GetNormalized()
+end
+
 local ROT_STEP = math.PI * 0.5 -- 90 degrees
-function meta:SnapToNearest90()
+function meta:GetNearest90()
 	local rot = math.Abs(self.rotation)
 	while rot > ROT_STEP do rot = rot - ROT_STEP end
 
@@ -336,10 +371,14 @@ function meta:SnapToNearest90()
 
 	-- Turn the opposite way if we are negative.
 	if self.rotation > 0 then
-		self.desiredRotation = self.rotation + (closerToZero and -rotCloserToZero or rotFurtherFromZero)
+		return self.rotation + (closerToZero and -rotCloserToZero or rotFurtherFromZero)
 	else
-		self.desiredRotation = self.rotation - (closerToZero and -rotCloserToZero or rotFurtherFromZero)
+		return self.rotation - (closerToZero and -rotCloserToZero or rotFurtherFromZero)
 	end
+end
+
+function meta:SnapToNearest90()
+	self.desiredRotation = self:GetNearest90()
 end
 
 function meta:Rotate90CW()
@@ -348,4 +387,22 @@ end
 
 function meta:Rotate90CCW()
 	self.desiredRotation = self.desiredRotation - ROT_STEP
+end
+
+function meta:EvalGridInventoryPlacement()
+	local backpack = GAMEMODE.backpack
+	local indexes = {}
+	for i = 1, #self.bindPoints do
+		indexes[i] = gamemode.Call("GetNearestScreenBindPointIndex", self.bindPoints[i])
+	end
+
+	-- If we find a bindpoint thats entirely outside the inventory, do nothing.
+	for i = 1, #indexes do
+		print("idx", indexes[i])
+		print("cell", backpack.cells[indexes[i]])
+		if not backpack.cells[indexes[i]] then return end
+	end
+
+	-- Bind!
+	self.isInGridInventory = true
 end

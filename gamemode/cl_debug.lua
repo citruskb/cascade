@@ -123,6 +123,18 @@ local function DrawCollisionPoint(cpoint)
 	surface.DrawRect(cx - s * 0.5, cy - s * 0.5, s, s)
 end
 
+local function DrawItemBindPoints(physObj2D)
+	if not physObj2D.bindPoints then return end
+
+	local s = 4
+	surface.SetDrawColor(COLOR_GREEN)
+	for i = 1, #physObj2D.bindPoints do
+		local point = physObj2D.bindPoints[i]
+		local x, y = point:Unpack()
+		surface.DrawRect(x - s * 0.5, y - s * 0.5, s, s)
+	end
+end
+
 local function DrawBackpackBindPoints()
 	if not IsValid(GAMEMODE.GridInventory) then return end
 
@@ -133,7 +145,6 @@ local function DrawBackpackBindPoints()
 	surface.SetDrawColor(COLOR_BLACK)
 	for i = 1, #backpack.cells do
 		local cell = backpack.cells[i]
-		print(cell.bindPointIndex)
 		local x, y = cell:GetAssocScreenBindPoint():Unpack()
 		surface.DrawRect(x - s * 0.5, y - s * 0.5, s, s)
 	end
@@ -199,6 +210,8 @@ local function DrawDebug()
 		table.insert(cps, cobj.screenPoint)
 	end
 
+	DrawBackpackBindPoints()
+
 	for _, obj in pairs(GAMEMODE.PhysicsObjects2D) do
 		--if detailed then DrawItemDebug(obj) end
 
@@ -213,14 +226,14 @@ local function DrawDebug()
 
 		if detailed then DrawAux(physbox, hitbox) end
 
+		DrawItemBindPoints(obj)
+
 		--[[
 		for k, line in pairs(refLines) do DrawRefLine(line) end
 		for k, line in pairs(incLines) do DrawIncLine(line) end
 		for k, data in pairs(normals) do DrawNormal(data) end
 		]]
 	end
-
-	DrawBackpackBindPoints()
 end
 
 hook.Add("DrawOverlay", "DrawOverlay.Debug", DrawDebug)

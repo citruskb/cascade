@@ -21,6 +21,11 @@ ITEM.hitboxPoints = {
 			Vector2(0, s)}),
 }
 
-ITEM.gridPoints = Points({Vector2(0, 0), Vector2(1, 0), Vector2(0, 1), Vector2(1, 1)})
+ITEM.gridPoints = {
+	[0] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(0, 1), Vector2(1, 1)}),
+	[90] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(0, 1), Vector2(1, 1)}),
+	[180] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(0, 1), Vector2(1, 1)}),
+	[270] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(0, 1), Vector2(1, 1)}),
+}
 
 ITEM.DoActivate = function(me, other) end

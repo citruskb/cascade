@@ -4,7 +4,6 @@ GamemodeLoaderRoot(GM) -- Start loading libraries.
 IncludeLibrary("vector2")
 IncludeLibrary("physobj2d")
 IncludeLibrary("gridinventory")
-IncludeLibrary("backpack_item")
 
 
 GM.Name		=	"Cascade"

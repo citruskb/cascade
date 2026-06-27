@@ -35,7 +35,7 @@ PHYS2D_GRAVITY_VEC2 = Vector2(0, PHYS2D_GRAVITY)
 PHYS2D_TERMINAL_VELOCITY = 500 -- Stop applying gravity after reaching this velocity.
 PHYS2D_RANDOM_AIRBORNE_ROTATION = 1
 
-PHYS2D_PUSH_VELOCITY = 700 -- Flat velocity applied to objects dropped outside of bounds, as they move back into bounds.
+PHYS2D_POP_VELOCITY = 700 -- Flat velocity applied to objects dropped outside of bounds, as they move back into bounds.
 
 PHYS2D_SLEEP_VEL_THRESHOLD = 3
 PHYS2D_SLEEP_ANGVEL_THRESHOLD = 0.1

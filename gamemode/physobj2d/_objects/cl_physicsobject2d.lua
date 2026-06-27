@@ -20,7 +20,6 @@ function PhysObj2:__Create(position, rotation, itemDataID, velocity, angularVelo
 		self.hitboxPoints = itemDataID
 	else
 		self.itemData = GAMEMODE.BackpackItems[itemDataID]
-		self:InitBindPoints()
 	end
 
 	self:InitPhysbox(velocity, angularVelocity, isStatic)
@@ -39,13 +38,26 @@ function PhysObj2:Eq(other)
 	return self.id == other.id
 end
 
-function meta:InitBindPoints()
-	local gridPoints = self.itemData.gridPoints
-	local siz = gamemode.Call("GetInventoryGridSize")
+function meta:EvalBindPoints()
+	local tab = self.itemData.gridPoints
+	if not tab then Error("[PhysObj2D] Unbound gridpoints") end
 
-	local bindPointsTab = {}
-	for i = 1, #gridPoints do
-		local x, y = gridPoints[i]:Unpack()
+	local ang = self.physbox:GetNearest90() -- TODO cache somehow?
+	ang = math.Ang(ang)
+	local idx = math.Round(ang, 0) % 360
+
+	local pointsObj = tab[idx]
+	if not pointsObj then Error("[PhysObj2D] No gridpoints for angle: " .. idx) end
+
+	self.bindPoints = {}
+	local pointsTab = pointsObj:GetPoints()
+	local siz = gamemode.Call("GetInventoryGridSize")
+	local origin = self.physbox:GetScreenHitboxPointsOrigin()
+	origin = origin + Vector2(siz * 0.5, siz * 0.5)
+
+	for i = 1, #pointsTab do
+		local point = pointsTab[i]
+		self.bindPoints[i] = origin + self.itemData.gridPointsOffsets[idx] + point * siz
 	end
 end
 
