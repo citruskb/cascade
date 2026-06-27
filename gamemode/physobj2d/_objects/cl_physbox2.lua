@@ -68,6 +68,7 @@ function Physbox2:__Create(parent)
 	self:RerollRandomAirborneRotation()
 	self:DisablePhysics()
 
+	self.boundCells = {}
 	self.bindPoints = {}
 
 	self.isScreenScaled = parent.isScreenScaled
@@ -313,6 +314,7 @@ function meta:MouseDrop(isInsideInventoryBounds)
 	self:RerollRandomAirborneRotation()
 
 	if isInsideInventoryBounds then
+		self:RemoveFromInventoryCells()
 		self:EnablePhysics()
 
 		-- Mitigate tossing the ortho view upwards.
@@ -349,10 +351,20 @@ function meta:IsInsideInventoryBounds()
 	return isInsideBounds
 end
 
+function meta:RemoveFromInventoryCells()
+	if table.Count(self.boundCells) <= 0 then return end
+
+	for idx, cell in pairs(self.boundCells) do
+		cell.heldItem = nil
+	end
+	table.Empty(self.boundCells)
+end
+
 -- Move from where it is back to inventory.
 function meta:Pop()
 	if self.isStatic then return end
 
+	self:RemoveFromInventoryCells()
 	self.isInGridInventory = false
 	self.isBeingPopped = true
 	self.popDir = (self:GetPopTo() - self.position):GetNormalized()
@@ -401,7 +413,21 @@ function meta:EvalGridInventoryPlacement()
 		if not backpack.cellsScreenIDX[indexes[i]] then return end
 	end
 
-	-- Bind!
+	-- Check if these indexes contain anything, and if they do prevent this from going in.
+	for i = 1, #indexes do
+		local cell = backpack.cellsScreenIDX[indexes[i]]
+		if cell.heldItem and cell.heldItem ~= self then return end
+	end
+
+	-- Bind!`
+	self:RemoveFromInventoryCells()
+	for i = 1, #indexes do
+		local cell = backpack.cellsScreenIDX[indexes[i]]
+		self.boundCells[indexes[i]] = cell
+
+		cell.heldItem = self
+	end
+
 	self.isPickedUp = false
 	self.isInGridInventory = true
 end
