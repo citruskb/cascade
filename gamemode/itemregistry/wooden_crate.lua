@@ -1,4 +1,4 @@
-ITEM.id = "test_wooden_crate"
+ITEM.id = "wooden_crate"
 ITEM.name = "Wooden Crate"
 ITEM.description = "It's just a crate."
 
@@ -13,7 +13,7 @@ ITEM.camOrthoAdjScale = 29
 ITEM.triggerDelay = 4
 ITEM.retriggerable = true
 
-local s = 60
+local s = 160
 ITEM.hitboxPoints = {
 	[1] = Points({	Vector2(0, 0),
 			Vector2(s, 0),

@@ -150,7 +150,7 @@ function PANEL:Init()
 	local function TossBoxes(num)
 		num = math.Clamp(math.Floor(num), 1, 64)
 		for i = 1, num do
-			MakeItem("wooden_crate",
+			MakeItem("test_wooden_crate",
 			Vector2(
 				w * 0.5 + math.Random(-40 * 4, 40 * 4),
 				h * 0.5 + math.Random(-40 * 4, 40 * 4)
@@ -165,14 +165,14 @@ function PANEL:Init()
 	local function StackOfBoxes(high)
 		high = math.Clamp(math.Floor(high), 1, 5)
 		for i = 1, high do
-			MakeItem("wooden_crate", Vector2(w * 0.5, 0.3 + h * (0.1 * i)))
+			MakeItem("test_wooden_crate", Vector2(w * 0.5, 0.3 + h * (0.1 * i)))
 		end
 	end
 
 	local function StackOfOffsetTossedBoxes(high, offset)
 		high = math.Clamp(math.Floor(high), 1, 5)
 		for i = 1, high do
-			MakeItem("wooden_crate",
+			MakeItem("test_wooden_crate",
 				Vector2(w * 0.5 + math.Random(-offset, offset), 0.3 + h * (0.1 * i)),
 				Vector2(0, -math.Rand(0, PHYS2D_TERMINAL_VELOCITY))
 			)
@@ -225,7 +225,7 @@ function PANEL:Init()
 	end
 
 	-- /// THE TEST ZONE /// --
-	--OneBox()								-- Spawn a regular box.
+	OneBox()								-- Spawn a regular box.
 	--StackOfBoxes(5)						-- Plain stacked boxes.
 	--StackOfOffsetTossedBoxes(5, 30)		-- Offset stacked boxes.
 	--TossBoxes(32)							-- Toss a load of boxes everywhere.
