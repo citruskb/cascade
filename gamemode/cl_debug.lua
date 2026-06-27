@@ -7,7 +7,7 @@ normals = {}
 DEBUG_MODE_MINIMAL = 1
 DEBUG_MODE_DETAILED = 2
 
-GM.Debug = false -- TODO move to a convar.
+GM.Debug = true -- TODO move to a convar.
 GM.DebugMode = DEBUG_MODE_MINIMAL
 GM.DebugObjects = {}
 
@@ -124,13 +124,17 @@ local function DrawCollisionPoint(cpoint)
 end
 
 local function DrawBackpackBindPoints()
-	local backpack = GAMEMODE.GridInventory
-	if not IsValid(backpack) then return end
+	if not IsValid(GAMEMODE.GridInventory) then return end
+
+	local backpack = GAMEMODE.backpack
+	if not backpack then return end
 
 	local s = 6
 	surface.SetDrawColor(COLOR_BLACK)
-	for i = 1, #backpack.bindPoints do
-		local x, y = backpack.bindPoints[i]:Unpack()
+	for i = 1, #backpack.cells do
+		local cell = backpack.cells[i]
+		print(cell.bindPointIndex)
+		local x, y = cell:GetAssocScreenBindPoint():Unpack()
 		surface.DrawRect(x - s * 0.5, y - s * 0.5, s, s)
 	end
 end

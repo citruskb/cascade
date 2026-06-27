@@ -1,20 +1,13 @@
 PANEL = {}
 
 function PANEL:Init()
-	self.bindPoints = {}
+	self.bindPointIndexes = {}
 	self.grid = vgui.Create("DGrid", self)
 
 	local gridCountWide, gridCountHigh = GAMEMODE.BackpackGridX, GAMEMODE.BackpackGridY
-	local w, h = ScrW() * 0.4, ScrH() * 0.6
+	local cellSiz = gamemode.Call("GetInventoryGridSize")
 
-	--self.grid:SetSize(w, h)
-	--self.grid:SetPos(0, 0)
-
-	local colWide = math.Floor(w / gridCountWide)
-	local rowHigh = math.Floor(h / gridCountHigh)
-	local cellSiz = colWide
-
-	self.grid:SetCols(GAMEMODE.BackpackGridX)
+	self.grid:SetCols(gridCountWide)
 	self.grid:SetColWide(cellSiz)
 	self.grid:SetRowHeight(cellSiz)
 
@@ -35,9 +28,12 @@ function PANEL:Init()
 
 	local cells = self.grid:GetItems()
 	for i = 1, #cells do
-		local x, y = cells[i]:GetPos()
-		self.bindPoints[i] = Vector2(x + cellSiz / 2, y + cellSiz / 2)
+		self.bindPointIndexes[i] = GAMEMODE:GetNearestScreenBindPointIndex(Vector2(cells[i]:GetPos()))
 	end
+
+	local backpack = GridInventory:Create()
+	backpack:BindToPanel(self)
+	GAMEMODE.backpack = backpack
 end
 
 function PANEL:PerformLayout()

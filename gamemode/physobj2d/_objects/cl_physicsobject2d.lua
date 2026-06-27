@@ -20,6 +20,7 @@ function PhysObj2:__Create(position, rotation, itemDataID, velocity, angularVelo
 		self.hitboxPoints = itemDataID
 	else
 		self.itemData = GAMEMODE.BackpackItems[itemDataID]
+		self:InitBindPoints()
 	end
 
 	self:InitPhysbox(velocity, angularVelocity, isStatic)
@@ -36,6 +37,16 @@ function PhysObj2:Eq(other)
 	if not IsTable(other) then return false end
 	if not other.isPhysObj2 then return false end
 	return self.id == other.id
+end
+
+function meta:InitBindPoints()
+	local gridPoints = self.itemData.gridPoints
+	local siz = gamemode.Call("GetInventoryGridSize")
+
+	local bindPointsTab = {}
+	for i = 1, #gridPoints do
+		local x, y = gridPoints[i]:Unpack()
+	end
 end
 
 function meta:InitPhysbox(velocity, angularVelocity, isStatic)

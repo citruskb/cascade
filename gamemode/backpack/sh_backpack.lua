@@ -1,6 +1,3 @@
--- 9 x 7 = 63
-GM.BackpackGridX = 9
-GM.BackpackGridY = 7
 
 if not Backpack then
 	GM.Backpacks = {}
