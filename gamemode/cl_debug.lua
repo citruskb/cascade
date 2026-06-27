@@ -123,13 +123,13 @@ local function DrawCollisionPoint(cpoint)
 	surface.DrawRect(cx - s * 0.5, cy - s * 0.5, s, s)
 end
 
-local function DrawItemBindPoints(physObj2D)
-	if not physObj2D.bindPoints then return end
+local function DrawItemBindPoints(physbox)
+	if not physbox.bindPoints then return end
 
 	local s = 4
 	surface.SetDrawColor(COLOR_GREEN)
-	for i = 1, #physObj2D.bindPoints do
-		local point = physObj2D.bindPoints[i]
+	for i = 1, #physbox.bindPoints do
+		local point = physbox.bindPoints[i]
 		local x, y = point:Unpack()
 		surface.DrawRect(x - s * 0.5, y - s * 0.5, s, s)
 	end
@@ -226,7 +226,7 @@ local function DrawDebug()
 
 		if detailed then DrawAux(physbox, hitbox) end
 
-		DrawItemBindPoints(obj)
+		DrawItemBindPoints(physbox)
 
 		--[[
 		for k, line in pairs(refLines) do DrawRefLine(line) end

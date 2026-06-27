@@ -249,7 +249,6 @@ function meta:StepPop(dt)
 	self.position:DoAdd(self.popDir * popMagdt)
 
 	self:UpdateParentPosAndRot()
-	self:EvalBindPoints()
 
 	-- Check if we've reached our destination.
 	if self.position:DistanceSqr(self:GetPopTo()) >= popMagdt * popMagdt then return end
@@ -262,13 +261,14 @@ end
 function meta:UpdateParentPosAndRot()
 	self.parent.position:Set(self.position)
 	self.parent.rotation = self.rotation
+	self:EvalBindPoints()
 end
 
 function meta:EvalBindPoints()
 	local tab = self.parent.itemData.gridPoints
 	if not tab then Error("[PhysObj2D] Unbound gridpoints") end
 
-	local ang = self.physbox:GetNearest90() -- TODO cache somehow?
+	local ang = self:GetNearest90() -- TODO cache somehow?
 	ang = math.Ang(ang)
 	local idx = math.Round(ang, 0) % 360
 
@@ -278,7 +278,7 @@ function meta:EvalBindPoints()
 	self.bindPoints = {}
 	local pointsTab = pointsObj:GetPoints()
 	local siz = gamemode.Call("GetInventoryGridSize")
-	local origin = self.physbox:GetScreenHitboxPointsOrigin()
+	local origin = self:GetScreenHitboxPointsOrigin()
 	origin = origin + Vector2(siz * 0.5, siz * 0.5)
 
 	for i = 1, #pointsTab do
