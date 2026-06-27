@@ -70,6 +70,7 @@ function Physbox2:__Create(parent)
 
 	self.boundCells = {}
 	self.bindPoints = {}
+	self.bindPointsCellIDX = {}
 
 	self.isScreenScaled = parent.isScreenScaled
 	self.isPickedUp = false
@@ -209,6 +210,7 @@ function meta:Step(dt)
 	self:StepPhysics(dt)
 	self:StepPickup(dt)
 	self:StepPop(dt)
+	self:StepGridInventory(dt)
 end
 
 function meta:StepPhysics(dt)
@@ -257,6 +259,19 @@ function meta:StepPop(dt)
 	self.isSleeping = false
 	self.isBeingPopped = false
 	self.velocity = self.popDir * PHYS2D_POP_VELOCITY
+end
+
+function meta:StepGridInventory(dt)
+	if not self.isInGridInventory then return end
+	local bindPoint = self.bindPoints[1]
+	local idx = self.bindPointsCellIDX[1]
+	local target = self.boundCells[idx]:GetAssocScreenBindPoint()
+	local delta = target - bindPoint
+
+	if delta:IsEqualTol(VECTOR2_ZERO, 1E-4) then return end
+
+	self.position = LerpVector2(0.1, self.position, self.position + delta)
+	self:UpdateParentPosAndRot()
 end
 
 function meta:UpdateParentPosAndRot()
@@ -358,6 +373,7 @@ function meta:RemoveFromInventoryCells()
 		cell.heldItem = nil
 	end
 	table.Empty(self.boundCells)
+	table.Empty(self.bindPointsCellIDX)
 end
 
 -- Move from where it is back to inventory.
@@ -419,11 +435,14 @@ function meta:EvalGridInventoryPlacement()
 		if cell.heldItem and cell.heldItem ~= self then return end
 	end
 
-	-- Bind!`
+	-- Bind!
 	self:RemoveFromInventoryCells()
 	for i = 1, #indexes do
 		local cell = backpack.cellsScreenIDX[indexes[i]]
 		self.boundCells[indexes[i]] = cell
+		self.bindPointsCellIDX[i] = indexes[i]
+
+		print("bindPointIDX at", i, "is", indexes[i])
 
 		cell.heldItem = self
 	end
