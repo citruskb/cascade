@@ -26,6 +26,7 @@ end
 
 function GM:InitPostEntity()
 	RunConsoleCommand("pp_bloom", "0")
+	self:CreateSounds()
 end
 
 function GM:OnReloaded()
@@ -234,4 +235,14 @@ end
 -- Fonts
 GM.font_family = "Typeface Mario 64"
 function GM:CreateCustomFonts() end
+--
+
+-- Sounds
+function GM:CreateSounds()
+	self.snd_pop = CreateSound(MySelf, "items/ammocrate_open.wav")
+end
+function GM:PlaySnd(idx)
+	self["snd_" .. idx]:Stop()
+	self["snd_" .. idx]:Play()
+end
 --

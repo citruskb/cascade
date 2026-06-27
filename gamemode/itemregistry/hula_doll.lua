@@ -67,4 +67,8 @@ ITEM.gridPointsOffsets = {
 	[270] = Vector2(-15, -11),
 }
 
+ITEM.PlayPlaceSound = function()
+	surface.PlaySound("physics/glass/glass_impact_soft" .. math.Random(1, 3) .. ".wav")
+end
+
 ITEM.DoActivate = function(me, other) end

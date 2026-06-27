@@ -141,6 +141,12 @@ ITEM.gridPointsOffsets = {
 	[270] = Vector2(-26, -32),
 }
 
+ITEM.PlayPlaceSound = function()
+	local roll = math.Random(1, 4)
+	surface.PlaySound("player/footsteps/dirt" .. roll .. ".wav")
+	surface.PlaySound("physics/flesh/flesh_squishy_impact_hard" .. roll .. ".wav")
+end
+
 ITEM.DoActivate = function(me, other) end
 
 

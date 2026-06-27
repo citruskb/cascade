@@ -391,6 +391,8 @@ function meta:Pop()
 	self.isInGridInventory = false
 	self.isBeingPopped = true
 	self.popDir = (self:GetPopTo() - self.position):GetNormalized()
+
+	gamemode.Call("PlaySnd", "pop")
 end
 
 local ROT_STEP = math.PI * 0.5 -- 90 degrees
@@ -486,4 +488,6 @@ function meta:EvalGridInventoryPlacement()
 
 	self.isPickedUp = false
 	self.isInGridInventory = true
+
+	if self.parent.itemData.PlayPlaceSound then self.parent.itemData.PlayPlaceSound() end
 end

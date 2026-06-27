@@ -35,4 +35,11 @@ ITEM.gridPointsOffsets = {
 	[270] = Vector2(-4, -4),
 }
 
+ITEM.PlayPlaceSound = function()
+	local roll = math.Random(1, 4)
+	for i = 1, 4 do
+		surface.PlaySound("player/footsteps/woodpanel" .. roll .. ".wav")
+	end
+end
+
 ITEM.DoActivate = function(me, other) end

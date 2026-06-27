@@ -29,4 +29,8 @@ ITEM.gridPoints = {
 	[270] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(0, 1), Vector2(1, 1)}),
 }
 
+ITEM.PlayPlaceSound = function()
+	surface.PlaySound("physics/wood/wood_box_footstep" .. math.Random(1, 4) .. ".wav")
+end
+
 ITEM.DoActivate = function(me, other) end

@@ -95,19 +95,10 @@ function PANEL:EvaluateOrthoLock(x, y, physbox)
 end
 
 function PANEL:EvaluateDrawLayer(physbox, isOrtho)
-	-- This takes precedence over all else. (Drawn last.)
-	if GAMEMODE.HeldItem == physbox then return DRAW_LAYER_HELD_ITEM end
-
-	-- Popped items next.
-	if physbox.isBeingPopped then return DRAW_LAYER_POPPED end
-
-	-- Placed items are drawn below those.
 	if physbox.isInGridInventory and (physbox.parent.isNormalItem or physbox.parent.isAugment) then return DRAW_LAYER_PLACED_ITEM end
-
-	-- Next, we draw placed containers.
 	if physbox.isInGridInventory and physbox.parent.isContainer then return DRAW_LAYER_PLACED_CONTAINER end
-
-	-- Inventory items drawn first.
+	if GAMEMODE.HeldItem == physbox then return physbox.parent.isContainer and DRAW_LAYER_PLACED_CONTAINER or DRAW_LAYER_HELD_ITEM end
+	if physbox.isBeingPopped then return DRAW_LAYER_POPPED end
 	if not isOrtho then return DRAW_LAYER_PHYSICS_INVENTORY end
 end
 
