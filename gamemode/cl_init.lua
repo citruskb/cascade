@@ -193,7 +193,6 @@ function GM:PostDrawSkyBox() self.DrawingInSky = false end
 --
 
 -- Overrides
-function GM:CreateCustomFonts() end
 function GM:PlayerDeath(pl, attacker) end
 function GM:ScalePlayerDamage(pl, hitgroup, dmginfo) end
 function GM:PlayerShouldTakeDamage(pl, attacker) return false end
@@ -238,7 +237,11 @@ end
 
 -- Fonts
 GM.font_family = "Typeface Mario 64"
-function GM:CreateCustomFonts() end
+function GM:CreateCustomFonts()
+	local screenscale = ScreenScale()
+	surface.CreateFont("FontItemName", {font = self.font_family, size = screenscale * 36, weight = 500, antialias = true, shadow = true})
+	surface.CreateFont("FontItemDescription", {font = self.font_default, size = screenscale * 24, weight = 100, antialias = true, shadow = false})
+end
 --
 
 -- Sounds

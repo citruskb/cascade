@@ -62,10 +62,10 @@ function PANEL:Init()
 	-- Stats & options
 	local stats = vgui.Create("DPanel", botLeft)
 	stats:SetSize(w * 0.2, h * 0.4)
-	stats:SetBackgroundColor(Color(0, 255, 0, GAMEMODE.Debug and 0 or 120))
+	stats:SetBackgroundColor(Color(0, 0, 0, 0))
 	stats:Dock(LEFT)
-	lab = EasyLabel(stats, "Stats", "SFontLarger")
-	DockCenter(lab, stats)
+	--lab = EasyLabel(stats, "Stats", "SFontLarger")
+	--DockCenter(lab, stats)
 	--
 
 

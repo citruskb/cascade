@@ -13,7 +13,10 @@ function PANEL:Init()
 end
 
 function PANEL:SetItemData(itemData)
+	local oldID = self.itemID
 	self.itemID = itemData.id
+	if oldID == self.itemID then return end
+
 	self.data = itemData
 	self:InvalidateLayout()
 end
@@ -22,6 +25,7 @@ function PANEL:PerformLayout()
 	-- Update information, resize.
 	local name = self.data.name
 	local description = self.data.description
+	local txtCol = ItemRarityTxtColors[self.data.rarity]
 
 	self.frame:SetTitle("")
 	self.frame:SetSize(self:GetSize())
@@ -30,21 +34,29 @@ function PANEL:PerformLayout()
 	self.frame:SetZPos(GM_ZPOS_ITEM_DESC)
 
 	self.frameTitle:SetText(name)
-	self.frameTitle:SetFont("SFontLarge")
+	self.frameTitle:SetFont("FontItemNameTest")
 	self.frameTitle:SizeToContents()
 	self.frameTitle:Dock(TOP)
 	self.frameTitle:SetZPos(GM_ZPOS_ITEM_DESC)
+	self.frameTitle:SetTextColor(txtCol)
 
 	self.richtxt:Dock(FILL)
 	self.richtxt:SetVerticalScrollbarEnabled(false)
-	self.richtxt:SetText(description)
+	self.richtxt:SetText("")
+	self.richtxt:InsertColorChange( txtCol.r, txtCol.g, txtCol.b, txtCol.a )
+	self.richtxt:AppendText(description)
 	self.richtxt.PerformLayout = function(pan)
-		if pan:GetFont() ~= "DFontSmall" then pan:SetFontInternal("DFontSmall") end
+		if pan:GetFont() ~= "FontItemDescription" then pan:SetFontInternal("FontItemDescription") end
 	end
 	self.richtxt:SetZPos(GM_ZPOS_ITEM_DESC)
 end
 
 function PANEL:Paint()
+	local w, h = self:GetSize()
+	local col = ItemRarityColors[self.data.rarity]
+
+	surface.SetDrawColor(col)
+	surface.DrawRect(0, 0, w, h)
 end
 
 vgui.Register("PItemInfo", PANEL, "DPanel")

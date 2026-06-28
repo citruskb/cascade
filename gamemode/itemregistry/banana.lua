@@ -2,6 +2,7 @@ ITEM.id = "banana"
 ITEM.name = "Banana"
 ITEM.description = "Every 5s: heal for 4 and recover 1 stamina"
 ITEM.type = ITEM_TYPE_NORMAL
+ITEM.rarity = ITEM_RARITY_BASIC
 
 ITEM.model = "models/props/cs_italy/bananna.mdl"
 ITEM.fov = 51

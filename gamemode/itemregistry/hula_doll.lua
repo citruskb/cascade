@@ -2,6 +2,7 @@ ITEM.id = "hula_doll"
 ITEM.name = "Hula Doll"
 ITEM.description = "Start of combat: +2 regen"
 ITEM.type = ITEM_TYPE_NORMAL
+ITEM.rarity = ITEM_RARITY_BASIC
 
 ITEM.model = "models/props_lab/huladoll.mdl"
 ITEM.fov = 47

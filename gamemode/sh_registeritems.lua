@@ -2,6 +2,30 @@ ITEM_TYPE_CONTAINER = 1
 ITEM_TYPE_NORMAL = 2
 ITEM_TYPE_AUGMENT = 3
 
+ITEM_RARITY_BASIC = 1
+ITEM_RARITY_UNCOMMON = 2
+ITEM_RARITY_RARE = 3
+ITEM_RARITY_EPIC = 4
+ITEM_RARITY_LEGENDARY = 5
+
+if CLIENT then
+	ItemRarityColors = {
+		[ITEM_RARITY_BASIC] = Color(170, 170, 170, 255),
+		[ITEM_RARITY_UNCOMMON] = Color(200, 240, 205, 255),
+		[ITEM_RARITY_RARE] = Color(180, 200, 230, 255),
+		[ITEM_RARITY_EPIC] = Color(200, 150, 220, 255),
+		[ITEM_RARITY_LEGENDARY] = Color(255, 230, 150, 255),
+	}
+
+	ItemRarityTxtColors = {
+		[ITEM_RARITY_BASIC] = Color(22, 22, 22, 255),
+		[ITEM_RARITY_UNCOMMON] = Color(0, 100, 00, 255),
+		[ITEM_RARITY_RARE] = Color(50, 85, 150, 255),
+		[ITEM_RARITY_EPIC] = Color(110, 50, 160, 255),
+		[ITEM_RARITY_LEGENDARY] = Color(200, 90, 15, 255),
+	}
+end
+
 function GM:RegisterBackpackItem(id, tab)
 	self.BackpackItems[id] = tab
 	if tab.hidden then return end
