@@ -104,6 +104,35 @@ function PANEL:EvaluateDrawLayer(physbox, isOrtho)
 	return DRAW_LAYER_PHYSICS_INVENTORY
 end
 
+local POSITIVE_X = 1
+local NEGATIVE_X = 2
+local POSITIVE_Y = 3
+local NEGATIVE_Y = 4
+local POSITIVE_Z = 5
+local NEGATIVE_Z = 6
+local adjustDirs = {
+	[POSITIVE_X] = {xDir = Vector(0, 1, 0), yDir = Vector(0, 0, -1)},
+	[NEGATIVE_X] = {xDir = Vector(0, -1, 0), yDir = Vector(0, 0, -1)},
+	[POSITIVE_Y] = {xDir = Vector(-1, 0, 0), yDir = Vector(0, 0, -1)},
+	[NEGATIVE_Y] = {xDir = Vector(1, 0, 0), yDir = Vector(0, 0, -1)},
+	[POSITIVE_Z] = {xDir = Vector(0, -1, 0), yDir = Vector(-1, 0, 0)},
+	[NEGATIVE_Z] = {xDir = Vector(0, -1, 0), yDir = Vector(1, 0, 0)},
+}
+
+function PANEL:GetOrthoAdjustDir(camPosOffset, xMag, yMag)
+	local idx =
+		camPosOffset.x > 0 and POSITIVE_X or
+		camPosOffset.x < 0 and NEGATIVE_X or
+		camPosOffset.y > 0 and POSITIVE_Y or
+		camPosOffset.y < 0 and NEGATIVE_Y or
+		camPosOffset.z > 0 and POSITIVE_Z or
+		camPosOffset.z < 0 and NEGATIVE_Z
+
+	if not idx then Error("[pPhysObj2DOverlay] - cam offset shouldn't be origin!") end
+
+	return adjustDirs[idx].xDir * xMag + adjustDirs[idx].yDir * yMag
+end
+
 function PANEL:EvaluateCameraPos(center, camPosOffset, dist, x, y, camOffScreenAdjScale, adjustSkew, objAng, isOrtho, physbox)
 
 	-- Do nothing, basically
@@ -121,7 +150,7 @@ function PANEL:EvaluateCameraPos(center, camPosOffset, dist, x, y, camOffScreenA
 
 		local xMag = x < 0 and -x or 0
 		local yMag = y < 0 and -y or 0
-		local adjustDir = Vector(0, xMag, -yMag)
+		local adjustDir = self:GetOrthoAdjustDir(camPosOffset, xMag, yMag) --Vector(0, xMag, -yMag)
 		local adjust = adjustDir * (camOffScreenAdjScale or 1)
 		adjust:Rotate(Angle(0, 0, -objAng))
 

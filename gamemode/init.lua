@@ -6,7 +6,6 @@ AddCSLuaFile("sh_registeritems.lua")
 
 AddCSLuaFile("cl_handlemouse.lua")
 AddCSLuaFile("cl_debug.lua")
-AddCSLuaFile("cl_dermaskin.lua")
 
 AddCSLuaFile("vgui/dgridcell.lua")
 AddCSLuaFile("vgui/pgridinventory.lua")
