@@ -8,7 +8,7 @@ ITEM.fov = 57
 ITEM.camPos = Vector(1, 0, 0)
 ITEM.camScale = 1
 ITEM.camXYOffsetAdj = VECTOR2_ZERO
-ITEM.camOffScreenAdjScale = 0.14
+ITEM.camOffScreenAdjScale = 0.18
 ITEM.camOrthoAdjScale = 23.5
 
 ITEM.triggerDelay = 4
@@ -16,22 +16,22 @@ ITEM.retriggerable = true
 
 ITEM.hitboxPoints = {
 	[1] = Points({	Vector2(0, 0),
-			Vector2(90, 0),
-			Vector2(90, 320),
-			Vector2(0, 320)}),
+			Vector2(70, 0),
+			Vector2(70, 249),
+			Vector2(0, 249)}),
 }
 
 ITEM.gridPoints = {
-	[0] = Points({Vector2(0, 0), Vector2(0, 1), Vector2(0, 2), Vector2(0, 3)}),
-	[90] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(2, 0), Vector2(3, 0)}),
-	[180] = Points({Vector2(0, 0), Vector2(0, 1), Vector2(0, 2), Vector2(0, 3)}),
-	[270] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(2, 0), Vector2(3, 0)}),
+	[0] = Points({Vector2(0, 0), Vector2(0, 1), Vector2(0, 2)}),
+	[90] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(2, 0)}),
+	[180] = Points({Vector2(0, 0), Vector2(0, 1), Vector2(0, 2)}),
+	[270] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(2, 0)}),
 }
 ITEM.gridPointsOffsets = {
-	[0] = Vector2(2, -10),
-	[90] = Vector2(-127, 115),
-	[180] = Vector2(2, -10),
-	[270] = Vector2(-127, 115),
+	[0] = Vector2(-8, -4),
+	[90] = Vector2(-93, 83),
+	[180] = Vector2(-8, -4),
+	[270] = Vector2(-93, 83),
 }
 
 ITEM.PlayPlaceSound = function()

@@ -100,6 +100,8 @@ function PANEL:EvaluateDrawLayer(physbox, isOrtho)
 	if GAMEMODE.HeldItem == physbox then return physbox.parent.isContainer and DRAW_LAYER_PLACED_CONTAINER or DRAW_LAYER_HELD_ITEM end
 	if physbox.isBeingPopped then return DRAW_LAYER_POPPED end
 	if not isOrtho then return DRAW_LAYER_PHYSICS_INVENTORY end
+
+	return DRAW_LAYER_PHYSICS_INVENTORY
 end
 
 function PANEL:EvaluateCameraPos(center, camPosOffset, dist, x, y, camOffScreenAdjScale, adjustSkew, objAng, isOrtho, physbox)
