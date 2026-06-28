@@ -146,6 +146,7 @@ function PANEL:Init()
 	end
 
 	local function OneBox() MakeItem("wooden_crate", Vector2(0.5 * w, 0.5 * h)) end
+	local function OneNightstand() MakeItem("nightstand", Vector2(0.5 * w, 0.5 * h)) end
 
 	local function TossBoxes(num)
 		num = math.Clamp(math.Floor(num), 1, 64)
@@ -235,13 +236,15 @@ function PANEL:Init()
 	--MakeItem("banana", Vector2(w * 0.5, h * 0.5))
 
 	--TossBoxes(32)
+	OneNightstand()
+	OneNightstand()
 	OneBox()
 	OneBox()
 	OneBox()
 	OneBox()
-	GoBananas(1)
+	GoBananas(2)
 	DoorBlast(1)
-	HulaTime(1)
+	HulaTime(3)
 
 	-- Free the mouse.
 	gui.EnableScreenClicker(true)
