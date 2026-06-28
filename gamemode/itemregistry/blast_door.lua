@@ -8,6 +8,7 @@ ITEM.fov = 55
 ITEM.camPos = Vector(1, 0, 0)
 ITEM.camScale = 1
 ITEM.camXYOffsetAdj = VECTOR2_ZERO
+ITEM.camAngleOffsetAdj = 0
 ITEM.camOffScreenAdjScale = 0.75
 ITEM.camOrthoAdjScale = 102
 

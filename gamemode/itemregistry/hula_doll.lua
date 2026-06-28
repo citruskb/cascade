@@ -7,6 +7,7 @@ ITEM.model = "models/props_lab/huladoll.mdl"
 ITEM.fov = 47
 ITEM.camPos = Vector(1, 0, 0)
 ITEM.camXYOffsetAdj = Vector2(0, -10)
+ITEM.camAngleOffsetAdj = 0
 ITEM.camOffScreenAdjScale = 0.1
 ITEM.camOrthoAdjScale = 3.95
 

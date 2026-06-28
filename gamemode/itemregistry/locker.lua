@@ -1,5 +1,5 @@
 ITEM.id = "locker"
-ITEM.name = "locker"
+ITEM.name = "Locker"
 ITEM.description = "+1 armor when an item triggers inside."
 ITEM.type = ITEM_TYPE_CONTAINER
 
@@ -7,7 +7,8 @@ ITEM.model = "models/props_lab/lockerdoorsingle.mdl"
 ITEM.fov = 53
 ITEM.camPos = Vector(1, 0, 0)
 ITEM.camScale = 1
-ITEM.camXYOffsetAdj = Vector2(0, 0)
+ITEM.camXYOffsetAdj = VECTOR2_ZERO
+ITEM.camAngleOffsetAdj = 0
 ITEM.camOffScreenAdjScale = 0.194
 ITEM.camOrthoAdjScale = 32
 

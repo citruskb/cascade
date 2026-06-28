@@ -43,7 +43,7 @@ function PANEL:SetupPaintVars(obj)
 	local x, y = obj.physbox:GetAdjCamPosition():Unpack()
 	local w, h = obj.physbox.fDist, obj.physbox.fDist
 
-	local objAng = math.Ang(-obj.rotation)
+	local objAng = math.Ang(-obj.rotation) + data.camAngleOffsetAdj
 	local fov = data.fov
 	local camPosOffset = data.camPos
 

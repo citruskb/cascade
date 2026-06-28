@@ -148,6 +148,7 @@ function PANEL:Init()
 	local function OneBox() MakeItem("wooden_crate", Vector2(0.5 * w, 0.5 * h)) end
 	local function OneNightstand() MakeItem("nightstand", Vector2(0.5 * w, 0.5 * h)) end
 	local function OneLocker() MakeItem("locker", Vector2(0.5 * w, 0.5 * h)) end
+	local function OneHarddrive() MakeItem("harddrive", Vector2(0.5 * w, 0.5 * h)) end
 
 	local function TossBoxes(num)
 		num = math.Clamp(math.Floor(num), 1, 64)
@@ -237,10 +238,11 @@ function PANEL:Init()
 	--MakeItem("banana", Vector2(w * 0.5, h * 0.5))
 
 	--TossBoxes(32)
-	--OneNightstand()
+	OneNightstand()
 	OneLocker()
-	--OneBox()
-	--OneBox()
+	OneHarddrive()
+	OneBox()
+	OneBox()
 	--OneBox()
 	--OneBox()
 	--GoBananas(2)
