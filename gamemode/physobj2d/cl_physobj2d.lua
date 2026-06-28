@@ -241,9 +241,6 @@ function PhysObj2D:SolveConstraints(dt, iter)
 			else
 				constr:WakeBodies()
 			end
-
-			constr.bodyA.desiredRotation = nil
-			constr.bodyB.desiredRotation = nil
 		end
 	end
 

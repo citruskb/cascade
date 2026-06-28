@@ -76,7 +76,7 @@ function PANEL:Init()
 	middle:Dock(LEFT)
 
 	local inventory = vgui.Create("DPanel", middle)
-	inventory:SetSize(w * 0.25, h * 0.9)
+	inventory:SetSize(w * 0.25, h * 0.1)
 	inventory:SetBackgroundColor(Color(255, 255, 0, 0)) --
 	inventory:Dock(TOP)
 	lab = EasyLabel(inventory, "Storage Inventory", "SFontLarger")

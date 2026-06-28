@@ -4,12 +4,15 @@ include("sh_registeritems.lua")
 
 include("cl_handlemouse.lua")
 include("cl_debug.lua")
+include("cl_dermaskin.lua")
 
 include("vgui/dgridcell.lua")
 include("vgui/pgridinventory.lua")
+include("vgui/piteminfo.lua")
 include("vgui/pshop.lua")
 include("vgui/pphysobj2doverlay.lua")
 
+GM_ZPOS_ITEM_DESC = 12
 GM_ZPOS_PGRID = 11
 GM_ZPOS_POVERLAY = 10
 GM_ZPOS_PSHOP = 9
@@ -114,7 +117,7 @@ local nextTick = 0
 function GM:_Think()
 	local ct = CurTime()
 
-	gamemode.Call("HandleMousePress")
+	gamemode.Call("HandleMouse")
 	PhysObj2D:PhysicsStep()
 
 	if nextTick > ct then return end

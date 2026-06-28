@@ -6,9 +6,11 @@ AddCSLuaFile("sh_registeritems.lua")
 
 AddCSLuaFile("cl_handlemouse.lua")
 AddCSLuaFile("cl_debug.lua")
+AddCSLuaFile("cl_dermaskin.lua")
 
 AddCSLuaFile("vgui/dgridcell.lua")
 AddCSLuaFile("vgui/pgridinventory.lua")
+AddCSLuaFile("vgui/piteminfo.lua")
 AddCSLuaFile("vgui/pshop.lua")
 AddCSLuaFile("vgui/pphysobj2doverlay.lua")
 

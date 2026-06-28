@@ -230,10 +230,10 @@ function meta:StepPhysics(dt)
 end
 
 function meta:StepPickup(dt)
-	if not self.isPickedUp and math.IsNearlyEqual(self.rotation, self.desiredRotation or 0) then return end
+	if not self.isPickedUp and not self.isBeingPushed and not self.isInGridInventory then return end
 
 	if self.isPickedUp then
-		local mousePos = GAMEMODE.CachedMousePos
+		local mousePos = GAMEMODE.CachedMousePressedPos
 		self.position = LerpVector2(0.7, self.position, mousePos)
 	end
 

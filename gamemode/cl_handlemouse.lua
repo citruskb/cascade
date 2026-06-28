@@ -2,6 +2,7 @@ if not handleMouseLoaded then
 	GM.LeftMouseBeingHeld = false
 	GM.RightMouseBeingHeld = false
 	GM.CachedMousePos = Vector2(input.GetCursorPos())
+	GM.CachedMousePressedPos = Vector2(input.GetCursorPos())
 	GM.CachedMouseVelocity = Vector2()
 	handleMouseLoaded = true
 end
@@ -13,7 +14,7 @@ function GM:GetItemPickupRangeSqr()
 end
 
 function LookForClosestPickup()
-	local mousePos = GAMEMODE.CachedMousePos
+	local mousePos = GAMEMODE.CachedMousePressedPos
 
 	local closestDist = math.HUGE
 	local rangeLimit = gamemode.Call("GetItemPickupRangeSqr")
@@ -41,7 +42,7 @@ local positions = {}
 local function EvaluateAverageMouseVelocity()
 	if not GAMEMODE.LeftMouseBeingHeld then positions = {} return end
 
-	table.Insert(positions, 1, GAMEMODE.CachedMousePos)
+	table.Insert(positions, 1, GAMEMODE.CachedMousePressedPos)
 
 	if #positions > numSteps then positions[#positions] = nil end
 	if #positions == 1 then return Vector2() end
@@ -61,9 +62,23 @@ local function EvaluateAverageMouseVelocity()
 	GAMEMODE.CachedMouseVelocity = vec
 end
 
-function GM:HandleMousePress()
+function GM:HandleMouse()
+	self:HandleMousePos()
 	self:HandleMouseFirst()
 	self:HandleMouseRight()
+end
+
+function GM:HandleMousePos()
+	self.CachedMousePos = Vector2(input.GetCursorPos())
+
+	local closestPickup = LookForClosestPickup()
+	if not closestPickup then return end
+
+	if self.pItemData then return end
+
+	local itemInfo = vgui.Create("PItemInfo")
+	itemInfo:SetItemData(closestPickup.parent.itemData)
+	self.pItemData = itemInfo
 end
 
 function GM:HandleMouseFirst()
@@ -72,7 +87,7 @@ function GM:HandleMouseFirst()
 	self.LeftMouseBeingHeld = newState
 
 	if self.LeftMouseBeingHeld then
-		self.CachedMousePos = Vector2(input.GetCursorPos())
+		self.CachedMousePressedPos = Vector2(input.GetCursorPos())
 	end
 	EvaluateAverageMouseVelocity()
 
