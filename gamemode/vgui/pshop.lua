@@ -31,17 +31,6 @@ function PANEL:Init()
 	leftTop:SetSize(w * 0.4, h * 0.6)
 	leftTop:SetBackgroundColor(Color(0, 0, 0, 0))
 	leftTop:Dock(TOP)
-	--[[
-	local lab = EasyLabel(leftTop, "Grid Inventory", "SFontLarger")
-	DockCenter(lab, leftTop)
-	]]
-
-	-- TODO to move to combat we likely need to decouple this from the shop eventually.
-	--local gridInventory = vgui.Create("DGridInventory", leftTop)
-	--gridInventory:SetSize(leftTop:GetSize())
-	--GAMEMODE.GridInventory = gridInventory
-	--
-
 
 	local botLeft = vgui.Create("DPanel", left)
 	botLeft:SetSize(w * 0.2, h * 0.4)
@@ -52,10 +41,10 @@ function PANEL:Init()
 	-- Playermodel
 	local model = vgui.Create("DPanel", botLeft)
 	model:SetSize(w * 0.2, h * 0.4)
-	model:SetBackgroundColor(Color(0, 0, 255, GAMEMODE.Debug and 0 or 120))
+	model:SetBackgroundColor(Color(0, 0, 0, 0))
 	model:Dock(LEFT)
-	lab = EasyLabel(model, "Player Model", "SFontLarger")
-	DockCenter(lab, model)
+	--lab = EasyLabel(model, "Player Model", "SFontLarger")
+	--DockCenter(lab, model)
 	--
 
 
@@ -283,6 +272,7 @@ function GM:ShowHelp(pl)
 
 		if IsValid(self.pPhysObj2DOverlay) then self.pPhysObj2DOverlay:SetVisible(false) end
 		if IsValid(self.pGridInventory) then self.pGridInventory:Remove() end
+		if IsValid(self.pMyPlayerModel) then self.pMyPlayerModel:Remove() end
 
 		return
 	end
@@ -298,4 +288,7 @@ function GM:ShowHelp(pl)
 	self.pGridInventory = vgui.Create("PGridInventory")
 	local w, h = ScrW(), ScrH()
 	self.pGridInventory:SetSize(w * 0.4, h * 0.6)
+
+	self.pMyPlayerModel = vgui.Create("DPlayerModel")
+	self.pMyPlayerModel:SetPlayer(MySelf)
 end

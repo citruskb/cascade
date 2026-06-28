@@ -36,7 +36,7 @@ function PANEL:PerformLayout()
 	self.frame:SetZPos(GM_ZPOS_ITEM_DESC)
 
 	self.frameTitle:SetText(name)
-	self.frameTitle:SetFont("FontItemNameTest")
+	self.frameTitle:SetFont("FontItemName")
 	self.frameTitle:SizeToContents()
 	self.frameTitle:Dock(TOP)
 	self.frameTitle:SetZPos(GM_ZPOS_ITEM_DESC)

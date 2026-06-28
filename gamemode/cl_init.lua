@@ -7,6 +7,7 @@ include("cl_handlemouse.lua")
 include("cl_debug.lua")
 
 include("vgui/dgridcell.lua")
+include("vgui/dplayermodel.lua")
 include("vgui/pgridinventory.lua")
 include("vgui/piteminfo.lua")
 include("vgui/pshop.lua")
