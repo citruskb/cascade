@@ -243,7 +243,9 @@ function PANEL:Init()
 	--OneLocker()
 	--OneHarddrive()
 	--OnePocketDimension()
-	--OneBox()
+	OneBox()
+	OneBox()
+	OneBox()
 	--OneBox()
 	--OneBox()
 	--OneBox()
@@ -251,6 +253,9 @@ function PANEL:Init()
 	--DoorBlast(1)
 	--HulaTime(3)
 
+	
+	MakeItem("briefcase", Vector2(0.5 * w, 0.5 * h))
+	MakeItem("briefcase", Vector2(0.5 * w, 0.5 * h))
 	MakeItem("briefcase", Vector2(0.5 * w, 0.5 * h))
 
 	-- Free the mouse.
