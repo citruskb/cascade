@@ -230,12 +230,16 @@ function meta:StepPhysics(dt)
 end
 
 function meta:StepPickup(dt)
-	if not self.isPickedUp then return end
+	if not self.isPickedUp and math.IsNearlyEqual(self.rotation, self.desiredRotation or 0) then return end
 
-	local mousePos = GAMEMODE.CachedMousePos
-	self.position = LerpVector2(0.7, self.position, mousePos)
+	if self.isPickedUp then
+		local mousePos = GAMEMODE.CachedMousePos
+		self.position = LerpVector2(0.7, self.position, mousePos)
+	end
 
-	self.rotation = Lerp(0.2, self.rotation, self.desiredRotation)
+	if not math.IsNearlyEqual(self.rotation, self.desiredRotation or 0) then
+		self.rotation = Lerp(0.2, self.rotation, self.desiredRotation or 0)
+	end
 
 	self:UpdateParentPosAndRot()
 end
@@ -513,11 +517,11 @@ function meta:SnapToNearest90()
 end
 
 function meta:Rotate90CW()
-	self.desiredRotation = self.desiredRotation + ROT_STEP
+	self.desiredRotation = (self.desiredRotation or 0) + ROT_STEP
 end
 
 function meta:Rotate90CCW()
-	self.desiredRotation = self.desiredRotation - ROT_STEP
+	self.desiredRotation = (self.desiredRotation or 0) - ROT_STEP
 end
 
 function meta:EvalGridInventoryPlacement()

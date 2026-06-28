@@ -149,6 +149,7 @@ function PANEL:Init()
 	local function OneNightstand() MakeItem("nightstand", Vector2(0.5 * w, 0.5 * h)) end
 	local function OneLocker() MakeItem("locker", Vector2(0.5 * w, 0.5 * h)) end
 	local function OneHarddrive() MakeItem("harddrive", Vector2(0.5 * w, 0.5 * h)) end
+	local function OnePocketDimension() MakeItem("pocket_dimension", Vector2(0.5 * w, 0.5 * h)) end
 
 	local function TossBoxes(num)
 		num = math.Clamp(math.Floor(num), 1, 64)
@@ -241,13 +242,14 @@ function PANEL:Init()
 	OneNightstand()
 	OneLocker()
 	OneHarddrive()
+	OnePocketDimension()
 	OneBox()
 	OneBox()
 	--OneBox()
 	--OneBox()
-	--GoBananas(2)
-	--DoorBlast(1)
-	--HulaTime(3)
+	GoBananas(2)
+	DoorBlast(1)
+	HulaTime(3)
 
 	-- Free the mouse.
 	gui.EnableScreenClicker(true)
