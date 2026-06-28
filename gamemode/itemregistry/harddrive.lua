@@ -5,6 +5,7 @@ ITEM.type = ITEM_TYPE_CONTAINER
 ITEM.rarity = ITEM_RARITY_UNCOMMON
 
 ITEM.model = "models/props_lab/harddrive02.mdl"
+ITEM.modelScale = Vector(1, 1, 1)
 ITEM.fov = 56
 ITEM.camPos = Vector(1, 0, 0)
 ITEM.camScale = 1

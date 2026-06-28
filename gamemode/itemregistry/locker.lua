@@ -5,6 +5,7 @@ ITEM.type = ITEM_TYPE_CONTAINER
 ITEM.rarity = ITEM_RARITY_EPIC
 
 ITEM.model = "models/props_lab/lockerdoorsingle.mdl"
+ITEM.modelScale = Vector(1, 1, 1)
 ITEM.fov = 53
 ITEM.camPos = Vector(1, 0, 0)
 ITEM.camScale = 1

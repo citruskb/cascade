@@ -5,6 +5,7 @@ ITEM.type = ITEM_TYPE_CONTAINER
 ITEM.rarity = ITEM_RARITY_BASIC
 
 ITEM.model = "models/props_junk/wood_crate001a.mdl"
+ITEM.modelScale = Vector(1, 1, 1)
 ITEM.fov = 60
 ITEM.camPos = Vector(1, 0, 0)
 ITEM.camScale = 1

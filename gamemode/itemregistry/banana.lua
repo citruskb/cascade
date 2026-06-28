@@ -5,6 +5,7 @@ ITEM.type = ITEM_TYPE_NORMAL
 ITEM.rarity = ITEM_RARITY_BASIC
 
 ITEM.model = "models/props/cs_italy/bananna.mdl"
+ITEM.modelScale = Vector(1, 1, 1)
 ITEM.fov = 51
 ITEM.camPos = Vector(1, 0, 0)
 ITEM.camScale = 1

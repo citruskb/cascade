@@ -35,6 +35,14 @@ function GM:RegisterBackpackItem(id, tab)
 		if not IsValid(ent) then return end
 
 		ent:SetNoDraw(true)
+
+		local scale = tab.modelScale
+		if scale ~= Vector(1, 1, 1) then
+			local matrix = Matrix()
+			matrix:Scale(scale)
+			ent:EnableMatrix("RenderMultiply", matrix)
+		end
+
 		tab.clEnt = ent
 	end
 	-- Do other things here.

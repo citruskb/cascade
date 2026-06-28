@@ -5,26 +5,27 @@ ITEM.type = ITEM_TYPE_NORMAL
 ITEM.rarity = ITEM_RARITY_BASIC
 
 ITEM.model = "models/props_c17/BriefCase001a.mdl"
-ITEM.fov = 56
+ITEM.modelScale = Vector(1, 1, 0.7)
+ITEM.fov = 50
 ITEM.camPos = Vector(0, 1, 0)
 ITEM.camScale = 1
 ITEM.camXYOffsetAdj = Vector2(0, 0)
 ITEM.camAngleOffsetAdj = 0
-ITEM.camOffScreenAdjScale = 0.15
-ITEM.camOrthoAdjScale = 13.4
+ITEM.camOffScreenAdjScale = 0.16
+ITEM.camOrthoAdjScale = 11.5
 
 ITEM.triggerDelay = 4
 ITEM.retriggerable = true
 
 ITEM.hitboxPoints = {
-	[1] = Points({	Vector2(31.5, 0),
-			Vector2(63, 0),
-			Vector2(63, 15.75),
-			Vector2(31.5, 15.75)}),
-	[2] = Points({	Vector2(0, 15.75),
-		Vector2(94.5, 15.75),
-		Vector2(94.5, 84),
-		Vector2(0, 84)}),
+	[1] = Points({	Vector2(43, 0),
+			Vector2(77, 0),
+			Vector2(77, 12),
+			Vector2(43, 12)}),
+	[2] = Points({	Vector2(0, 12),
+		Vector2(120, 12),
+		Vector2(120, 80),
+		Vector2(0, 80)}),
 }
 
 ITEM.gridPoints = {
@@ -34,10 +35,10 @@ ITEM.gridPoints = {
 	[270] = Points({Vector2(0, 0), Vector2(0, 1)}),
 }
 ITEM.gridPointsOffsets = {
-	[0] = Vector2(-36, -1),
-	[90] = Vector2(4, -42),
-	[180] = Vector2(-36, -1),
-	[270] = Vector2(4, -42),
+	[0] = Vector2(-25, -4),
+	[90] = Vector2(18, -42),
+	[180] = Vector2(-25, -4),
+	[270] = Vector2(18, -42),
 }
 
 ITEM.PlayPlaceSound = function()

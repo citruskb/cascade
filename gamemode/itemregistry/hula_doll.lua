@@ -5,6 +5,7 @@ ITEM.type = ITEM_TYPE_NORMAL
 ITEM.rarity = ITEM_RARITY_BASIC
 
 ITEM.model = "models/props_lab/huladoll.mdl"
+ITEM.modelScale = Vector(1, 1, 1)
 ITEM.fov = 47
 ITEM.camPos = Vector(1, 0, 0)
 ITEM.camXYOffsetAdj = Vector2(0, -10)

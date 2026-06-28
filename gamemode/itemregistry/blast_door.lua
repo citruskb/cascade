@@ -5,6 +5,7 @@ ITEM.type = ITEM_TYPE_NORMAL
 ITEM.rarity = ITEM_RARITY_EPIC
 
 ITEM.model = "models/props_lab/blastdoor001c.mdl"
+ITEM.modelScale = Vector(1, 1, 1)
 ITEM.fov = 55
 ITEM.camPos = Vector(1, 0, 0)
 ITEM.camScale = 1
