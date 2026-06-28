@@ -22,6 +22,8 @@ function PANEL:SetItemData(itemData)
 end
 
 function PANEL:PerformLayout()
+	if not self.data then return end
+
 	-- Update information, resize.
 	local name = self.data.name
 	local description = self.data.description

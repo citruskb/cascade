@@ -72,6 +72,10 @@ function GM:HandleMousePos()
 	local lastCached = self.CachedMousePos
 	self.CachedMousePos = Vector2(input.GetCursorPos())
 	if lastCached:IsEqualTol(self.CachedMousePos, 1E-8) then return end
+	if self.HeldItem then
+		if IsValid(self.pItemData) then self.pItemData:Remove() end
+		return
+	end
 
 	local closestPickup = LookForClosestPickup()
 
