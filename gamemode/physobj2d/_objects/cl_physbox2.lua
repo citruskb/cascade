@@ -319,44 +319,13 @@ function meta:EvalBindPoints()
 
 	local _, placeableList, notPlaceableList = self:GetIsPlaceableOnBinds()
 	for i = 1, #self.bindPoints do
-		if placeableList[i] then
-			local id = self.backpackBindPoints[i]
-			backpack.cellsScreenIDX[id].canPlaceDraw = true
-		end
-		if notPlaceableList[i] then
-			local id = self.backpackBindPoints[i]
-			backpack.cellsScreenIDX[id].cannotPlaceDraw = true
-		end
+		local id = self.backpackBindPoints[i]
+		local cell = backpack.cellsScreenIDX[id]
+		if not cell then continue end
+
+		cell.canPlaceDraw = placeableList[i]
+		cell.cannotPlaceDraw = notPlaceableList[i]
 	end
-
-	--[[
-	local backpack = GAMEMODE.backpack
-	local indexes = self.backpackBindPoints
-
-	-- If we find a bindpoint thats entirely outside the inventory, do nothing.
-	for i = 1, #indexes do
-		if not backpack.cellsScreenIDX[indexes[i]--] then return end
-	end
-
-	-- Whether we can place an item depends on what kind of item it is.
-	for i = 1, #indexes do
-		local cell = backpack.cellsScreenIDX[indexes[i]--]
-
-		-- Containers can only be placed on spots that are entirely empty.
-		if self.parent.isContainer then
-			if cell:IsCompletelyEmpty() then continue end
-			if cell.heldContainer and cell.heldContainer ~= self then return end
-		end
-
-		-- In contrast, normal items can only be placed on containers not holding anything else.
-		if self.parent.isNormalItem then
-			if cell:IsContainerButEmpty() then continue end
-			if not cell.heldContainer then return end
-			if cell.heldItem and cell.heldItem ~= self then return end
-		end
-	end
-	]]
-
 end
 
 function meta:GetIsPlaceableOnBinds()
@@ -366,13 +335,25 @@ function meta:GetIsPlaceableOnBinds()
 
 	-- If we find a bindpoint thats entirely outside the inventory, no dice.
 	local canPlace = true
-
+	local isOutside = false
 	for i = 1, #indexes do
-		if not backpack.cellsScreenIDX[indexes[i]] then canPlace = false end
+		if backpack.cellsScreenIDX[indexes[i]] then continue end
+
+		canPlace = false
+		isOutside = true
+		break
 	end
 
 	-- Whether we can place an item depends on what kind of item it is.
 	for i = 1, #indexes do
+		-- If any part of us is outside the play grid, mark our entirety as not placeable.
+		if isOutside then
+			notPlaceableTab[i] = true
+			placeableTab[i] = nil
+			canPlace = false
+			continue
+		end
+
 		local cell = backpack.cellsScreenIDX[indexes[i]]
 		if not cell then continue end
 
