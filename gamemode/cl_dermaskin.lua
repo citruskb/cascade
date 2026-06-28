@@ -1,0 +1,110 @@
+function GM:ForceDermaSkin()
+	return "cascade"
+end
+
+local SKIN = {}
+
+SKIN.PrintName = "Cascade Derma Skin"
+SKIN.Author = "Citrus"
+SKIN.DermaVersion = 1
+
+SKIN.bg_color = Color(50, 50, 50, 255)
+SKIN.bg_color_sleep = Color(40, 40, 40, 255)
+SKIN.bg_color_dark = Color(30, 30, 30, 255)
+SKIN.bg_color_bright = Color(80, 80, 80, 255)
+
+SKIN.Colors = {}
+SKIN.Colors.Panel = {}
+SKIN.Colors.Panel.Normal = Color(50, 50, 50, 120)
+
+local color_frame_background = Color(64, 64, 64, 255)
+SKIN.color_frame_background = color_frame_background
+SKIN.color_frame_border = Color(0, 80, 0, 255)
+
+SKIN.colTextEntryText = Color(200, 200, 200)
+SKIN.colTextEntryTextHighlight = Color(30, 255, 0)
+SKIN.colTextEntryTextBorder = Color(70, 90, 70, 255)
+
+SKIN.colPropertySheet = Color(30, 30, 30, 255)
+SKIN.colTab = SKIN.colPropertySheet
+SKIN.colTabInactive = Color(25, 25, 25, 155)
+SKIN.colTabShadow = Color(20, 30, 20, 255)
+SKIN.colTabText	= Color(240, 255, 240, 255)
+SKIN.colTabTextInactive	= Color(240, 255, 240, 120)
+
+function SKIN:PaintFrame(panel, w, h)
+	--surface.SetDrawColor(panel.ColorOverride or color_frame_background)
+	--surface.DrawRect(0, 0, w, h)
+end
+
+SKIN.Colours = {}
+
+SKIN.Colours.Window = {}
+SKIN.Colours.Window.TitleActive			= GWEN.TextureColor( 4 + 8 * 0, 508 );
+SKIN.Colours.Window.TitleInactive		= GWEN.TextureColor( 4 + 8 * 1, 508 );
+
+SKIN.Colours.Button = {}
+SKIN.Colours.Button.Normal				= Color(200, 200, 200, 220)
+SKIN.Colours.Button.Hover				= Color(255, 255, 255, 220)
+SKIN.Colours.Button.Down				= Color(255, 255, 255, 255)
+SKIN.Colours.Button.Disabled			= Color(160, 160, 160, 220)
+
+SKIN.Colours.Tab = {}
+SKIN.Colours.Tab.Active = {}
+SKIN.Colours.Tab.Active.Normal			= GWEN.TextureColor( 4 + 8 * 4, 508 );
+SKIN.Colours.Tab.Active.Hover			= GWEN.TextureColor( 4 + 8 * 5, 508 );
+SKIN.Colours.Tab.Active.Down			= GWEN.TextureColor( 4 + 8 * 4, 500 );
+SKIN.Colours.Tab.Active.Disabled		= GWEN.TextureColor( 4 + 8 * 5, 500 );
+
+SKIN.Colours.Tab.Inactive = {}
+SKIN.Colours.Tab.Inactive.Normal		= GWEN.TextureColor( 4 + 8 * 6, 508 );
+SKIN.Colours.Tab.Inactive.Hover			= GWEN.TextureColor( 4 + 8 * 7, 508 );
+SKIN.Colours.Tab.Inactive.Down			= GWEN.TextureColor( 4 + 8 * 6, 500 );
+SKIN.Colours.Tab.Inactive.Disabled		= GWEN.TextureColor( 4 + 8 * 7, 500 );
+
+SKIN.Colours.Label = {}
+SKIN.Colours.Label.Default				= GWEN.TextureColor( 4 + 8 * 8, 508 );
+SKIN.Colours.Label.Bright				= GWEN.TextureColor( 4 + 8 * 9, 508 );
+SKIN.Colours.Label.Dark					= GWEN.TextureColor( 4 + 8 * 8, 500 );
+SKIN.Colours.Label.Highlight			= GWEN.TextureColor( 4 + 8 * 9, 500 );
+
+SKIN.Colours.Tree = {}
+SKIN.Colours.Tree.Lines					= GWEN.TextureColor( 4 + 8 * 10, 508 );		---- !!!
+SKIN.Colours.Tree.Normal				= GWEN.TextureColor( 4 + 8 * 11, 508 );
+SKIN.Colours.Tree.Hover					= GWEN.TextureColor( 4 + 8 * 10, 500 );
+SKIN.Colours.Tree.Selected				= GWEN.TextureColor( 4 + 8 * 11, 500 );
+
+SKIN.Colours.Properties = {}
+SKIN.Colours.Properties.Line_Normal			= GWEN.TextureColor( 4 + 8 * 12, 508 );
+SKIN.Colours.Properties.Line_Selected		= GWEN.TextureColor( 4 + 8 * 13, 508 );
+SKIN.Colours.Properties.Line_Hover			= GWEN.TextureColor( 4 + 8 * 12, 500 );
+SKIN.Colours.Properties.Title				= GWEN.TextureColor( 4 + 8 * 13, 500 );
+SKIN.Colours.Properties.Column_Normal		= GWEN.TextureColor( 4 + 8 * 14, 508 );
+SKIN.Colours.Properties.Column_Selected		= GWEN.TextureColor( 4 + 8 * 15, 508 );
+SKIN.Colours.Properties.Column_Hover		= GWEN.TextureColor( 4 + 8 * 14, 500 );
+SKIN.Colours.Properties.Border				= GWEN.TextureColor( 4 + 8 * 15, 500 );
+SKIN.Colours.Properties.Label_Normal		= GWEN.TextureColor( 4 + 8 * 16, 508 );
+SKIN.Colours.Properties.Label_Selected		= GWEN.TextureColor( 4 + 8 * 17, 508 );
+SKIN.Colours.Properties.Label_Hover			= GWEN.TextureColor( 4 + 8 * 16, 500 );
+
+SKIN.Colours.Category = {}
+SKIN.Colours.Category.Header				= GWEN.TextureColor( 4 + 8 * 18, 500 );
+SKIN.Colours.Category.Header_Closed			= GWEN.TextureColor( 4 + 8 * 19, 500 );
+SKIN.Colours.Category.Line = {}
+SKIN.Colours.Category.Line.Text				= GWEN.TextureColor( 4 + 8 * 20, 508 );
+SKIN.Colours.Category.Line.Text_Hover		= GWEN.TextureColor( 4 + 8 * 21, 508 );
+SKIN.Colours.Category.Line.Text_Selected	= GWEN.TextureColor( 4 + 8 * 20, 500 );
+SKIN.Colours.Category.Line.Button			= GWEN.TextureColor( 4 + 8 * 21, 500 );
+SKIN.Colours.Category.Line.Button_Hover		= GWEN.TextureColor( 4 + 8 * 22, 508 );
+SKIN.Colours.Category.Line.Button_Selected	= GWEN.TextureColor( 4 + 8 * 23, 508 );
+SKIN.Colours.Category.LineAlt = {}
+SKIN.Colours.Category.LineAlt.Text				= GWEN.TextureColor( 4 + 8 * 22, 500 );
+SKIN.Colours.Category.LineAlt.Text_Hover		= GWEN.TextureColor( 4 + 8 * 23, 500 );
+SKIN.Colours.Category.LineAlt.Text_Selected		= GWEN.TextureColor( 4 + 8 * 24, 508 );
+SKIN.Colours.Category.LineAlt.Button			= GWEN.TextureColor( 4 + 8 * 25, 508 );
+SKIN.Colours.Category.LineAlt.Button_Hover		= GWEN.TextureColor( 4 + 8 * 24, 500 );
+SKIN.Colours.Category.LineAlt.Button_Selected	= GWEN.TextureColor( 4 + 8 * 25, 500 );
+
+SKIN.Colours.TooltipText	= GWEN.TextureColor( 4 + 8 * 26, 500 );
+
+derma.DefineSkin("cascade", "The Derma skin for Cascade", SKIN, "Default")

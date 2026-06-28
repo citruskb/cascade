@@ -151,6 +151,9 @@ function PANEL:Init()
 	local function OneHarddrive() MakeItem("harddrive", Vector2(0.5 * w, 0.5 * h)) end
 	local function OnePocketDimension() MakeItem("pocket_dimension", Vector2(0.5 * w, 0.5 * h)) end
 
+	local function OneBriefcase() MakeItem("briefcase", Vector2(0.5 * w, 0.5 * h)) end
+	local function OnePlank() MakeItem("plank", Vector2(0.5 * w, 0.5 * h)) end
+
 	local function TossBoxes(num)
 		num = math.Clamp(math.Floor(num), 1, 64)
 		for i = 1, num do
@@ -239,24 +242,23 @@ function PANEL:Init()
 	--MakeItem("banana", Vector2(w * 0.5, h * 0.5))
 
 	--TossBoxes(32)
-	--OneNightstand()
-	--OneLocker()
-	--OneHarddrive()
-	--OnePocketDimension()
+	OneNightstand()
+	OneNightstand()
+	OneLocker()
+	OneHarddrive()
+	OneHarddrive()
+	OnePocketDimension()
 	OneBox()
 	OneBox()
-	OneBox()
-	--OneBox()
-	--OneBox()
-	--OneBox()
-	--GoBananas(2)
-	--DoorBlast(1)
-	--HulaTime(3)
+	GoBananas(2)
+	DoorBlast(1)
+	HulaTime(3)
+	OneBriefcase()
+	OnePlank()
 
-	
-	MakeItem("briefcase", Vector2(0.5 * w, 0.5 * h))
-	MakeItem("briefcase", Vector2(0.5 * w, 0.5 * h))
-	MakeItem("briefcase", Vector2(0.5 * w, 0.5 * h))
+
+	--MakeItem("briefcase", Vector2(0.5 * w, 0.5 * h))
+	--MakeItem("plank", Vector2(0.5 * w, 0.5 * h))
 
 	-- Free the mouse.
 	gui.EnableScreenClicker(true)

@@ -2,6 +2,7 @@ include("shared.lua")
 include("sh_convars.lua")
 include("sh_registeritems.lua")
 
+include("cl_dermaskin.lua")
 include("cl_handlemouse.lua")
 include("cl_debug.lua")
 

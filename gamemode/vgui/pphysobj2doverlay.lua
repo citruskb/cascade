@@ -210,6 +210,7 @@ function PANEL:Paint()
 	render.SuppressEngineLighting(true)
 	cam.IgnoreZ(true)
 
+
 	for k, vars in ipairs(self.paintVars) do
 		if vars.isOrtho then
 			self:PaintOrthoPhysObj2D(vars)

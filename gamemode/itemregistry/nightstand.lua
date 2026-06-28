@@ -1,6 +1,6 @@
 ITEM.id = "nightstand"
 ITEM.name = "Nightstand"
-ITEM.description = "Stores items: 1x3\n\n-1 fatigue damage taken"
+ITEM.description = "Holds items: 1x3\n\n-1 fatigue damage taken"
 ITEM.type = ITEM_TYPE_CONTAINER
 ITEM.rarity = ITEM_RARITY_RARE
 
