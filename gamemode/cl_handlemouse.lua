@@ -14,7 +14,7 @@ function GM:GetItemPickupRangeSqr()
 end
 
 function LookForClosestPickup()
-	local mousePos = GAMEMODE.CachedMousePressedPos
+	local mousePos = GAMEMODE.CachedMousePos
 
 	local closestDist = math.HUGE
 	local rangeLimit = gamemode.Call("GetItemPickupRangeSqr")
@@ -69,16 +69,43 @@ function GM:HandleMouse()
 end
 
 function GM:HandleMousePos()
+	local lastCached = self.CachedMousePos
 	self.CachedMousePos = Vector2(input.GetCursorPos())
+	if lastCached:IsEqualTol(self.CachedMousePos, 1E-8) then return end
 
 	local closestPickup = LookForClosestPickup()
-	if not closestPickup then return end
 
-	if self.pItemData then return end
+	-- If our panel exists, update it.
+	if IsValid(self.pItemData) then
+		if closestPickup then
+			self.pItemData:SetItemData(closestPickup.parent.itemData)
+		else
+			self.pItemData:Remove()
+		end
 
-	local itemInfo = vgui.Create("PItemInfo")
-	itemInfo:SetItemData(closestPickup.parent.itemData)
-	self.pItemData = itemInfo
+		return
+	end
+
+	if closestPickup then
+		self.pItemData = vgui.Create("PItemInfo")
+		self.pItemData:SetItemData(closestPickup.parent.itemData)
+	end
+
+
+	--[[
+
+	if not closestPickup then
+		if IsValid(self.pItemData) then
+			self.pItemData:Remove()
+		end
+		return
+	end
+
+	if IsValid(self.pItemData) and self.pItemData.itemID == closestPickup.parent.itemData.id then return end
+
+	self.pItemData = vgui.Create("PItemInfo")
+	self.pItemData:SetItemData(closestPickup.parent.itemData)
+	]]
 end
 
 function GM:HandleMouseFirst()

@@ -1,6 +1,6 @@
 ITEM.id = "banana"
 ITEM.name = "Banana"
-ITEM.description = "Go bananas."
+ITEM.description = "Every 5s: heal for 4 and recover 1 stamina"
 ITEM.type = ITEM_TYPE_NORMAL
 
 ITEM.model = "models/props/cs_italy/bananna.mdl"

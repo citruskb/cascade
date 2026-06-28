@@ -1,6 +1,6 @@
 ITEM.id = "locker"
 ITEM.name = "Locker"
-ITEM.description = "+1 armor when an item triggers inside."
+ITEM.description = "Stores items: 1x4\n\nWhen item inside triggers: +1 armor"
 ITEM.type = ITEM_TYPE_CONTAINER
 
 ITEM.model = "models/props_lab/lockerdoorsingle.mdl"

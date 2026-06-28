@@ -1,6 +1,6 @@
 ITEM.id = "hula_doll"
 ITEM.name = "Hula Doll"
-ITEM.description = "It's all in the hips."
+ITEM.description = "Start of combat: +2 regen"
 ITEM.type = ITEM_TYPE_NORMAL
 
 ITEM.model = "models/props_lab/huladoll.mdl"

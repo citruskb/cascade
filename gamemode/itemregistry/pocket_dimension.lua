@@ -1,6 +1,6 @@
 ITEM.id = "pocket_dimension"
 ITEM.name = "Pocket Dimension"
-ITEM.description = "..."
+ITEM.description = "Stores items: 1x1\n\nEvery 12 seconds: cleanse 1 random debuff and gain 1 random buff"
 ITEM.type = ITEM_TYPE_CONTAINER
 
 ITEM.model = "models/props_combine/breentp_rings.mdl"

@@ -1,6 +1,6 @@
 ITEM.id = "nightstand"
 ITEM.name = "Nightstand"
-ITEM.description = "-2 fatigue damage taken."
+ITEM.description = "Stores items: 1x3\n\n-1 fatigue damage taken"
 ITEM.type = ITEM_TYPE_CONTAINER
 
 ITEM.model = "models/props_c17/FurnitureDrawer003a.mdl"
