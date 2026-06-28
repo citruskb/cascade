@@ -61,6 +61,12 @@ function PhysObj2D:PhysicsStep()
 	end
 
 	PhysObj2D.lastStepTime = CurTime()
+
+	--[[
+	local backpack = GAMEMODE.backpack
+	if not backpack then return end
+	backpack:ClearGridDraw()
+	]]
 end
 
 function PhysObj2D:PhysicsPass(dt, iter)

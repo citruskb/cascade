@@ -39,3 +39,19 @@ function meta:PopUncontainedItems()
 		cell.heldItem:Pop()
 	end
 end
+
+function meta:ClearGridDraw()
+	for i = 1, #self.cells do
+		local cell = self.cells[i]
+		cell.canPlaceDraw = nil
+		cell.cannotPlaceDraw = nil
+	end
+end
+
+--[[
+hook.Add("PostRenderVGUI", "PostRenderVGUI.backpack", function()
+	local backpack = GAMEMODE.backpack
+	if not backpack then return end
+	backpack:ClearGridDraw()
+end)
+]]

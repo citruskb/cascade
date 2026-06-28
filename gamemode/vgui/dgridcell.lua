@@ -10,6 +10,7 @@ end
 PANEL = {}
 
 function PANEL:Init()
+	self:SetZPos(GM_ZPOS_PGRID)
 	self.fov = 45
 	self.camPosOffset = Vector(0.6, 0, 0)
 	self:InvalidateLayout()
@@ -23,6 +24,12 @@ function PANEL:RefreshBackpackBindPoint()
 end
 
 function PANEL:Paint()
+	local backpack = GAMEMODE.backpack
+	if not backpack then return end
+
+	local boundCell = backpack.cellsScreenIDX[self.bindPointIndex]
+	if not boundCell.canPlaceDraw and not boundCell.cannotPlaceDraw then return end
+
 	local ent = GAMEMODE.CellProp
 	if not IsValid(ent) then return end
 
@@ -47,12 +54,42 @@ function PANEL:Paint()
 
 	cam.Start3D(camPos, ang, self.fov, x, y, siz, siz, 8, 64)
 		render.OverrideDepthEnable(true, false)
+		render.SetColorModulation(
+			not boundCell.canPlaceDraw and boundCell.cannotPlaceDraw and 1 or 0,
+			not boundCell.cannotPlaceDraw and boundCell.canPlaceDraw and 1 or 0,
+			0)
+		render.SetBlend(0.7)
+
 		GAMEMODE.CellProp:DrawModel()
+
+		render.SetBlend(1)
+		render.SetColorModulation(1, 1, 1)
 		render.OverrideDepthEnable(false)
 	cam.End3D()
 
 	cam.IgnoreZ(false)
 	render.SuppressEngineLighting(false)
+
+	local held = GAMEMODE.HeldItem
+	local contained = false
+	if held then
+		for i = 1, #held.backpackBindPoints do
+			local idx = held.backpackBindPoints[i]
+			if idx ~= self.bindPointIndex then continue end
+
+			contained = true
+			break
+		end
+	end
+
+	if boundCell.canPlaceDraw then
+		if not contained then return end
+		timer.Create(ToString(self) .. "_canPlaceDraw", 0.066, 1, function() boundCell.canPlaceDraw = nil end)
+	end
+	if boundCell.cannotPlaceDraw then
+		if not contained then return end
+		timer.Create(ToString(self) .. "_cannotPlaceDraw", 0.066, 1, function() boundCell.cannotPlaceDraw = nil end)
+	end
 end
 
 vgui.Register("DGridCell", PANEL, "DPanel")

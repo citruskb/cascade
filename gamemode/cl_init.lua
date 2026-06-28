@@ -6,10 +6,11 @@ include("cl_handlemouse.lua")
 include("cl_debug.lua")
 
 include("vgui/dgridcell.lua")
-include("vgui/dgridinventory.lua")
+include("vgui/pgridinventory.lua")
 include("vgui/pshop.lua")
 include("vgui/pphysobj2doverlay.lua")
 
+GM_ZPOS_PGRID = 11
 GM_ZPOS_POVERLAY = 10
 GM_ZPOS_PSHOP = 9
 

@@ -1,6 +1,7 @@
 PANEL = {}
 
 function PANEL:Init()
+	self:SetZPos(GM_ZPOS_PGRID)
 	self.bindPointIndexes = {}
 	self.grid = vgui.Create("DGrid", self)
 
@@ -28,7 +29,9 @@ function PANEL:Init()
 
 	local cells = self.grid:GetItems()
 	for i = 1, #cells do
-		self.bindPointIndexes[i] = GAMEMODE:GetNearestScreenBindPointIndex(Vector2(cells[i]:GetPos()))
+		local idx = GAMEMODE:GetNearestScreenBindPointIndex(Vector2(cells[i]:GetPos()))
+		self.bindPointIndexes[i] = idx
+		cells[i].bindPointIndex = idx
 	end
 
 	local backpack = GridInventory:Create()
@@ -39,7 +42,8 @@ end
 function PANEL:PerformLayout()
 end
 
-function PANEL:Paint() end
+function PANEL:Paint()
+end
 
 
-vgui.Register("DGridInventory", PANEL, "DPanel")
+vgui.Register("PGridInventory", PANEL, "DPanel")

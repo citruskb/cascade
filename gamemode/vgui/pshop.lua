@@ -37,9 +37,9 @@ function PANEL:Init()
 	]]
 
 	-- TODO to move to combat we likely need to decouple this from the shop eventually.
-	local gridInventory = vgui.Create("DGridInventory", leftTop)
-	gridInventory:SetSize(leftTop:GetSize())
-	GAMEMODE.GridInventory = gridInventory
+	--local gridInventory = vgui.Create("DGridInventory", leftTop)
+	--gridInventory:SetSize(leftTop:GetSize())
+	--GAMEMODE.GridInventory = gridInventory
 	--
 
 
@@ -265,6 +265,7 @@ function GM:ShowHelp(pl)
 		end
 
 		if IsValid(self.pPhysObj2DOverlay) then self.pPhysObj2DOverlay:SetVisible(false) end
+		if IsValid(self.pGridInventory) then self.pGridInventory:Remove() end
 
 		return
 	end
@@ -276,4 +277,8 @@ function GM:ShowHelp(pl)
 	end
 
 	self.pShop = vgui.Create("PShop")
+
+	self.pGridInventory = vgui.Create("PGridInventory")
+	local w, h = ScrW(), ScrH()
+	self.pGridInventory:SetSize(w * 0.4, h * 0.6)
 end

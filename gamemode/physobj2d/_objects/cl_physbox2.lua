@@ -70,6 +70,7 @@ function Physbox2:__Create(parent)
 
 	self.boundCells = {}
 	self.bindPoints = {}
+	self.backpackBindPoints = {}
 	self.bindPointsCellIDX = {}
 
 	self.isScreenScaled = parent.isScreenScaled
@@ -291,6 +292,7 @@ function meta:EvalBindPoints()
 	local pointsObj = tab[idx]
 	if not pointsObj then Error("[PhysObj2D] No gridpoints for angle: " .. idx) end
 
+	-- Calculate our bindpoints.
 	self.bindPoints = {}
 	local pointsTab = pointsObj:GetPoints()
 	local siz = gamemode.Call("GetInventoryGridSize")
@@ -301,6 +303,117 @@ function meta:EvalBindPoints()
 		local point = pointsTab[i]
 		self.bindPoints[i] = origin + self.parent.itemData.gridPointsOffsets[idx] + point * siz
 	end
+
+	-- Find the associated bindpoints if they were in the backpack.
+	self.backpackBindPoints = {}
+	for i = 1, #self.bindPoints do
+		self.backpackBindPoints[i] = gamemode.Call("GetNearestScreenBindPointIndex", self.bindPoints[i])
+	end
+
+	-- Calculate if we can be put in each bindpoint.
+	-- We only need to do this if we're the held item.
+	if not GAMEMODE.HeldItem then return end
+	if GAMEMODE.HeldItem ~= self then return end
+
+	local backpack = GAMEMODE.backpack
+
+	local _, placeableList, notPlaceableList = self:GetIsPlaceableOnBinds()
+	for i = 1, #self.bindPoints do
+		if placeableList[i] then
+			local id = self.backpackBindPoints[i]
+			backpack.cellsScreenIDX[id].canPlaceDraw = true
+		end
+		if notPlaceableList[i] then
+			local id = self.backpackBindPoints[i]
+			backpack.cellsScreenIDX[id].cannotPlaceDraw = true
+		end
+	end
+
+	--[[
+	local backpack = GAMEMODE.backpack
+	local indexes = self.backpackBindPoints
+
+	-- If we find a bindpoint thats entirely outside the inventory, do nothing.
+	for i = 1, #indexes do
+		if not backpack.cellsScreenIDX[indexes[i]--] then return end
+	end
+
+	-- Whether we can place an item depends on what kind of item it is.
+	for i = 1, #indexes do
+		local cell = backpack.cellsScreenIDX[indexes[i]--]
+
+		-- Containers can only be placed on spots that are entirely empty.
+		if self.parent.isContainer then
+			if cell:IsCompletelyEmpty() then continue end
+			if cell.heldContainer and cell.heldContainer ~= self then return end
+		end
+
+		-- In contrast, normal items can only be placed on containers not holding anything else.
+		if self.parent.isNormalItem then
+			if cell:IsContainerButEmpty() then continue end
+			if not cell.heldContainer then return end
+			if cell.heldItem and cell.heldItem ~= self then return end
+		end
+	end
+	]]
+
+end
+
+function meta:GetIsPlaceableOnBinds()
+	local backpack = GAMEMODE.backpack
+	local indexes = self.backpackBindPoints
+	local placeableTab, notPlaceableTab = {}, {}
+
+	-- If we find a bindpoint thats entirely outside the inventory, no dice.
+	local canPlace = true
+
+	for i = 1, #indexes do
+		if not backpack.cellsScreenIDX[indexes[i]] then canPlace = false end
+	end
+
+	-- Whether we can place an item depends on what kind of item it is.
+	for i = 1, #indexes do
+		local cell = backpack.cellsScreenIDX[indexes[i]]
+		if not cell then continue end
+
+		-- Containers can only be placed on spots that are entirely empty.
+		if self.parent.isContainer then
+			if cell:IsCompletelyEmpty() then
+				placeableTab[i] = true
+				notPlaceableTab[i] = nil
+				continue
+			end
+			if cell.heldContainer and cell.heldContainer ~= self then
+				notPlaceableTab[i] = true
+				placeableTab[i] = nil
+				canPlace = false
+			end
+		end
+
+		-- In contrast, normal items can only be placed on containers not holding anything else.
+		if self.parent.isNormalItem then
+			if cell:IsContainerButEmpty() then
+				placeableTab[i] = true
+				notPlaceableTab[i] = nil
+				continue
+			end
+			if not cell.heldContainer then
+				notPlaceableTab[i] = true
+				placeableTab[i] = nil
+				canPlace = false
+			end
+			if cell.heldItem and cell.heldItem ~= self then
+				notPlaceableTab[i] = true
+				placeableTab[i] = nil
+				canPlace = false
+			end
+		end
+
+		placeableTab[i] = not notPlaceableTab[i]
+	end
+
+	-- TODO augments
+	return canPlace, placeableTab, notPlaceableTab
 end
 
 function meta:ApplyImpulse(impulse, screenPoint)
@@ -427,53 +540,14 @@ function meta:Rotate90CCW()
 end
 
 function meta:EvalGridInventoryPlacement()
-	local backpack = GAMEMODE.backpack
-	local indexes = {}
-	for i = 1, #self.bindPoints do
-		indexes[i] = gamemode.Call("GetNearestScreenBindPointIndex", self.bindPoints[i])
-	end
-
-	-- If we find a bindpoint thats entirely outside the inventory, do nothing.
-	for i = 1, #indexes do
-		if not backpack.cellsScreenIDX[indexes[i]] then return end
-	end
-
-	-- Whether we can place an item depends on what kind of item it is.
-	for i = 1, #indexes do
-		local cell = backpack.cellsScreenIDX[indexes[i]]
-
-		-- Containers can only be placed on spots that are entirely empty.
-		if self.parent.isContainer then
-			if cell:IsCompletelyEmpty() then continue end
-			if cell.heldContainer and cell.heldContainer ~= self then return end
-		end
-
-		-- In contrast, normal items can only be placed on containers not holding anything else.
-		if self.parent.isNormalItem then
-			if cell:IsContainerButEmpty() then continue end
-			if not cell.heldContainer then return end
-			if cell.heldItem and cell.heldItem ~= self then return end
-		end
-	end
-	-- TODO augments
-
-	--[[
-	for i = 1, #indexes do
-		local cell = backpack.cellsScreenIDX[indexes[i]--]
-
-		if self.parent.isContainer then
-			if cell.heldContainer and cell.heldContainer ~= self then return end
-		elseif self.parent.isNormalItem then
-			if cell.heldItem and cell.heldItem ~= self then
-				print("different item!", cell.heldItem, self)
-				return
-			end
-		end
-	end
-	]]
+	local isPlaceable, _, _ = self:GetIsPlaceableOnBinds()
+	if not isPlaceable then return end
 
 	-- Bind!
 	self:RemoveFromInventoryCells()
+
+	local indexes = self.backpackBindPoints
+	local backpack = GAMEMODE.backpack
 	for i = 1, #indexes do
 		local cell = backpack.cellsScreenIDX[indexes[i]]
 		self.boundCells[indexes[i]] = cell

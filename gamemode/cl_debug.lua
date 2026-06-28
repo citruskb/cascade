@@ -136,7 +136,7 @@ local function DrawItemBindPoints(physbox)
 end
 
 local function DrawBackpackBindPoints()
-	if not IsValid(GAMEMODE.GridInventory) then return end
+	if not IsValid(GAMEMODE.pGridInventory) then return end
 
 	local backpack = GAMEMODE.backpack
 	if not backpack then return end
