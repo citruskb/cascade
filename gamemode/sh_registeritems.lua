@@ -53,9 +53,58 @@ function GM:RegisterBackpackItems()
 
 	local included = {}
 
-	local itemfiles, itemdirectories = file.Find(self.FolderName .. "/gamemode/itemregistry/*", "LUA")
-	table.sort(itemfiles)
+	--local itemfiles, itemdirectories = file.Find(self.FolderName .. "/gamemode/itemregistry/*", "LUA")
+	--table.sort(itemfiles)
 	--table.sort(itemdirectories)
+
+	local function LoadFile(dir, fileName)
+		if string.sub(fileName, -4) ~= ".lua" then continue end
+		ITEM = {}
+
+		AddCSLuaFile(dir .. fileName)
+		include(dir .. fileName)
+
+		self:RegisterBackpackItem(ITEM.id, ITEM)
+
+		included[fileName] = ITEM
+		ITEM = nil
+	end
+
+	local function LoadDirectory(dir)
+		local files, dirs = file.Find(self.FolderName .. "/gamemode/" .. dir .. "*", "LUA")
+
+		table.Sort(files)
+		table.Sort(dirs)
+
+		for i, fileName in ipairs(files) do LoadFile(dir, fileName) end
+		for i, recursiveDir in ipairs(dirs) do LoadDirectory(dir .. "/" .. recursiveDir) end
+	end
+
+	local baseDir = "itemregistry/"
+	LoadDirectory(baseDir)
+
+	--[[
+	local function LoadDirectory(dir, filesTab)
+		dir = dir or ""
+
+		if dir ~= "" then
+			
+		end
+
+		for i, filename in ipairs(filesTab) do
+			if string.sub(filename, -4) ~= ".lua" then continue end
+
+			ITEM = {}
+
+			AddCSLuaFile("itemregistry/" .. filename)
+			include("itemregistry/" .. filename)
+
+			self:RegisterBackpackItem(ITEM.id, ITEM)
+
+			included[filename] = ITEM
+			ITEM = nil
+		end
+	end
 
 	for i, filename in ipairs(itemfiles) do
 		if string.sub(filename, -4) ~= ".lua" then continue end
@@ -70,6 +119,7 @@ function GM:RegisterBackpackItems()
 		included[filename] = ITEM
 		ITEM = nil
 	end
+	]]
 
 	for k, v in pairs(self.BackpackItems) do
 

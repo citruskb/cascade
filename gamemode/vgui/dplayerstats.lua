@@ -82,7 +82,7 @@ function PANEL:PerformLayout()
 
 	-- Lives
 	rt:InsertColorChange(255, 255, 255, 255)
-	rt:AppendText("Wins:\t5\n")
+	rt:AppendText("Lives:\t5\n")
 
 	rt.PerformLayout = function(pan)
 		if pan:GetFont() ~= "FontPlayerStats" then pan:SetFontInternal("FontPlayerStats") end
