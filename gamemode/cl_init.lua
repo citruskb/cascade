@@ -8,6 +8,7 @@ include("cl_debug.lua")
 
 include("vgui/dgridcell.lua")
 include("vgui/dplayermodel.lua")
+include("vgui/dplayerstats.lua")
 include("vgui/pgridinventory.lua")
 include("vgui/piteminfo.lua")
 include("vgui/pshop.lua")
@@ -242,6 +243,9 @@ function GM:CreateCustomFonts()
 	local screenscale = ScreenScale()
 	surface.CreateFont("FontItemName", {font = self.font_family, size = screenscale * 36, weight = 500, antialias = true, shadow = true})
 	surface.CreateFont("FontItemDescription", {font = self.font_default, size = screenscale * 24, weight = 100, antialias = true, shadow = false})
+
+	surface.CreateFont("FontPlayerStatsName", {font = self.font_family, size = screenscale * 52, weight = 500, antialias = true, shadow = true})
+	surface.CreateFont("FontPlayerStats", {font = self.font_default, size = screenscale * 36, weight = 100, antialias = true, shadow = false})
 end
 --
 

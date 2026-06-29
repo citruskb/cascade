@@ -13,6 +13,8 @@ function PANEL:Init()
 end
 
 function PANEL:SetItemData(itemData)
+	if not itemData then return end
+
 	local oldID = self.itemID
 	self.itemID = itemData.id
 	if oldID == self.itemID then return end
@@ -54,6 +56,7 @@ function PANEL:PerformLayout()
 end
 
 function PANEL:Paint()
+	if not self.data then return end
 	local w, h = self:GetSize()
 	local col = ItemRarityColors[self.data.rarity]
 

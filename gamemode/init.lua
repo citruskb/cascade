@@ -10,6 +10,7 @@ AddCSLuaFile("cl_debug.lua")
 
 AddCSLuaFile("vgui/dgridcell.lua")
 AddCSLuaFile("vgui/dplayermodel.lua")
+AddCSLuaFile("vgui/dplayerstats.lua")
 AddCSLuaFile("vgui/pgridinventory.lua")
 AddCSLuaFile("vgui/piteminfo.lua")
 AddCSLuaFile("vgui/pshop.lua")

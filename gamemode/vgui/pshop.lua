@@ -270,9 +270,11 @@ function GM:ShowHelp(pl)
 			v:Remove()
 		end
 
+		if IsValid(self.pItemData) then self.pItemData:Remove() end
 		if IsValid(self.pPhysObj2DOverlay) then self.pPhysObj2DOverlay:SetVisible(false) end
 		if IsValid(self.pGridInventory) then self.pGridInventory:Remove() end
 		if IsValid(self.pMyPlayerModel) then self.pMyPlayerModel:Remove() end
+		if IsValid(self.pMyPlayerStats) then self.pMyPlayerStats:Remove() end
 
 		return
 	end
@@ -291,4 +293,7 @@ function GM:ShowHelp(pl)
 
 	self.pMyPlayerModel = vgui.Create("DPlayerModel")
 	self.pMyPlayerModel:SetPlayer(MySelf)
+
+	self.pMyPlayerStats = vgui.Create("DPlayerStats")
+	self.pMyPlayerStats:SetPlayer(MySelf)
 end

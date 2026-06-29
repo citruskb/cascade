@@ -3,8 +3,8 @@ PANEL = {}
 function PANEL:Init()
 	local w, h = ScrW(), ScrH()
 
-	self.fov = 60
-	self.camPosOffset = Vector(1, 0, 0)
+	self.fov = 50
+	self.camPosOffset = Vector(0.2, -0.8, 0)
 
 	self:SetPos(0, h * 0.6)
 	self:SetSize(w * 0.2, h * 0.4)
@@ -12,7 +12,7 @@ end
 
 function PANEL:SetPlayer(pl)
 	if pl == MySelf then
-		print("set player!", MySelf, MySelf:GetModel())
+		self.MySelf = true
 		self.model = MySelf:GetModel()
 	else
 		-- TODO
@@ -23,11 +23,17 @@ function PANEL:SetPlayer(pl)
 	self.ent:SetNoDraw(true)
 	self.ent:SetIK(false)
 
-	local iSeq = self.ent:LookupSequence( "walk_all" )
-	if ( iSeq <= 0 ) then iSeq = self.ent:LookupSequence( "WalkUnarmed_all" ) end
-	if ( iSeq <= 0 ) then iSeq = self.ent:LookupSequence( "walk_all_moderate" ) end
+	--PrintTable(self.ent:GetSequenceList())
 
-	if ( iSeq > 0 ) then self.ent:ResetSequence( iSeq ) end
+	self.ent.GetPlayerColor = function() return MySelf:GetPlayerColor() end
+
+	-- idle_melee_angry looks quite good for your own model.
+	self:SendSequence("idle_melee_angry")
+end
+
+function PANEL:SendSequence(seq)
+	local iSeq = self.ent:LookupSequence(seq)
+	if iSeq > 0 then self.ent:ResetSequence(iSeq) end
 end
 
 function PANEL:Paint()
@@ -36,29 +42,29 @@ function PANEL:Paint()
 
 	local buffer = 0
 	local x, y = self:GetPos()
-	local siz = self:GetSize()
+	local w, h = self:GetSize()
 
 	-- Adjust for the buffer
 	x, y = x + buffer, y + buffer
-	siz = siz - 2 * buffer
+	--siz = siz - 2 * buffer
 
 	local mins, maxs = ent:OBBMins(), ent:OBBMaxs()
-	local center = ent:OBBCenter() + Vector(0, 0, 4.8)
+	local center = ent:OBBCenter() + Vector(0, 0, -5)
 	local dist = mins:Distance(maxs)
 	local camPos = center + self.camPosOffset * dist
 	local lookat = center
 	local towards = lookat - camPos
 	local ang = towards:Angle()
 
+	if self.MySelf then
+		--ang:RotateAroundAxis(towards:GetNormalized(), 180)
+	end
+
 	render.SuppressEngineLighting(true)
 	cam.IgnoreZ(true)
 
-	cam.Start3D(camPos, ang, self.fov, x, y, siz, siz, 8, 256)
-		render.OverrideDepthEnable(true, false)
-
+	cam.Start3D(camPos, ang, self.fov, x, y, w, h, 8, 256)
 		self.ent:DrawModel()
-
-		render.OverrideDepthEnable(false)
 	cam.End3D()
 
 	cam.IgnoreZ(false)
