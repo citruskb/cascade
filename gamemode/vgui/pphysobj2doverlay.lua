@@ -193,6 +193,12 @@ function PANEL:PaintOrthoPhysObj2D(vars)
 	}
 	cam.Start(camData)
 		render.OverrideDepthEnable(true, false)
+
+			-- TODO - might be able to use cam.ApplyShake() to do some interesting effects..
+			-- Say when items activate?
+
+			-- TODO - might be able to mess with the FOV to affect perceived object size.
+
 			vars.clEnt:DrawModel()
 		render.OverrideDepthEnable(false)
 	cam.End3D()
