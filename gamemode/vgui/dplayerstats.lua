@@ -87,11 +87,6 @@ function PANEL:PerformLayout()
 	rt.PerformLayout = function(pan)
 		if pan:GetFont() ~= "FontPlayerStats" then pan:SetFontInternal("FontPlayerStats") end
 	end
-
-	--[[
-	print("text:")
-	print(self.richText:GetText())
-	]]
 end
 
 local colBackground = Color(22, 22, 22, 120)

@@ -212,6 +212,8 @@ local function DrawDebug()
 
 	DrawBackpackBindPoints()
 
+	for k, cpoint in pairs(cps) do DrawCollisionPoint(cpoint) end
+
 	for obj, _ in pairs(GAMEMODE.itemObjs) do
 		--if detailed then DrawItemDebug(obj) end
 
@@ -222,8 +224,6 @@ local function DrawDebug()
 			DrawHitboxDebug(hitbox)
 		end
 
-		for k, cpoint in pairs(cps) do DrawCollisionPoint(cpoint) end
-
 		if detailed then DrawAux(physbox, hitbox) end
 
 		DrawItemBindPoints(physbox)
@@ -233,6 +233,14 @@ local function DrawDebug()
 		for k, line in pairs(incLines) do DrawIncLine(line) end
 		for k, data in pairs(normals) do DrawNormal(data) end
 		]]
+	end
+
+	for wall, _ in pairs(GAMEMODE.physObjWalls) do
+		local physbox = wall.physbox
+
+		for __, hitbox in pairs(physbox.hitboxes) do
+			DrawHitboxDebug(hitbox)
+		end
 	end
 end
 

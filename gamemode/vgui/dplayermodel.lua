@@ -23,8 +23,6 @@ function PANEL:SetPlayer(pl)
 	self.ent:SetNoDraw(true)
 	self.ent:SetIK(false)
 
-	--PrintTable(self.ent:GetSequenceList())
-
 	self.ent.GetPlayerColor = function() return MySelf:GetPlayerColor() end
 
 	-- idle_melee_angry looks quite good for your own model.

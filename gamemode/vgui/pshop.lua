@@ -89,10 +89,26 @@ function PANEL:Init()
 		return gamemode.Call("NewPhysObjWall", actualOrigin, pointsObj)
 	end
 
+	--[[
+	local function MakeWall2(screenOrigin, fW, fH)
+		local actualOrigin = screenOrigin + Vector2(fW * 0.5, fH * 0.5)
+		local pointsObj = Points({
+				Vector2(0, 0),
+				Vector2(fW, 0),
+				Vector2(fW, fH),
+				Vector2(0, fH),
+			})
+
+		return gamemode.Call("NewItemObj", actualOrigin, pointsObj)
+	end
+	]]
+
 	GAMEMODE.InventoryFloor = MakeWall(Vector2(w * 0.4, h * 0.95), w * 0.25, h * 0.2)		-- Floor collision
 	GAMEMODE.InventoryLeftWall = MakeWall(Vector2(w * 0.35, -h), w * 0.05, 2 * h)			-- Left side wall
 	GAMEMODE.InventoryRightWall = MakeWall(Vector2(w * 0.65, -h), w * 0.05, 2 * h)			-- Right side wall
 	GAMEMODE.InventoryTop = MakeWall(Vector2(w * 0.4, -h + 0.05 * h), w * 0.25, h * 0.05)	-- Cap, out of view. just in case.
+	--local test = MakeWall2(Vector2(w * 0.4, -h + 0.05 * h), w * 0.25, h * 0.05)
+	
 	--
 
 

@@ -58,7 +58,6 @@ function PhysObj2D:PhysicsStep()
 		for physbox, _ in pairs(self.physboxes) do
 			if physbox.parent and physbox.parent.id then continue end
 
-			print("@@@@@@ REMOVING PHYSBOX.", physbox)
 			physbox:Remove()
 		end
 
