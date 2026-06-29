@@ -33,20 +33,77 @@ function __points:ToString()
 end
 
 function __points:Add(other)
-	local pointstab = Rawget(self, "_points")
+	local pointsTab = Rawget(self, "_points")
 
+	local ret = {}
 	if other.isVector2 then
-		table.Insert(pointstab, other)
-		return self
-	elseif other.isPointsObj then
-		local ret = {}
-		table.Add(ret, pointstab)
-
-		local otherPointstab = Rawget(other, "_points")
-		table.Add(ret, otherPointstab)
-
-		return Points(ret)
+		for i = 1, #pointsTab do
+			ret[i] = pointsTab[i]:DoAdd(other)
+		end
+	else
+		Error("[Points] - Tried to add a non Vector2: " .. (other or "nil"))
 	end
+
+	return Points(ret)
+end
+
+function __points:Sub(other)
+	local pointsTab = Rawget(self, "_points")
+	local ret = {}
+	if other.isVector2 then
+		for i = 1, #pointsTab do
+			ret[i] = pointsTab[i]:DoSub(other)
+		end
+	else
+		Error("[Points] - Tried to subtract a non Vector2: " .. (other or "nil"))
+	end
+
+	return Points(ret)
+end
+
+function __points:Mul(other)
+	local pointsTab = Rawget(self, "_points")
+
+	local ret = {}
+	if IsNumber(other) then
+		for i = 1, #pointsTab do
+			ret[i] = pointsTab[i] * other
+		end
+	else
+		Error("[Points] - Tried to multiply by a non number: " .. (other or "nil"))
+	end
+
+	return Points(ret)
+end
+
+function __points:Div(other)
+	local pointsTab = Rawget(self, "_points")
+
+	local ret = {}
+	if IsNumber(other) then
+		for i = 1, #pointsTab do
+			ret[i] = pointsTab[i] / other
+		end
+	else
+		Error("[Points] - Tried to divide by a non number: " .. (other or "nil"))
+	end
+
+	return Points(ret)
+end
+
+-- Adds a vector2 to this points object and returns ourself.
+function meta:AddVector2(vect2)
+	table.Insert(Rawget(self, "_points"), vect2)
+	return self
+end
+
+-- Mash together two points objects into a new one.
+function meta:CombineWith(other)
+	local ret = {}
+	table.Add(ret, Rawget(self, "_points"))
+	table.Add(ret, Rawget(other, "_points"))
+
+	return Points(ret)
 end
 
 function meta:GetCenter() return Vector2((self:GetMinX() + self:GetMaxX()) * 0.5, (self:GetMinY() + self:GetMaxY()) * 0.5) end

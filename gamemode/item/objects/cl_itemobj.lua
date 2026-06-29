@@ -35,16 +35,9 @@ end
 function meta:InitPhysbox()
 	self.physbox = Physbox2:Create(self)
 
-	-- Add hitboxes to the physbox.
-	-- Maybe this would fit better in the physbox object itself?
 	for i = 1, #self.itemData.hitboxPoints do
-		local pointsTab = self.itemData.hitboxPoints[i]:GetPoints() -- TODO maybe add a shortcut for this in the points obj.
-		local scaledPointsTab = {}
-		for j = 1, #pointsTab do
-			scaledPointsTab[j] = pointsTab[j] * GAMEMODE.UncappedScreenScale
-		end
-
-		self.physbox:AddHitbox(Points(scaledPointsTab))
+		local pointObj = self.itemData.hitboxPoints[i]
+		self.physbox:AddHitbox(pointObj * GAMEMODE.UncappedScreenScale)
 	end
 end
 

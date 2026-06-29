@@ -138,7 +138,7 @@ function meta:GetAllHitboxPoints()
 			continue
 		end
 
-		allpoints = allpoints + hitbox.pointsObj
+		allpoints = allpoints:CombineWith(hitbox.pointsObj)
 	end
 
 	return allpoints
