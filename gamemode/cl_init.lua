@@ -121,6 +121,7 @@ function GM:_Think()
 
 	gamemode.Call("HandleMouse")
 	PhysObj2D:PhysicsStep()
+	gamemode.Call("StepItems")
 
 	if nextTick > ct then return end
 	nextTick = ct + 1

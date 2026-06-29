@@ -53,6 +53,7 @@ end
 
 function meta:EnablePhysics() self.physbox:EnablePhysics() end
 function meta:DisablePhysics() self.physbox:DisablePhysics() end
+function meta:IsPhysicsEnabled() return self.physbox.isPhysicsEnabled end
 
 function meta:Remove()
 	GAMEMODE.itemObjs[self] = nil

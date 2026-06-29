@@ -225,7 +225,7 @@ function meta:StepPhysics(dt)
 		self:AddPosition(self.velocity * dt)
 		self:AddRotation(self.angularVelocity * dt)
 
-		self:UpdateParentPosAndRot()
+		--self:UpdateParentPosAndRot()
 	end
 end
 
