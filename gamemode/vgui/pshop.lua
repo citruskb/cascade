@@ -78,7 +78,6 @@ function PANEL:Init()
 
 	--position, rotation, itemDataID, velocity, angularVelocity, isStatic, notScreenScaled
 	local function MakeWall(screenOrigin, fW, fH)
-
 		local actualOrigin = screenOrigin + Vector2(fW * 0.5, fH * 0.5)
 		local pointsObj = Points({
 				Vector2(0, 0),
@@ -87,11 +86,7 @@ function PANEL:Init()
 				Vector2(0, fH),
 			})
 
-		return gamemode.Call("NewPhysObj2",
-				actualOrigin,
-				0,
-				pointsObj,
-				nil, nil, true, true)
+		return gamemode.Call("NewPhysObjWall", actualOrigin, pointsObj)
 	end
 
 	GAMEMODE.InventoryFloor = MakeWall(Vector2(w * 0.4, h * 0.95), w * 0.25, h * 0.2)		-- Floor collision
@@ -129,9 +124,10 @@ function PANEL:Init()
 
 
 	-- Test items
-	local function MakeItem(id, origin, vel, rad, physDisabled)
-		local obj = gamemode.Call("NewPhysObj2", origin, rad, id, vel)
-		if not physDisabled then obj:EnablePhysics() end
+	local function MakeItem(id, origin, rad, vel)
+		local obj = gamemode.Call("NewItemObj", id, origin, rad, MySelf)
+		if vel then obj:AddVelocity(vel) end
+		obj:EnablePhysics()
 	end
 
 	local function OneBox() MakeItem("wooden_crate", Vector2(0.5 * w, 0.5 * h)) end
@@ -150,8 +146,8 @@ function PANEL:Init()
 			Vector2(
 				w * 0.5 + math.Random(-40 * 4, 40 * 4),
 				h * 0.5 + math.Random(-40 * 4, 40 * 4)
-			)
-			,Vector2(
+			),
+			Vector2(
 				math.Rand(-PHYS2D_TERMINAL_VELOCITY, PHYS2D_TERMINAL_VELOCITY),
 				-math.Rand(0, PHYS2D_TERMINAL_VELOCITY)
 			))
@@ -182,8 +178,8 @@ function PANEL:Init()
 			Vector2(
 				w * 0.5 + math.Random(-40 * 4, 40 * 4),
 				h * 0.5 + math.Random(-40 * 4, 40 * 4)
-			)
-			,Vector2(
+			),
+			Vector2(
 				math.Rand(-PHYS2D_TERMINAL_VELOCITY, PHYS2D_TERMINAL_VELOCITY),
 				-math.Rand(0, PHYS2D_TERMINAL_VELOCITY)
 			))
@@ -197,8 +193,8 @@ function PANEL:Init()
 			Vector2(
 				w * 0.5 + math.Random(-40 * 4, 40 * 4),
 				h * 0.5 + math.Random(-40 * 4, 40 * 4)
-			)
-			,Vector2(
+			),
+			Vector2(
 				math.Rand(-PHYS2D_TERMINAL_VELOCITY, PHYS2D_TERMINAL_VELOCITY),
 				-math.Rand(0, PHYS2D_TERMINAL_VELOCITY)
 			))
@@ -212,8 +208,8 @@ function PANEL:Init()
 			Vector2(
 				w * 0.5 + math.Random(-40 * 4, 40 * 4),
 				h * 0.5 + math.Random(-40 * 4, 40 * 4)
-			)
-			,Vector2(
+			),
+			Vector2(
 				math.Rand(-PHYS2D_TERMINAL_VELOCITY, PHYS2D_TERMINAL_VELOCITY),
 				-math.Rand(0, PHYS2D_TERMINAL_VELOCITY)
 			))
@@ -231,6 +227,8 @@ function PANEL:Init()
 	--MakeItem("banana", Vector2(w * 0.5, h * 0.5))
 
 	--TossBoxes(32)
+
+	--[[
 	OneNightstand()
 	OneNightstand()
 	OneLocker()
@@ -244,6 +242,9 @@ function PANEL:Init()
 	HulaTime(3)
 	OneBriefcase()
 	OnePlank()
+	]]
+
+	OneBox()
 
 
 	--MakeItem("briefcase", Vector2(0.5 * w, 0.5 * h))
@@ -266,8 +267,8 @@ function GM:ShowHelp(pl)
 	if IsValid(self.pShop) then
 		self.pShop:Remove()
 
-		for k, v in pairs(GAMEMODE.PhysicsObjects2D) do
-			v:Remove()
+		for obj, _ in pairs(GAMEMODE.itemObjs) do
+			obj:Remove()
 		end
 
 		if IsValid(self.pItemData) then self.pItemData:Remove() end

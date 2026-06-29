@@ -40,6 +40,10 @@ PHYS2D_POP_VELOCITY = 700 -- Flat velocity applied to objects dropped outside of
 PHYS2D_SLEEP_VEL_THRESHOLD = 3
 PHYS2D_SLEEP_ANGVEL_THRESHOLD = 0.1
 
+function GM:IsValidPhysObj2DParent()
+
+end
+
 function PhysObj2D:PhysicsStep()
 	local dt = PHYS2D_DT
 	local iter = PHYS2D_CONSTRAINT_ITERATIONS
@@ -52,7 +56,9 @@ function PhysObj2D:PhysicsStep()
 
 	while self.accuStepTime > dt do
 		for physbox, _ in pairs(self.physboxes) do
-			if physbox.parent and physbox.parent.isPhysObj2 then continue end
+			if physbox.parent and physbox.parent.id then continue end
+
+			print("@@@@@@ REMOVING PHYSBOX.", physbox)
 			physbox:Remove()
 		end
 

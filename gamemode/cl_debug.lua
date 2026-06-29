@@ -212,7 +212,7 @@ local function DrawDebug()
 
 	DrawBackpackBindPoints()
 
-	for _, obj in pairs(GAMEMODE.PhysicsObjects2D) do
+	for obj, _ in pairs(GAMEMODE.itemObjs) do
 		--if detailed then DrawItemDebug(obj) end
 
 		local physbox = obj.physbox

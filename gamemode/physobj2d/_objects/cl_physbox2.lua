@@ -41,6 +41,8 @@ function Physbox2:__Create(parent)
 	Physbox2Count = Physbox2Count + 1
 	self.id = Physbox2Count
 
+
+	print("adding parent:", parent)
 	self.parent = parent
 
 	-- Init a bunch of dummy values.
@@ -446,6 +448,7 @@ function meta:MouseCanGrab()
 end
 
 function meta:GetAdjCamPosition()
+	PrintTable(self.parent.itemData)
 	return self:GetCenterScreenPoint() + self.camXYOffset + self.parent.itemData.camXYOffsetAdj
 end
 

@@ -3,6 +3,7 @@ DeriveGamemode("orange-juice")
 GamemodeLoaderRoot(GM) -- Start loading libraries.
 IncludeLibrary("vector2")
 IncludeLibrary("physobj2d")
+IncludeLibrary("itemobj")
 IncludeLibrary("gridinventory")
 
 

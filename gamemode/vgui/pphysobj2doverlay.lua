@@ -206,7 +206,7 @@ end
 
 function PANEL:Paint()
 	self.paintVars = {}
-	for k, obj in pairs(GAMEMODE.PhysicsObjects2D) do
+	for obj, _ in pairs(GAMEMODE.itemObjs) do
 		self:SetupPaintVars(obj)
 	end
 
