@@ -7,7 +7,7 @@ normals = {}
 DEBUG_MODE_MINIMAL = 1
 DEBUG_MODE_DETAILED = 2
 
-GM.Debug = false -- TODO move to a convar.
+GM.Debug = true -- TODO move to a convar.
 GM.DebugMode = DEBUG_MODE_MINIMAL
 GM.DebugObjects = {}
 
@@ -123,13 +123,13 @@ local function DrawCollisionPoint(cpoint)
 	surface.DrawRect(cx - s * 0.5, cy - s * 0.5, s, s)
 end
 
-local function DrawItemBindPoints(physbox)
-	if not physbox.bindPoints then return end
+local function DrawItemBindPoints(item)
+	if not item.gridPointEvaluator.bindPoints then return end
 
 	local s = 4
 	surface.SetDrawColor(COLOR_GREEN)
-	for i = 1, #physbox.bindPoints do
-		local point = physbox.bindPoints[i]
+	for i = 1, #item.gridPointEvaluator.bindPoints do
+		local point = item.gridPointEvaluator.bindPoints[i]
 		local x, y = point:Unpack()
 		surface.DrawRect(x - s * 0.5, y - s * 0.5, s, s)
 	end
@@ -220,13 +220,15 @@ local function DrawDebug()
 		local physbox = obj.physbox
 		--if detailed then DrawPhysboxDebug(physbox) end
 
-		for __, hitbox in pairs(physbox.hitboxes) do
-			DrawHitboxDebug(hitbox)
+		if physbox.isPhysicsEnabled then
+			for __, hitbox in pairs(physbox.hitboxes) do
+				DrawHitboxDebug(hitbox)
+			end
 		end
 
 		if detailed then DrawAux(physbox, hitbox) end
 
-		DrawItemBindPoints(physbox)
+		DrawItemBindPoints(obj)
 
 		--[[
 		for k, line in pairs(refLines) do DrawRefLine(line) end

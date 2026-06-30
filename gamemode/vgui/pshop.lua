@@ -244,7 +244,6 @@ function PANEL:Init()
 
 	--TossBoxes(32)
 
-	--[[
 	OneNightstand()
 	OneNightstand()
 	OneLocker()
@@ -258,19 +257,6 @@ function PANEL:Init()
 	HulaTime(3)
 	OneBriefcase()
 	OnePlank()
-	]]
-
-	--[[
-	OneNightstand()
-	OneLocker()
-	OneHarddrive()
-	OnePocketDimension()
-	OneBox()
-	]]
-
-	DoorBlast(1)
-	GoBananas(2)
-
 
 	--MakeItem("briefcase", Vector2(0.5 * w, 0.5 * h))
 	--MakeItem("plank", Vector2(0.5 * w, 0.5 * h))
@@ -294,6 +280,10 @@ function GM:ShowHelp(pl)
 
 		for obj, _ in pairs(GAMEMODE.itemObjs) do
 			obj:Remove()
+		end
+
+		for wall, _ in pairs(GAMEMODE.physObjWalls) do
+			wall:Remove()
 		end
 
 		if IsValid(self.pItemData) then self.pItemData:Remove() end

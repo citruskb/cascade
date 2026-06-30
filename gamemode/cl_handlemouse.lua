@@ -144,9 +144,9 @@ function GM:LeftMouseRelease()
 	if not self.HeldItem then return end
 
 	-- Check if we drop an item in our inventory.
-	self.HeldItem.physbox:EvalGridInventoryPlacement()
+	self.HeldItem:EvaluateGridInventoryPlacement()
 
-	if self.HeldItem.physbox.isInGridInventory then
+	if self.HeldItem.isInGridInventory then
 		self.HeldItem = nil
 		self.backpack:PopUncontainedItems()
 		return

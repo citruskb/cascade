@@ -48,6 +48,78 @@ function meta:ClearGridDraw()
 	end
 end
 
+--TODO: Adjust this to take
+-- 1. item id
+-- 2. insertion point
+-- 3. object orientation
+-- to determine if it'll fit.
+function meta:GetIsPlaceableOnBinds(item, indexes)
+	local placeableTab, notPlaceableTab = {}, {}
+
+	-- If we find a bindpoint thats entirely outside the inventory, no dice.
+	local canPlace = true
+	local isOutside = false
+	for i = 1, #indexes do
+		if self.cellsScreenIDX[indexes[i]] then continue end
+
+		canPlace = false
+		isOutside = true
+		break
+	end
+
+	-- Whether we can place an item depends on what kind of item it is.
+	for i = 1, #indexes do
+		-- If any part of us is outside the play grid, mark our entirety as not placeable.
+		if isOutside then
+			notPlaceableTab[i] = true
+			placeableTab[i] = nil
+			canPlace = false
+			continue
+		end
+
+		local cell = self.cellsScreenIDX[indexes[i]]
+		if not cell then continue end
+
+		-- Containers can only be placed on spots that are entirely empty.
+		if item.isContainer then
+			if cell:IsCompletelyEmpty() then
+				placeableTab[i] = true
+				notPlaceableTab[i] = nil
+				continue
+			end
+			if cell.heldContainer and cell.heldContainer ~= item then
+				notPlaceableTab[i] = true
+				placeableTab[i] = nil
+				canPlace = false
+			end
+		end
+
+		-- In contrast, normal items can only be placed on containers not holding anything else.
+		if item.isNormalItem then
+			if cell:IsContainerButEmpty() then
+				placeableTab[i] = true
+				notPlaceableTab[i] = nil
+				continue
+			end
+			if not cell.heldContainer then
+				notPlaceableTab[i] = true
+				placeableTab[i] = nil
+				canPlace = false
+			end
+			if cell.heldItem and cell.heldItem ~= item then
+				notPlaceableTab[i] = true
+				placeableTab[i] = nil
+				canPlace = false
+			end
+		end
+
+		placeableTab[i] = not notPlaceableTab[i]
+	end
+
+	-- TODO augments
+	return canPlace, placeableTab, notPlaceableTab
+end
+
 --[[
 hook.Add("PostRenderVGUI", "PostRenderVGUI.backpack", function()
 	local backpack = GAMEMODE.backpack

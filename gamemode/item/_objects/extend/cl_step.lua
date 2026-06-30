@@ -3,14 +3,29 @@ local meta = FindMetaTable("ItemObj")
 function meta:StepItem()
 
 	-- Sync up with physics if we should be applying physics.
-	if self:IsPhysicsEnabled() then self:SyncWithPhysbox() end
+	if self:IsPhysicsEnabled() then
+		self:SyncWithPhysbox() end
 
 	-- Pull the object's position around while it's being held.
-	if self.isPickedUp then self:StepPickedUp() end
+	if self.isPickedUp then
+		self:StepPickedUp() end
 
 	-- Object is being thrown back to a location it needs to be inside.
 	-- Could be back to the inventory, or back to the shop if you can't afford purchase, etc.
-	if self.isBeingPopped then self:StepPop() end
+	if self.isBeingPopped then
+		self:StepPop() end
+
+	-- If we are placed in the grid inventory, ease the object into alignment with the grid.
+	if self.isInGridInventory then
+		self:StepGridInventory() end
+
+	-- Evaluate our bind points if necessary!
+	if self.isPickedUp or self.isInGridInventory then
+		self:StepBindPoints()
+	elseif not self.gridPointEvaluator.cleared then -- Clear them if not being used anymore.
+		self.gridPointEvaluator.bindPoints = {}
+		self.gridPointEvaluator.cleared = true
+	end
 
 	-- We applied rotation to the object. Make sure it rotates to completion.
 	-- But only if it's being held, being popped, or in the inventory.
@@ -48,6 +63,23 @@ function meta:StepPop()
 	self:EnablePhysics()
 	self.physbox.isSleeping = false
 	self.physbox.velocity = self.popDir * PHYS2D_POP_VELOCITY
+end
+
+function meta:StepGridInventory()
+	local bindPoint = self.gridPointEvaluator.bindPoints[1]
+	local idx = self.gridPointEvaluator.bindPointsCellIDX[1]
+	local target = self.gridPointEvaluator.boundCells[idx]:GetAssocScreenBindPoint()
+	local delta = target - bindPoint
+
+	if delta:IsEqualTol(VECTOR2_ZERO, 1E-4) then return end
+
+	self.position = LerpVector2(0.1, self.position, self.position + delta)
+end
+
+function meta:StepBindPoints()
+	self.gridPointEvaluator:EvaluateBindPoints(self:GetPhysboxPointsOrigin(), self.desiredRotation)
+	self.gridPointEvaluator:EvaluateBackpackBindPoints()
+	self.gridPointEvaluator:EvaluateDrawnBackpackGrid()
 end
 
 function meta:StepDesiredRotation()

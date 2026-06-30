@@ -253,7 +253,7 @@ end
 -- Sounds
 function GM:CreateSounds()
 	self.snd_pop = CreateSound(MySelf, "items/ammocrate_open.wav")
-	self.snd_rotate = CreateSound(MySelf, "npc/zombie_poison/pz_left_foot1.wav")
+	self.snd_rotate = CreateSound(MySelf, "buttons/lever7.wav")
 end
 function GM:PlaySnd(idx, vol, pitch)
 	vol = vol or 1

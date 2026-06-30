@@ -25,11 +25,14 @@ function ItemObj:__Create(itemDataID, position, rotation, owner)
 	self.owner = owner
 
 	self:InitPhysbox()
+	self:InitGridPointEvaluator()
 
 	self.isPickedUp = false
 
 	self.isBeingPopped = false
 	self.poppedDir = Vector2()
+
+	self.isInGridInventory = false
 
 	self.isItemObj = true
 
@@ -47,33 +50,14 @@ function ItemObj:Eq(other)
 	return self.id == other.id
 end
 
-function meta:InitPhysbox()
-	self.physbox = Physbox2:Create(self)
-
-	for i = 1, #self.itemData.hitboxPoints do
-		local pointObj = self.itemData.hitboxPoints[i]
-		self.physbox:AddHitbox(pointObj * GAMEMODE.UncappedScreenScale)
-	end
-end
-
-function meta:EnablePhysics()
-	self.desiredRotation = nil
-
-	self.physbox.position:Set(self.position)
-	self.physbox.rotation = self.rotation
-
-	self.physbox:EnablePhysics()
-end
-function meta:DisablePhysics() self.physbox:DisablePhysics() end
-function meta:IsPhysicsEnabled() return self.physbox.isPhysicsEnabled end
-
 function meta:MousePickup()
 	self.isPickedUp = true
 
 	self:DisablePhysics()
 	self:SnapToNearest90()
+
 	self.physbox.isSleeping = false
-	self.physbox.isInGridInventory = false
+	self.isInGridInventory = false
 end
 
 function meta:MouseDrop()
@@ -83,7 +67,7 @@ function meta:MouseDrop()
 	self.physbox:RerollRandomAirborneRotation()
 
 	if self:IsInsideInventoryBounds() then
-		self.physbox:RemoveFromInventoryCells()
+		self.gridPointEvaluator:RemoveFromInventoryCells()
 		self:EnablePhysics()
 
 		-- Mitigate tossing the ortho view upwards.

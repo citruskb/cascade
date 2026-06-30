@@ -196,20 +196,16 @@ function meta:Remove()
 	table.Empty(self)
 end
 
-function meta:UpdateParentVars()
-end
-
 -- TODO may need to recode a bit
 function meta:Step(dt)
 	self.aabb = nil
 	self.aabbRaw = nil
 
 	self:StepPhysics(dt)
-	self:StepGridInventory(dt)
 end
 
 function meta:StepPhysics(dt)
-	if (not self.isPhysicsEnabled) or self.isInGridInventory then return end
+	if not self.isPhysicsEnabled then return end
 
 	if self.isSleeping then
 		self.velocity:Zero()
@@ -219,143 +215,6 @@ function meta:StepPhysics(dt)
 		self:AddPosition(self.velocity * dt)
 		self:AddRotation(self.angularVelocity * dt)
 	end
-end
-
-function meta:StepGridInventory(dt)
-	if not self.isInGridInventory then return end
-	local bindPoint = self.bindPoints[1]
-	local idx = self.bindPointsCellIDX[1]
-	local target = self.boundCells[idx]:GetAssocScreenBindPoint()
-	local delta = target - bindPoint
-
-	if delta:IsEqualTol(VECTOR2_ZERO, 1E-4) then return end
-
-	self.position = LerpVector2(0.1, self.position, self.position + delta)
-	self:UpdateParentPosAndRot()
-end
-
-function meta:UpdateParentPosAndRot()
-	self.parent.position:Set(self.position)
-	self.parent.rotation = self.rotation
-	--self:EvalBindPoints()
-end
-
-function meta:EvalBindPoints()
-	local tab = self.parent.itemData.gridPoints
-	if not tab then Error("[PhysObj2D] Unbound gridpoints") end
-
-	local ang = self:GetNearest90() -- TODO cache somehow?
-	ang = math.Ang(ang)
-	local idx = math.Round(ang, 0) % 360
-
-	local pointsObj = tab[idx]
-	if not pointsObj then Error("[PhysObj2D] No gridpoints for angle: " .. idx) end
-
-	-- Calculate our bindpoints.
-	self.bindPoints = {}
-	local pointsTab = pointsObj:GetPoints()
-	local siz = gamemode.Call("GetInventoryGridSize")
-	local origin = self:GetScreenHitboxPointsOrigin()
-	origin = origin + Vector2(siz * 0.5, siz * 0.5)
-
-	for i = 1, #pointsTab do
-		local point = pointsTab[i]
-		self.bindPoints[i] = origin + self.parent.itemData.gridPointsOffsets[idx] + point * siz
-	end
-
-	-- Find the associated bindpoints if they were in the backpack.
-	self.backpackBindPoints = {}
-	for i = 1, #self.bindPoints do
-		self.backpackBindPoints[i] = gamemode.Call("GetNearestScreenBindPointIndex", self.bindPoints[i])
-	end
-
-	-- Calculate if we can be put in each bindpoint.
-	-- We only need to do this if we're the held item.
-	if not GAMEMODE.HeldItem then return end
-	if GAMEMODE.HeldItem.physbox ~= self then return end
-
-	local backpack = GAMEMODE.backpack
-
-	local _, placeableList, notPlaceableList = self:GetIsPlaceableOnBinds()
-	for i = 1, #self.bindPoints do
-		local id = self.backpackBindPoints[i]
-		local cell = backpack.cellsScreenIDX[id]
-		if not cell then continue end
-
-		cell.canPlaceDraw = placeableList[i]
-		cell.cannotPlaceDraw = notPlaceableList[i]
-	end
-end
-
-function meta:GetIsPlaceableOnBinds()
-	if true then return false end
-
-	local backpack = GAMEMODE.backpack
-	local indexes = self.backpackBindPoints
-	local placeableTab, notPlaceableTab = {}, {}
-
-	-- If we find a bindpoint thats entirely outside the inventory, no dice.
-	local canPlace = true
-	local isOutside = false
-	for i = 1, #indexes do
-		if backpack.cellsScreenIDX[indexes[i]] then continue end
-
-		canPlace = false
-		isOutside = true
-		break
-	end
-
-	-- Whether we can place an item depends on what kind of item it is.
-	for i = 1, #indexes do
-		-- If any part of us is outside the play grid, mark our entirety as not placeable.
-		if isOutside then
-			notPlaceableTab[i] = true
-			placeableTab[i] = nil
-			canPlace = false
-			continue
-		end
-
-		local cell = backpack.cellsScreenIDX[indexes[i]]
-		if not cell then continue end
-
-		-- Containers can only be placed on spots that are entirely empty.
-		if self.parent.isContainer then
-			if cell:IsCompletelyEmpty() then
-				placeableTab[i] = true
-				notPlaceableTab[i] = nil
-				continue
-			end
-			if cell.heldContainer and cell.heldContainer ~= self then
-				notPlaceableTab[i] = true
-				placeableTab[i] = nil
-				canPlace = false
-			end
-		end
-
-		-- In contrast, normal items can only be placed on containers not holding anything else.
-		if self.parent.isNormalItem then
-			if cell:IsContainerButEmpty() then
-				placeableTab[i] = true
-				notPlaceableTab[i] = nil
-				continue
-			end
-			if not cell.heldContainer then
-				notPlaceableTab[i] = true
-				placeableTab[i] = nil
-				canPlace = false
-			end
-			if cell.heldItem and cell.heldItem ~= self then
-				notPlaceableTab[i] = true
-				placeableTab[i] = nil
-				canPlace = false
-			end
-		end
-
-		placeableTab[i] = not notPlaceableTab[i]
-	end
-
-	-- TODO augments
-	return canPlace, placeableTab, notPlaceableTab
 end
 
 function meta:ApplyImpulse(impulse, screenPoint)
@@ -368,79 +227,4 @@ end
 
 function meta:RerollRandomAirborneRotation()
 	self.randomAirborneRotation = math.Rand(-PHYS2D_RANDOM_AIRBORNE_ROTATION, PHYS2D_RANDOM_AIRBORNE_ROTATION)
-end
-
-function meta:RemoveFromInventoryCells()
-	if table.Count(self.boundCells) <= 0 then return end
-
-	for idx, cell in pairs(self.boundCells) do
-		-- If we are a container, what we were holding needs to pop out.
-		if self.parent.isContainer then
-			if cell.heldItem then cell.heldItem:Pop() end
-			cell.heldContainer = nil
-		elseif self.parent.isNormalItem then
-			cell.heldItem = nil
-		end
-	end
-
-	table.Empty(self.boundCells)
-	table.Empty(self.bindPointsCellIDX)
-end
-
-local ROT_STEP = math.PI * 0.5 -- 90 degrees
-function meta:GetNearest90()
-	local rot = math.Abs(self.rotation)
-	while rot > ROT_STEP do rot = rot - ROT_STEP end
-
-	-- Are we closer to zero degrees or 90?
-	local closerToZero = rot - ROT_STEP * 0.5 < 0
-
-	local rotCloserToZero = rot
-	local rotFurtherFromZero = ROT_STEP - rot
-
-	-- Turn the opposite way if we are negative.
-	if self.rotation > 0 then
-		return self.rotation + (closerToZero and -rotCloserToZero or rotFurtherFromZero)
-	else
-		return self.rotation - (closerToZero and -rotCloserToZero or rotFurtherFromZero)
-	end
-end
-
-function meta:SnapToNearest90()
-	self.desiredRotation = self:GetNearest90()
-end
-
-function meta:Rotate90CW()
-	self.desiredRotation = (self.desiredRotation or 0) + ROT_STEP
-end
-
-function meta:Rotate90CCW()
-	self.desiredRotation = (self.desiredRotation or 0) - ROT_STEP
-end
-
-function meta:EvalGridInventoryPlacement()
-	local isPlaceable, _, _ = self:GetIsPlaceableOnBinds()
-	if not isPlaceable then return end
-
-	-- Bind!
-	self:RemoveFromInventoryCells()
-
-	local indexes = self.backpackBindPoints
-	local backpack = GAMEMODE.backpack
-	for i = 1, #indexes do
-		local cell = backpack.cellsScreenIDX[indexes[i]]
-		self.boundCells[indexes[i]] = cell
-		self.bindPointsCellIDX[i] = indexes[i]
-
-		if self.parent.isContainer then
-			cell.heldContainer = self
-		elseif self.parent.isNormalItem then
-			cell.heldItem = self
-		end
-	end
-
-	--self.isPickedUp = false
-	self.isInGridInventory = true
-
-	if self.parent.itemData.PlayPlaceSound then self.parent.itemData.PlayPlaceSound() end
 end
