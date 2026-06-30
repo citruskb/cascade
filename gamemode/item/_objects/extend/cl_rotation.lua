@@ -24,9 +24,11 @@ function meta:SnapToNearest90()
 end
 
 function meta:Rotate90CW()
+	gamemode.Call("PlaySnd", "rotate", 0.16, math.Random(100, 105))
 	self.desiredRotation = (self.desiredRotation or 0) + ROT_STEP
 end
 
 function meta:Rotate90CCW()
+	gamemode.Call("PlaySnd", "rotate", 0.16, math.Random(80, 85))
 	self.desiredRotation = (self.desiredRotation or 0) - ROT_STEP
 end

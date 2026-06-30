@@ -140,10 +140,10 @@ function PANEL:Init()
 
 
 	-- Test items
-	local function MakeItem(id, origin, rad, vel)
-		local obj = gamemode.Call("NewItemObj", id, origin, rad, MySelf)
-		if vel then obj:AddVelocity(vel) end
+	local function MakeItem(id, origin, vel)
+		local obj = gamemode.Call("NewItemObj", id, origin, 0, MySelf)
 		obj:EnablePhysics()
+		if vel then obj.physbox:AddVelocity(vel) end
 	end
 
 	local function OneBox() MakeItem("wooden_crate", Vector2(0.5 * w, 0.5 * h)) end
@@ -260,7 +260,16 @@ function PANEL:Init()
 	OnePlank()
 	]]
 
+	--[[
+	OneNightstand()
+	OneLocker()
+	OneHarddrive()
+	OnePocketDimension()
 	OneBox()
+	]]
+
+	DoorBlast(1)
+	GoBananas(2)
 
 
 	--MakeItem("briefcase", Vector2(0.5 * w, 0.5 * h))

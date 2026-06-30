@@ -253,9 +253,13 @@ end
 -- Sounds
 function GM:CreateSounds()
 	self.snd_pop = CreateSound(MySelf, "items/ammocrate_open.wav")
+	self.snd_rotate = CreateSound(MySelf, "npc/zombie_poison/pz_left_foot1.wav")
 end
-function GM:PlaySnd(idx)
+function GM:PlaySnd(idx, vol, pitch)
+	vol = vol or 1
+	pitch = pitch or 100
+
 	self["snd_" .. idx]:Stop()
-	self["snd_" .. idx]:Play()
+	self["snd_" .. idx]:PlayEx(vol, pitch)
 end
 --

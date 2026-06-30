@@ -1,9 +1,23 @@
 local meta = FindMetaTable("ItemObj")
 
 function meta:StepItem()
+
+	-- Sync up with physics if we should be applying physics.
 	if self:IsPhysicsEnabled() then self:SyncWithPhysbox() end
+
+	-- Pull the object's position around while it's being held.
 	if self.isPickedUp then self:StepPickedUp() end
+
+	-- Object is being thrown back to a location it needs to be inside.
+	-- Could be back to the inventory, or back to the shop if you can't afford purchase, etc.
 	if self.isBeingPopped then self:StepPop() end
+
+	-- We applied rotation to the object. Make sure it rotates to completion.
+	-- But only if it's being held, being popped, or in the inventory.
+	if self.isPickedUp or self.isBeingPopped and
+		not math.IsNearlyEqual(self.rotation, self.desiredRotation or 0) then
+			self:StepDesiredRotation() end
+
 end
 
 function meta:SyncWithPhysbox()
@@ -18,7 +32,7 @@ function meta:StepPickedUp()
 	end
 
 	if not math.IsNearlyEqual(self.rotation, self.desiredRotation or 0) then
-		self.rotation = Lerp(0.2, self.rotation, self.desiredRotation or 0)
+		self.rotation = Lerp(0.12, self.rotation, self.desiredRotation or 0)
 	end
 end
 
@@ -34,4 +48,8 @@ function meta:StepPop()
 	self:EnablePhysics()
 	self.physbox.isSleeping = false
 	self.physbox.velocity = self.popDir * PHYS2D_POP_VELOCITY
+end
+
+function meta:StepDesiredRotation()
+	self.rotation = Lerp(0.12, self.rotation, self.desiredRotation or 0)
 end
