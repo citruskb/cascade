@@ -9,15 +9,26 @@ end
 
 PANEL = {}
 
+local SkyBlue = Color(0, 130, 220, 255)
 function PANEL:Init()
 	self.painted = false
 	self:SetZPos(GM_ZPOS_PGRID)
 	self.fov = 45
 	self.camPosOffset = Vector(0.6, 0, 0)
+	self.buffer = 8
+
+	self.shapeImg = vgui.Create("DImage", self)
+	self.shapeImg:SetImage("kiteh.png")
+	self.shapeImg:SetImageColor(SkyBlue)
+	self.shapeImg:SetVisible(false)
+
 	self:InvalidateLayout()
 end
 
 function PANEL:PerformLayout()
+	local w, h = self:GetSize()
+	self.shapeImg:SetSize(w * 0.5, h * 0.5)
+	self.shapeImg:SetPos(w * 0.25 + self.buffer / 4, h * 0.25 + self.buffer / 4)
 end
 
 function PANEL:PaintCell(r, g, b, blend)
@@ -29,13 +40,12 @@ function PANEL:PaintCell(r, g, b, blend)
 	b = b or 1
 	blend = blend or 1
 
-	local buffer = 8
 	local x, y = self:GetPos()
 	local siz = self:GetSize()
 
 	-- Adjust for the buffer
-	x, y = x + buffer, y + buffer
-	siz = siz - 2 * buffer
+	x, y = x + self.buffer, y + self.buffer
+	siz = siz - 2 * self.buffer
 
 	local mins, maxs = ent:OBBMins(), ent:OBBMaxs()
 	local center = ent:OBBCenter() + Vector(0, 0, 4.8)
@@ -64,6 +74,10 @@ function PANEL:PaintCell(r, g, b, blend)
 	render.SuppressEngineLighting(false)
 
 	return true
+end
+
+function PANEL:Think()
+	self.shapeImg:SetVisible(true)
 end
 
 function PANEL:PaintPlacementHints()

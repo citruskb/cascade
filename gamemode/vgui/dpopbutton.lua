@@ -47,12 +47,8 @@ function PANEL:ButtonActivate()
 	local items = {}
 	for i = 1, #backpack.cells do
 		local cell = backpack.cells[i]
-		if cell.heldContainer then
-			items[cell.heldContainer] = true
-		end
-		if cell.heldItem then
-			items[cell.heldItem] = true
-		end
+		if not cell.heldItem then continue end
+		items[cell.heldItem] = true
 	end
 
 	for item in pairs(items) do item:Pop() end
