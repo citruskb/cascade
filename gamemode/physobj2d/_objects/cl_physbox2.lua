@@ -77,8 +77,8 @@ function Physbox2:__Create(parent)
 	--self.isPickedUp = false
 	self.isInGridInventory = false
 
-	self.isBeingPopped = false
-	self.popTo = Vector2()
+	--self.isBeingPopped = false
+	--self.popTo = Vector2()
 
 	PhysObj2D.physboxes[self] = true
 	self.isPhysbox2 = true
@@ -210,7 +210,7 @@ function meta:Step(dt)
 
 	self:StepPhysics(dt)
 	--self:StepPickup(dt)
-	self:StepPop(dt)
+	--self:StepPop(dt)
 	self:StepGridInventory(dt)
 end
 
@@ -247,6 +247,7 @@ end
 ]]
 
 -- TODO: Cache. Refresh if we detect a screenscale change.
+--[[
 function meta:GetPopTo()
 	local w, h = ScrW(), ScrH()
 	return Vector2(w * 0.55, h * 0.5)
@@ -267,6 +268,7 @@ function meta:StepPop(dt)
 	self.isBeingPopped = false
 	self.velocity = self.popDir * PHYS2D_POP_VELOCITY
 end
+]]
 
 function meta:StepGridInventory(dt)
 	if not self.isInGridInventory then return end
@@ -482,7 +484,7 @@ function meta:RemoveFromInventoryCells()
 	for idx, cell in pairs(self.boundCells) do
 		-- If we are a container, what we were holding needs to pop out.
 		if self.parent.isContainer then
-			--if cell.heldItem then cell.heldItem:Pop() end
+			if cell.heldItem then cell.heldItem:Pop() end
 			cell.heldContainer = nil
 		elseif self.parent.isNormalItem then
 			cell.heldItem = nil
@@ -494,6 +496,7 @@ function meta:RemoveFromInventoryCells()
 end
 
 -- Move from where it is back to inventory.
+--[[
 function meta:Pop()
 	if self.isStatic then return end
 
@@ -504,6 +507,7 @@ function meta:Pop()
 
 	gamemode.Call("PlaySnd", "pop")
 end
+]]
 
 local ROT_STEP = math.PI * 0.5 -- 90 degrees
 function meta:GetNearest90()

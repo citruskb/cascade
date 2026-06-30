@@ -98,7 +98,7 @@ function PANEL:EvaluateDrawLayer(physbox, isOrtho)
 	if physbox.isInGridInventory and (physbox.parent.isNormalItem or physbox.parent.isAugment) then return DRAW_LAYER_PLACED_ITEM end
 	if physbox.isInGridInventory and physbox.parent.isContainer then return DRAW_LAYER_PLACED_CONTAINER end
 	if GAMEMODE.HeldItem and GAMEMODE.HeldItem.physbox == physbox then return physbox.parent.isContainer and DRAW_LAYER_PLACED_CONTAINER or DRAW_LAYER_HELD_ITEM end
-	if physbox.isBeingPopped then return DRAW_LAYER_POPPED end
+	if physbox.parent.isBeingPopped then return DRAW_LAYER_POPPED end
 	if not isOrtho then return DRAW_LAYER_PHYSICS_INVENTORY end
 
 	return DRAW_LAYER_PHYSICS_INVENTORY

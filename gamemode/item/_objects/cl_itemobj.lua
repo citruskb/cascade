@@ -28,6 +28,9 @@ function ItemObj:__Create(itemDataID, position, rotation, owner)
 
 	self.isPickedUp = false
 
+	self.isBeingPopped = false
+	self.poppedDir = Vector2()
+
 	self.isItemObj = true
 
 	GAMEMODE.itemObjs[self] = true
@@ -87,7 +90,7 @@ function meta:MouseDrop(isInsideInventoryBounds)
 		local _, y = self:GetAdjCamPosition():Unpack()
 		self.physbox:AddVelocity(GAMEMODE.CachedMouseVelocity * (y < 0 and 0.1 or 1))
 	else
-		self.physbox:Pop()
+		self:Pop()
 	end
 end
 
@@ -95,7 +98,7 @@ function meta:MouseCanGrab()
 	return
 		self.physbox and
 		not self.physbox.isStatic and
-		not self.physbox.isBeingPopped and
+		not self.isBeingPopped and
 		not self.physbox.isCamOrthoLocked
 end
 

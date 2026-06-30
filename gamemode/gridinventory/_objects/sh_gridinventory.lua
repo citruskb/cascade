@@ -36,7 +36,7 @@ function meta:PopUncontainedItems()
 		local cell = self.cells[i]
 		if not cell:IsFilledButShouldntBe() then continue end
 
-		cell.heldItem.physbox:Pop()
+		cell.heldItem:Pop()
 	end
 end
 
