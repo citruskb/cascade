@@ -29,7 +29,7 @@ function meta:StepItem()
 
 	-- We applied rotation to the object. Make sure it rotates to completion.
 	-- But only if it's being held, being popped, or in the inventory.
-	if self.isPickedUp or self.isBeingPopped and
+	if self.isPickedUp or self.isBeingPopped or self.isInGridInventory and
 		not math.IsNearlyEqual(self.rotation, self.desiredRotation or 0) then
 			self:StepDesiredRotation() end
 
@@ -79,7 +79,7 @@ end
 function meta:StepBindPoints()
 	self.gridPointEvaluator:EvaluateBindPoints(self:GetPhysboxPointsOrigin(), self.desiredRotation)
 	self.gridPointEvaluator:EvaluateBackpackBindPoints()
-	self.gridPointEvaluator:EvaluateDrawnBackpackGrid()
+	self.gridPointEvaluator:EvaluateDrawnBackpackGrid(self)
 end
 
 function meta:StepDesiredRotation()

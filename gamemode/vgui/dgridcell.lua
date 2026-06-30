@@ -19,10 +19,6 @@ end
 function PANEL:PerformLayout()
 end
 
-function PANEL:RefreshBackpackBindPoint()
-
-end
-
 function PANEL:Paint()
 	local backpack = GAMEMODE.backpack
 	if not backpack then return end
@@ -73,8 +69,8 @@ function PANEL:Paint()
 	local held = GAMEMODE.HeldItem
 	local contained = false
 	if held then
-		for i = 1, #held.physbox.backpackBindPoints do
-			local idx = held.physbox.backpackBindPoints[i]
+		for i = 1, #held.gridPointEvaluator.backpackBindPoints do
+			local idx = held.gridPointEvaluator.backpackBindPoints[i]
 			if idx ~= self.bindPointIndex then continue end
 
 			contained = true

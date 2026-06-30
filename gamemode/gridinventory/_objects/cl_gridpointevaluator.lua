@@ -58,7 +58,7 @@ end
 
 function meta:EvaluateDrawnBackpackGrid(item)
 	if not GAMEMODE.HeldItem then return end
-	if GAMEMODE.HeldItem ~= self then return end
+	if GAMEMODE.HeldItem ~= item then return end
 
 	local backpack = GAMEMODE.backpack
 	local _, placeableList, notPlaceableList = backpack:GetIsPlaceableOnBinds(item, self.backpackBindPoints)
