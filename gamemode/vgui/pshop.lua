@@ -14,6 +14,8 @@ function PANEL:Init()
 	self:Center()
 	self.Create = SysTime()
 
+	local screenscale = ScreenScale()
+
 	-- Top left: inventory grid
 	-- Bottom left: stats
 	-- Center: storage
@@ -136,6 +138,12 @@ function PANEL:Init()
 	lab = EasyLabel(shopkeep, "Shopkeep", "SFontLarger")
 	DockCenter(lab, right)
 	--
+
+
+	-- pop button
+	local popButton = vgui.Create("DPopButton", self)
+	popButton:SetSize(screenscale * 32, screenscale * 32)
+	popButton:SetPos(w * 0.4 - screenscale * 32, h * 0.6 - screenscale * 32)
 
 
 
@@ -262,7 +270,7 @@ function PANEL:Init()
 	--MakeItem("plank", Vector2(0.5 * w, 0.5 * h))
 
 	-- Free the mouse.
-	gui.EnableScreenClicker(true)
+	self:MakePopupMouse()
 end
 
 function PANEL:Paint()
@@ -291,6 +299,7 @@ function GM:ShowHelp(pl)
 		if IsValid(self.pGridInventory) then self.pGridInventory:Remove() end
 		if IsValid(self.pMyPlayerModel) then self.pMyPlayerModel:Remove() end
 		if IsValid(self.pMyPlayerStats) then self.pMyPlayerStats:Remove() end
+		--if IsValid(self.dPopButton) then GAMEMODE.dPopButton:Remove() end
 
 		return
 	end
@@ -313,3 +322,10 @@ function GM:ShowHelp(pl)
 	self.pMyPlayerStats = vgui.Create("DPlayerStats")
 	self.pMyPlayerStats:SetPlayer(MySelf)
 end
+
+hook.Add("OnPauseMenuShow", "OnPauseMenuShow.Shop", function()
+	if not IsValid(GAMEMODE.pShop) then return true end
+	gamemode.Call("ShowHelp", MySelf)
+
+	return true
+end)

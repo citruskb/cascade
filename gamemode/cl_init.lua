@@ -3,15 +3,18 @@ include("sh_convars.lua")
 include("sh_registeritems.lua")
 
 include("cl_dermaskin.lua")
+include("cl_extendpanel.lua")
 include("cl_handlemouse.lua")
 include("cl_debug.lua")
 
 include("vgui/dgridcell.lua")
 include("vgui/dplayermodel.lua")
 include("vgui/dplayerstats.lua")
+include("vgui/dpopbutton.lua")
 include("vgui/pgridinventory.lua")
 include("vgui/piteminfo.lua")
 include("vgui/pshop.lua")
+
 include("vgui/pphysobj2doverlay.lua")
 
 GM_ZPOS_ITEM_DESC = 12

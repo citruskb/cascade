@@ -10,6 +10,7 @@ end
 PANEL = {}
 
 function PANEL:Init()
+	self.painted = false
 	self:SetZPos(GM_ZPOS_PGRID)
 	self.fov = 45
 	self.camPosOffset = Vector(0.6, 0, 0)
@@ -19,15 +20,14 @@ end
 function PANEL:PerformLayout()
 end
 
-function PANEL:Paint()
-	local backpack = GAMEMODE.backpack
-	if not backpack then return end
-
-	local boundCell = backpack.cellsScreenIDX[self.bindPointIndex]
-	if not boundCell.canPlaceDraw and not boundCell.cannotPlaceDraw then return end
-
+function PANEL:PaintCell(r, g, b, blend)
 	local ent = GAMEMODE.CellProp
 	if not IsValid(ent) then return end
+
+	r = r or 1
+	g = g or 1
+	b = b or 1
+	blend = blend or 1
 
 	local buffer = 8
 	local x, y = self:GetPos()
@@ -50,11 +50,8 @@ function PANEL:Paint()
 
 	cam.Start3D(camPos, ang, self.fov, x, y, siz, siz, 8, 64)
 		render.OverrideDepthEnable(true, false)
-		render.SetColorModulation(
-			not boundCell.canPlaceDraw and boundCell.cannotPlaceDraw and 1 or 0,
-			not boundCell.cannotPlaceDraw and boundCell.canPlaceDraw and 1 or 0,
-			0)
-		render.SetBlend(0.7)
+		render.SetColorModulation(r, g, b)
+		render.SetBlend(blend)
 
 		GAMEMODE.CellProp:DrawModel()
 
@@ -65,6 +62,26 @@ function PANEL:Paint()
 
 	cam.IgnoreZ(false)
 	render.SuppressEngineLighting(false)
+
+	return true
+end
+
+function PANEL:PaintPlacementHints()
+	local backpack = GAMEMODE.backpack
+	if not backpack then return end
+
+	local boundCell = backpack.cellsScreenIDX[self.bindPointIndex]
+	if not boundCell.canPlaceDraw and not boundCell.cannotPlaceDraw then return end
+
+	self.painted = self:PaintCell(
+		-- Color modulation
+		not boundCell.canPlaceDraw and boundCell.cannotPlaceDraw and 1 or 0,
+		not boundCell.cannotPlaceDraw and boundCell.canPlaceDraw and 1 or 0,
+		0,
+
+		-- blend
+		0.7
+	)
 
 	local held = GAMEMODE.HeldItem
 	local contained = false
@@ -86,6 +103,35 @@ function PANEL:Paint()
 		if not contained then return end
 		timer.Create(ToString(self) .. "_cannotPlaceDraw", 0.066, 1, function() boundCell.cannotPlaceDraw = nil end)
 	end
+end
+
+function PANEL:PaintHintCells()
+	if self.painted then return end
+
+	local held = GAMEMODE.HeldItem
+	if not held then return end
+
+	local backpack = GAMEMODE.backpack
+	if not backpack then return end
+
+	local boundCell = backpack.cellsScreenIDX[self.bindPointIndex]
+
+	-- Only draw cells we care to hint about.
+
+	if held.isContainer and boundCell.heldContainer and boundCell.heldContainer ~= held then
+		return
+	end
+	if (held.isNormalItem or held.isAugment) and (boundCell.heldItem and boundCell.heldItem ~= held or not boundCell.heldContainer) then
+		return
+	end
+
+	self:PaintCell(0.9, 0.9, 0.9, 0.6)
+end
+
+function PANEL:Paint()
+	self.painted = false
+	self:PaintPlacementHints()
+	self:PaintHintCells()
 end
 
 vgui.Register("DGridCell", PANEL, "DPanel")

@@ -30,6 +30,7 @@ function ItemObj:__Create(itemDataID, position, rotation, owner)
 	self.isPickedUp = false
 
 	self.isBeingPopped = false
+	self.popTo = Vector2()
 	self.poppedDir = Vector2()
 
 	self.isInGridInventory = false

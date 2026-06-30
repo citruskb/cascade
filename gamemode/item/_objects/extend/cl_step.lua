@@ -56,9 +56,10 @@ function meta:StepPop()
 	self.position:DoAdd(self.popDir * popMagdt)
 
 	-- Check if we've reached our destination.
-	if self.position:DistanceSqr(gamemode.Call("GetPopTo")) >= popMagdt * popMagdt then return end
+	if self.position:DistanceSqr(self.popTo) >= popMagdt * popMagdt then return end
 
 	self.isBeingPopped = false
+	self.popTo:SetUnpacked(0, 0)
 
 	self:EnablePhysics()
 	self.physbox.isSleeping = false
