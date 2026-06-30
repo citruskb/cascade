@@ -102,9 +102,7 @@ function meta:RemoveFromInventoryCells()
 	if table.Count(self.boundCells) <= 0 then return end
 
 	for idx, cell in pairs(self.boundCells) do
-		-- If we are a container, what we were holding needs to pop out.
 		if self.itemType == ITEM_TYPE_CONTAINER then
-			if cell.heldItem then cell.heldItem:Pop() end
 			cell.heldContainer = nil
 		elseif self.itemType == ITEM_TYPE_NORMAL then
 			cell.heldItem = nil
