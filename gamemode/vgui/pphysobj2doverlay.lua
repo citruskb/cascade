@@ -40,7 +40,7 @@ function PANEL:SetupPaintVars(obj)
 
 	-- Our size needs to be large enough to handle however our object is rotated. 
 	-- Our X and Y originates based on this as well.
-	local x, y = obj.physbox:GetAdjCamPosition():Unpack()
+	local x, y = obj:GetAdjCamPosition():Unpack()
 	local w, h = obj.physbox.fDist, obj.physbox.fDist
 
 	local objAng = math.Ang(-obj.rotation) + data.camAngleOffsetAdj
@@ -57,7 +57,7 @@ function PANEL:SetupPaintVars(obj)
 	local isOrtho = obj.physbox.isCamOrthoLocked
 	if not isOrtho then
 		local inBounds = obj.physbox:IsInsideInventoryBounds()
-		isOrtho = not inBounds or inBounds and (obj.physbox.isPickedUp or obj.physbox.isBeingPushed)
+		isOrtho = not inBounds or inBounds and (obj.isPickedUp or obj.physbox.isBeingPushed)
 	end
 
 	center, camPos, x, y, zsqr = self:EvaluateCameraPos(center, camPosOffset, dist, x, y, data.camOffScreenAdjScale, sizeAdjust, objAng, isOrtho)

@@ -74,7 +74,7 @@ function Physbox2:__Create(parent)
 	self.bindPointsCellIDX = {}
 
 	self.isScreenScaled = parent.isScreenScaled
-	self.isPickedUp = false
+	--self.isPickedUp = false
 	self.isInGridInventory = false
 
 	self.isBeingPopped = false
@@ -209,7 +209,7 @@ function meta:Step(dt)
 	self.aabbRaw = nil
 
 	self:StepPhysics(dt)
-	self:StepPickup(dt)
+	--self:StepPickup(dt)
 	self:StepPop(dt)
 	self:StepGridInventory(dt)
 end
@@ -229,6 +229,7 @@ function meta:StepPhysics(dt)
 	end
 end
 
+--[[
 function meta:StepPickup(dt)
 	if not self.isPickedUp and not self.isBeingPushed and not self.isInGridInventory then return end
 
@@ -243,6 +244,7 @@ function meta:StepPickup(dt)
 
 	self:UpdateParentPosAndRot()
 end
+]]
 
 -- TODO: Cache. Refresh if we detect a screenscale change.
 function meta:GetPopTo()
@@ -282,7 +284,7 @@ end
 function meta:UpdateParentPosAndRot()
 	self.parent.position:Set(self.position)
 	self.parent.rotation = self.rotation
-	self:EvalBindPoints()
+	--self:EvalBindPoints()
 end
 
 function meta:EvalBindPoints()
@@ -333,6 +335,8 @@ function meta:EvalBindPoints()
 end
 
 function meta:GetIsPlaceableOnBinds()
+	if true then return false end
+
 	local backpack = GAMEMODE.backpack
 	local indexes = self.backpackBindPoints
 	local placeableTab, notPlaceableTab = {}, {}
@@ -409,18 +413,21 @@ function meta:ApplyImpulse(impulse, screenPoint)
 	self:AddAngularVelocity(angularImpulse / self.momentOfInertia)
 end
 
+--[[
 function meta:MousePickup(isInsideInventoryBounds)
 	self:DisablePhysics()
 	self:SnapToNearest90()
 	self.isSleeping = false
 	self.isInGridInventory = false
-	self.isPickedUp = true
+	--self.isPickedUp = true
 end
+]]
 
 function meta:RerollRandomAirborneRotation()
 	self.randomAirborneRotation = math.Rand(-PHYS2D_RANDOM_AIRBORNE_ROTATION, PHYS2D_RANDOM_AIRBORNE_ROTATION)
 end
 
+--[[
 function meta:MouseDrop(isInsideInventoryBounds)
 	self.isPickedUp = false
 	self.isCamOrthoLocked = true
@@ -437,17 +444,22 @@ function meta:MouseDrop(isInsideInventoryBounds)
 		self:Pop()
 	end
 end
+]]
 
+--[[
 function meta:MouseCanGrab()
 	return
 		not self.isStatic and
 		not self.isBeingPopped and
 		not self.isCamOrthoLocked
 end
+]]
 
+--[[
 function meta:GetAdjCamPosition()
 	return self:GetCenterScreenPoint() + self.camXYOffset + self.parent.itemData.camXYOffsetAdj
 end
+]]
 
 function meta:IsInsideInventoryBounds()
 	local x, y = self.position:Unpack()
@@ -545,7 +557,7 @@ function meta:EvalGridInventoryPlacement()
 		end
 	end
 
-	self.isPickedUp = false
+	--self.isPickedUp = false
 	self.isInGridInventory = true
 
 	if self.parent.itemData.PlayPlaceSound then self.parent.itemData.PlayPlaceSound() end

@@ -112,7 +112,7 @@ function PhysObj2D:HashGridCollisions()
 
 	local objects = {}
 	for physbox, _ in pairs(self.physboxes) do
-		if physbox.isPickedUp or physbox.isBeingPopped or physbox.isInGridInventory then continue end
+		if physbox.parent.isPickedUp or physbox.isBeingPopped or physbox.isInGridInventory then continue end
 		table.Insert(objects, physbox)
 	end
 

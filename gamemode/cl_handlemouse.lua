@@ -21,7 +21,8 @@ function LookForClosestPickup()
 	local closest
 	for hitbox, _ in pairs(PhysObj2D.hitboxes) do
 		local physbox = hitbox.physbox
-		if not physbox:MouseCanGrab() then continue end
+		if not physbox.parent.MouseCanGrab then continue end
+		if not physbox.parent:MouseCanGrab() then continue end
 
 		local pointsObj = hitbox:GetHBScreenPointsObj()
 		local center = pointsObj:GetCenter()
@@ -140,7 +141,7 @@ function GM:LeftMouseClick()
 	if not self.HeldItem then return end
 
 	local insideBounds = self.HeldItem:IsInsideInventoryBounds()
-	self.HeldItem:MousePickup(insideBounds)
+	self.HeldItem.parent:MousePickup(insideBounds)
 	gamemode.Call("InventoryItemPickedUp", self.HeldItem.parent, insideBounds)
 end
 
@@ -157,7 +158,7 @@ function GM:LeftMouseRelease()
 	end
 
 	local insideBounds = self.HeldItem:IsInsideInventoryBounds()
-	self.HeldItem:MouseDrop(insideBounds)
+	self.HeldItem.parent:MouseDrop(insideBounds)
 	gamemode.Call("InventoryItemDropped", self.HeldItem.parent, insideBounds)
 
 	self.HeldItem = nil

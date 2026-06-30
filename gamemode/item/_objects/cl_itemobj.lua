@@ -26,6 +26,8 @@ function ItemObj:__Create(itemDataID, position, rotation, owner)
 
 	self:InitPhysbox()
 
+	self.isPickedUp = false
+
 	self.isItemObj = true
 
 	GAMEMODE.itemObjs[self] = true
@@ -51,9 +53,51 @@ function meta:InitPhysbox()
 	end
 end
 
-function meta:EnablePhysics() self.physbox:EnablePhysics() end
+function meta:EnablePhysics()
+	self.desiredRotation = nil
+
+	self.physbox.position:Set(self.position)
+	self.physbox.rotation = self.rotation
+
+	self.physbox:EnablePhysics()
+end
 function meta:DisablePhysics() self.physbox:DisablePhysics() end
 function meta:IsPhysicsEnabled() return self.physbox.isPhysicsEnabled end
+
+function meta:MousePickup(isInsideInventoryBounds)
+	self.isPickedUp = true
+
+	self:DisablePhysics()
+	self:SnapToNearest90()
+	self.physbox.isSleeping = false
+	self.physbox.isInGridInventory = false
+end
+
+function meta:MouseDrop(isInsideInventoryBounds)
+	self.isPickedUp = false
+
+	self.physbox.isCamOrthoLocked = true
+	self.physbox:RerollRandomAirborneRotation()
+
+	if isInsideInventoryBounds then
+		self.physbox:RemoveFromInventoryCells()
+		self:EnablePhysics()
+
+		-- Mitigate tossing the ortho view upwards.
+		local _, y = self:GetAdjCamPosition():Unpack()
+		self.physbox:AddVelocity(GAMEMODE.CachedMouseVelocity * (y < 0 and 0.1 or 1))
+	else
+		self.physbox:Pop()
+	end
+end
+
+function meta:MouseCanGrab()
+	return
+		self.physbox and
+		not self.physbox.isStatic and
+		not self.physbox.isBeingPopped and
+		not self.physbox.isCamOrthoLocked
+end
 
 function meta:Remove()
 	GAMEMODE.itemObjs[self] = nil
