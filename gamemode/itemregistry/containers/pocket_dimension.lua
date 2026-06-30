@@ -41,6 +41,8 @@ ITEM.gridPointsOffsets = {
 	[270] = Vector2(4, 4),
 }
 
+ITEM.gridPointsSynergies = {}
+
 ITEM.PlayPlaceSound = function()
 	surface.PlaySound("weapons/physcannon/energy_bounce" .. math.Random(1, 2) .. ".wav")
 end

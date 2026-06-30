@@ -144,6 +144,21 @@ ITEM.gridPointsOffsets = {
 	[270] = Vector2(-26, -32),
 }
 
+ITEM.gridPointsSynergies = {
+	[0] = {
+		kite = Points({Vector2(0, -1), Vector2(1, 0), Vector2(2, 1), Vector2(1, 2), Vector2(0, 2), Vector2(-1, 1), Vector2(-1, 0)})
+	},
+	[90] = {
+		kite = Points({Vector2(0, -1), Vector2(1, -1), Vector2(2, 0), Vector2(1, 1), Vector2(0, 2), Vector2(-1, 1), Vector2(-1, 0)})
+	},
+	[180] = {
+		kite = Points({Vector2(0, -1), Vector2(1, -1), Vector2(2, 0), Vector2(2, 1), Vector2(1, 2), Vector2(0, 1), Vector2(-1, 0)})
+	},
+	[270] = {
+		kite = Points({Vector2(0, 0), Vector2(1, -1), Vector2(2, 0), Vector2(2, 1), Vector2(1, 2), Vector2(0, 2), Vector2(-1, 1)})
+	}
+}
+
 ITEM.PlayPlaceSound = function()
 	surface.PlaySound("physics/flesh/flesh_squishy_impact_hard" .. math.Random(1, 4) .. ".wav")
 end

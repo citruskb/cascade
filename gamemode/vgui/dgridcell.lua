@@ -18,7 +18,7 @@ function PANEL:Init()
 	self.buffer = 8
 
 	self.shapeImg = vgui.Create("DImage", self)
-	self.shapeImg:SetImage("kiteh.png")
+	self.shapeImg:SetImage("kite.png")
 	self.shapeImg:SetImageColor(SkyBlue)
 	self.shapeImg:SetVisible(false)
 
@@ -77,7 +77,22 @@ function PANEL:PaintCell(r, g, b, blend)
 end
 
 function PANEL:Think()
-	self.shapeImg:SetVisible(true)
+	if not IsValid(GAMEMODE.pItemData) and self.shapeImg:IsVisible() then
+		self.shapeImg:SetVisible(false)
+	end
+
+	self:EvaluateShownSynergy(IsValid(GAMEMODE.pItemData) and GAMEMODE.pItemData.item or GAMEMODE.HeldItem)
+end
+
+function PANEL:EvaluateShownSynergy(item)
+	if not item then return end
+
+	local synergyPoints = item.gridPointEvaluator.backpackSynergyPoints
+
+	if synergyPoints.kite then
+		local showSynergy = synergyPoints["kite"][self.bindPointIndex]
+		if showSynergy then self.shapeImg:SetVisible(true) end
+	end
 end
 
 function PANEL:PaintPlacementHints()

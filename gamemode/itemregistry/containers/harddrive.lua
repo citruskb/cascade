@@ -37,6 +37,8 @@ ITEM.gridPointsOffsets = {
 	[270] = Vector2(-55, 38),
 }
 
+ITEM.gridPointsSynergies = {}
+
 ITEM.PlayPlaceSound = function()
 	surface.PlaySound("physics/metal/metal_computer_impact_soft" .. math.Random(1, 3) .. ".wav")
 end

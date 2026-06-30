@@ -12,14 +12,12 @@ function PANEL:Init()
 	self.richtxt = vgui.Create("RichText", self.frame)
 end
 
-function PANEL:SetItemData(itemData)
-	if not itemData then return end
+function PANEL:SetItem(item)
+	if not item then return end
+	if self.item and item.id == self.item.id then return end
 
-	local oldID = self.itemID
-	self.itemID = itemData.id
-	if oldID == self.itemID then return end
-
-	self.data = itemData
+	self.item = item
+	self.data = item.itemData
 	self:InvalidateLayout()
 end
 

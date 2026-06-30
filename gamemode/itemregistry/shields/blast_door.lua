@@ -37,6 +37,8 @@ ITEM.gridPointsOffsets = {
 	[270] = Vector2(25, -56),
 }
 
+ITEM.gridPointsSynergies = {}
+
 ITEM.PlayPlaceSound = function()
 	surface.PlaySound("doors/door_metal_large_chamber_close1.wav")
 	surface.PlaySound("player/footsteps/metalgrate" .. math.Random(1, 4) .. ".wav")

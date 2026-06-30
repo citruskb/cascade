@@ -4,13 +4,16 @@ end
 
 local meta = FindMetaTable("GridPointEvaluator")
 
-function GridPointEvaluator:__Create(gridPointsTable, gridPointsOffsets, itemType)
+function GridPointEvaluator:__Create(gridPointsTable, gridPointsOffsets, synergyPointsTable, itemType)
 	self.gridPointsTable = gridPointsTable
 	self.gridPointsOffsets = gridPointsOffsets
+	self.synergyPointsTable = synergyPointsTable
 	self.itemType = itemType
 
 	self.bindPoints = {}
+	self.bindPointOriginIDX = ""
 	self.backpackBindPoints = {}
+	self.backpackSynergyPoints = {}
 	self.boundCells = {}
 	self.bindPointsCellIDX = {}
 	self.cleared = true
@@ -21,9 +24,11 @@ function GridPointEvaluator:ToString() return "[GridPointEvaluator]" end
 
 function meta:Clear()
 	self.bindPoints = {}
+	self.bindPointOriginIDX = ""
 	self.backpackBindPoints = {}
 	self.boundCells = {}
 	self.bindPointsCellIDX = {}
+	self.idx = nil
 	self.cleared = true
 end
 
@@ -31,18 +36,18 @@ function meta:EvaluateBindPoints(origin, rotation)
 	if not self.gridPointsTable then Error("[PhysObj2D] Unbound gridpoints") end
 
 	local ang = math.Ang(rotation)
-	local idx = math.Round(ang, 0) % 360
+	self.idx = math.Round(ang, 0) % 360
 
-	if not self.gridPointsTable[idx] then Error("[PhysObj2D] No gridpoints for angle: " .. idx) end
+	if not self.gridPointsTable[self.idx] then Error("[PhysObj2D] No gridpoints for angle: " .. self.idx) end
 
 	-- Calculate our bindpoints.
 	self.bindPoints = {}
-	local pointsTab = self.gridPointsTable[idx]:GetPoints()
+	local pointsTab = self.gridPointsTable[self.idx]:GetPoints()
 	local siz = gamemode.Call("GetInventoryGridSize")
 	origin = origin + Vector2(siz * 0.5, siz * 0.5)
 
 	for i = 1, #pointsTab do
-		self.bindPoints[i] = origin + self.gridPointsOffsets[idx] + pointsTab[i] * siz
+		self.bindPoints[i] = origin + self.gridPointsOffsets[self.idx] + pointsTab[i] * siz
 	end
 
 	self.cleared = false
@@ -53,6 +58,30 @@ function meta:EvaluateBackpackBindPoints()
 	self.backpackBindPoints = {}
 	for i = 1, #self.bindPoints do
 		self.backpackBindPoints[i] = gamemode.Call("GetNearestScreenBindPointIndex", self.bindPoints[i])
+	end
+end
+
+function meta:CalculateBackpackPointsOriginIDX()
+	local gridPointsFirst = self.gridPointsTable[self.idx]:GetPoints()[1]
+	self.bindPointsOriginIDX =
+		gridPointsFirst:IsZero() and self.backpackBindPoints[1] or
+		gamemode.Call("TranslateBindPointIndex", self.backpackBindPoints[1], -gridPointsFirst)
+end
+
+function meta:EvaluateBackpackSynergyPoints()
+	self.backpackSynergyPoints = {}
+
+	local data = self.synergyPointsTable[self.idx]
+	if not data then return end
+
+	for typ, pointsObj in pairs(data) do
+		local pointsTab = pointsObj:GetPoints()
+		local synergies = {}
+		for i = 1, #pointsTab do
+			synergies[gamemode.Call("TranslateBindPointIndex", self.bindPointsOriginIDX, pointsTab[i])] = true
+		end
+
+		self.backpackSynergyPoints[typ] = synergies
 	end
 end
 

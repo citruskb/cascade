@@ -40,6 +40,8 @@ ITEM.gridPointsOffsets = {
 	[270] = Vector2(-66, 28),
 }
 
+ITEM.gridPointsSynergies = {}
+
 ITEM.PlayPlaceSound = function()
 	surface.PlaySound("physics/wood/wood_box_impact_bullet" .. math.Random(1, 3) .. ".wav")
 end

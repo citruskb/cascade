@@ -79,7 +79,7 @@ function GM:HandleMousePos()
 	-- If our panel exists, update it.
 	if IsValid(self.pItemData) then
 		if closestPickup then
-			self.pItemData:SetItemData(closestPickup.itemData)
+			self.pItemData:SetItem(closestPickup)
 		else
 			self.pItemData:Remove()
 		end
@@ -89,24 +89,8 @@ function GM:HandleMousePos()
 
 	if closestPickup then
 		self.pItemData = vgui.Create("PItemInfo")
-		self.pItemData:SetItemData(closestPickup.itemData)
+		self.pItemData:SetItem(closestPickup)
 	end
-
-
-	--[[
-
-	if not closestPickup then
-		if IsValid(self.pItemData) then
-			self.pItemData:Remove()
-		end
-		return
-	end
-
-	if IsValid(self.pItemData) and self.pItemData.itemID == closestPickup.parent.itemData.id then return end
-
-	self.pItemData = vgui.Create("PItemInfo")
-	self.pItemData:SetItemData(closestPickup.parent.itemData)
-	]]
 end
 
 function GM:HandleMouseFirst()

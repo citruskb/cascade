@@ -37,6 +37,8 @@ ITEM.gridPointsOffsets = {
 	[270] = Vector2(-132, 115),
 }
 
+ITEM.gridPointsSynergies = {}
+
 local PlaceSounds = {
 	[1] = "doors/door_metal_thin_open1.wav",
 	[2] = "doors/door_metal_thin_close2.wav",

@@ -84,6 +84,10 @@ end
 if SERVER then return end
 
 local function GetGridID(x, y) return ToString(x) .. "x" .. ToString(y) end
+local function GetGridCoords(id)
+	local tab = string.Explode("x", id)
+	return tab[1], tab[2]
+end
 local function InitScreenWideGrid()
 	GAMEMODE.screenBindPoints = {}
 	GAMEMODE.screenBindPointsByID = {}
@@ -130,4 +134,10 @@ end
 
 function GM:GetNearestScreenBindPointIndex(vec2)
 	return GetGridID(self:GetNearestScreenBindPointXY(vec2))
+end
+
+function GM:TranslateBindPointIndex(id, vec2)
+	local x1, y1 = GetGridCoords(id)
+	local x2, y2 = vec2:Unpack()
+	return GetGridID(x1 + x2, y1 + y2)
 end

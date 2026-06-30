@@ -80,6 +80,8 @@ end
 function meta:StepBindPoints()
 	self.gridPointEvaluator:EvaluateBindPoints(self:GetPhysboxPointsOrigin(), self.desiredRotation)
 	self.gridPointEvaluator:EvaluateBackpackBindPoints()
+	self.gridPointEvaluator:CalculateBackpackPointsOriginIDX()
+	self.gridPointEvaluator:EvaluateBackpackSynergyPoints()
 	self.gridPointEvaluator:EvaluateDrawnBackpackGrid(self)
 end
 

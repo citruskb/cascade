@@ -4,6 +4,7 @@ function meta:InitGridPointEvaluator()
 	self.gridPointEvaluator = GridPointEvaluator:Create(
 		self.itemData.gridPoints,
 		self.itemData.gridPointsOffsets,
+		self.itemData.gridPointsSynergies,
 		self.itemData.type
 	)
 end

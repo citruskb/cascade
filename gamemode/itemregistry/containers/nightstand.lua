@@ -37,6 +37,8 @@ ITEM.gridPointsOffsets = {
 	[270] = Vector2(-93, 83),
 }
 
+ITEM.gridPointsSynergies = {}
+
 ITEM.PlayPlaceSound = function()
 	local roll = math.Random(1, 4)
 	for i = 1, 2 do
