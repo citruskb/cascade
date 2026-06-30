@@ -56,7 +56,7 @@ function PANEL:SetupPaintVars(obj)
 	self:EvaluateOrthoLock(x, y, obj.physbox)
 	local isOrtho = obj.physbox.isCamOrthoLocked
 	if not isOrtho then
-		local inBounds = obj.physbox:IsInsideInventoryBounds()
+		local inBounds = obj:IsInsideInventoryBounds()
 		isOrtho = not inBounds or inBounds and (obj.isPickedUp or obj.physbox.isBeingPushed)
 	end
 

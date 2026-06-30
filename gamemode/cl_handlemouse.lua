@@ -136,9 +136,8 @@ function GM:LeftMouseClick()
 	self.HeldItem = LookForClosestPickup()
 	if not self.HeldItem then return end
 
-	local insideBounds = self.HeldItem.physbox:IsInsideInventoryBounds()
-	self.HeldItem:MousePickup(insideBounds)
-	gamemode.Call("InventoryItemPickedUp", self.HeldItem, insideBounds)
+	self.HeldItem:MousePickup()
+	gamemode.Call("InventoryItemPickedUp", self.HeldItem, self.HeldItem:IsInsideInventoryBounds())
 end
 
 function GM:LeftMouseRelease()
@@ -153,9 +152,8 @@ function GM:LeftMouseRelease()
 		return
 	end
 
-	local insideBounds = self.HeldItem.physbox:IsInsideInventoryBounds()
-	self.HeldItem:MouseDrop(insideBounds)
-	gamemode.Call("InventoryItemDropped", self.HeldItem, insideBounds)
+	self.HeldItem:MouseDrop()
+	gamemode.Call("InventoryItemDropped", self.HeldItem, self.HeldItem:IsInsideInventoryBounds())
 
 	self.HeldItem = nil
 	self.backpack:PopUncontainedItems()

@@ -67,7 +67,7 @@ end
 function meta:DisablePhysics() self.physbox:DisablePhysics() end
 function meta:IsPhysicsEnabled() return self.physbox.isPhysicsEnabled end
 
-function meta:MousePickup(isInsideInventoryBounds)
+function meta:MousePickup()
 	self.isPickedUp = true
 
 	self:DisablePhysics()
@@ -76,13 +76,13 @@ function meta:MousePickup(isInsideInventoryBounds)
 	self.physbox.isInGridInventory = false
 end
 
-function meta:MouseDrop(isInsideInventoryBounds)
+function meta:MouseDrop()
 	self.isPickedUp = false
 
 	self.physbox.isCamOrthoLocked = true
 	self.physbox:RerollRandomAirborneRotation()
 
-	if isInsideInventoryBounds then
+	if self:IsInsideInventoryBounds() then
 		self.physbox:RemoveFromInventoryCells()
 		self:EnablePhysics()
 
@@ -100,6 +100,21 @@ function meta:MouseCanGrab()
 		not self.physbox.isStatic and
 		not self.isBeingPopped and
 		not self.physbox.isCamOrthoLocked
+end
+
+function meta:IsInsideInventoryBounds()
+	local x, y = self.position:Unpack()
+	local floorAABB = GAMEMODE.InventoryFloor.physbox:GetAABB()
+	local leftWallAABB = GAMEMODE.InventoryLeftWall.physbox:GetAABB()
+	local rightWallAABB = GAMEMODE.InventoryRightWall.physbox:GetAABB()
+
+	-- Remember, positive Y is down.
+	local isInsideBounds =
+		y < floorAABB.min.y and -- Our center point is above the floor.
+		x > leftWallAABB.max.x and -- Our center point is right of the left wall.
+		x < rightWallAABB.min.x	-- Our center point is left of the right wall.
+
+	return isInsideBounds
 end
 
 function meta:Remove()

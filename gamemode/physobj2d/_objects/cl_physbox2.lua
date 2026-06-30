@@ -74,11 +74,7 @@ function Physbox2:__Create(parent)
 	self.bindPointsCellIDX = {}
 
 	self.isScreenScaled = parent.isScreenScaled
-	--self.isPickedUp = false
 	self.isInGridInventory = false
-
-	--self.isBeingPopped = false
-	--self.popTo = Vector2()
 
 	PhysObj2D.physboxes[self] = true
 	self.isPhysbox2 = true
@@ -209,8 +205,6 @@ function meta:Step(dt)
 	self.aabbRaw = nil
 
 	self:StepPhysics(dt)
-	--self:StepPickup(dt)
-	--self:StepPop(dt)
 	self:StepGridInventory(dt)
 end
 
@@ -224,51 +218,8 @@ function meta:StepPhysics(dt)
 		-- Move & rotate
 		self:AddPosition(self.velocity * dt)
 		self:AddRotation(self.angularVelocity * dt)
-
-		--self:UpdateParentPosAndRot()
 	end
 end
-
---[[
-function meta:StepPickup(dt)
-	if not self.isPickedUp and not self.isBeingPushed and not self.isInGridInventory then return end
-
-	if self.isPickedUp then
-		local mousePos = GAMEMODE.CachedMousePressedPos
-		self.position = LerpVector2(0.7, self.position, mousePos)
-	end
-
-	if not math.IsNearlyEqual(self.rotation, self.desiredRotation or 0) then
-		self.rotation = Lerp(0.2, self.rotation, self.desiredRotation or 0)
-	end
-
-	self:UpdateParentPosAndRot()
-end
-]]
-
--- TODO: Cache. Refresh if we detect a screenscale change.
---[[
-function meta:GetPopTo()
-	local w, h = ScrW(), ScrH()
-	return Vector2(w * 0.55, h * 0.5)
-end
-
-function meta:StepPop(dt)
-	if not self.isBeingPopped then return end
-
-	local popMagdt = PHYS2D_POP_VELOCITY * dt
-	self.position:DoAdd(self.popDir * popMagdt)
-
-	self:UpdateParentPosAndRot()
-
-	-- Check if we've reached our destination.
-	if self.position:DistanceSqr(self:GetPopTo()) >= popMagdt * popMagdt then return end
-	self:EnablePhysics()
-	self.isSleeping = false
-	self.isBeingPopped = false
-	self.velocity = self.popDir * PHYS2D_POP_VELOCITY
-end
-]]
 
 function meta:StepGridInventory(dt)
 	if not self.isInGridInventory then return end
@@ -415,67 +366,8 @@ function meta:ApplyImpulse(impulse, screenPoint)
 	self:AddAngularVelocity(angularImpulse / self.momentOfInertia)
 end
 
---[[
-function meta:MousePickup(isInsideInventoryBounds)
-	self:DisablePhysics()
-	self:SnapToNearest90()
-	self.isSleeping = false
-	self.isInGridInventory = false
-	--self.isPickedUp = true
-end
-]]
-
 function meta:RerollRandomAirborneRotation()
 	self.randomAirborneRotation = math.Rand(-PHYS2D_RANDOM_AIRBORNE_ROTATION, PHYS2D_RANDOM_AIRBORNE_ROTATION)
-end
-
---[[
-function meta:MouseDrop(isInsideInventoryBounds)
-	self.isPickedUp = false
-	self.isCamOrthoLocked = true
-	self:RerollRandomAirborneRotation()
-
-	if isInsideInventoryBounds then
-		self:RemoveFromInventoryCells()
-		self:EnablePhysics()
-
-		-- Mitigate tossing the ortho view upwards.
-		local _, y = self:GetAdjCamPosition():Unpack()
-		self:AddVelocity(GAMEMODE.CachedMouseVelocity * (y < 0 and 0.1 or 1))
-	else
-		self:Pop()
-	end
-end
-]]
-
---[[
-function meta:MouseCanGrab()
-	return
-		not self.isStatic and
-		not self.isBeingPopped and
-		not self.isCamOrthoLocked
-end
-]]
-
---[[
-function meta:GetAdjCamPosition()
-	return self:GetCenterScreenPoint() + self.camXYOffset + self.parent.itemData.camXYOffsetAdj
-end
-]]
-
-function meta:IsInsideInventoryBounds()
-	local x, y = self.position:Unpack()
-	local floorAABB = GAMEMODE.InventoryFloor.physbox:GetAABB()
-	local leftWallAABB = GAMEMODE.InventoryLeftWall.physbox:GetAABB()
-	local rightWallAABB = GAMEMODE.InventoryRightWall.physbox:GetAABB()
-
-	-- Remember, positive Y is down.
-	local isInsideBounds =
-		y < floorAABB.min.y and -- Our center point is above the floor.
-		x > leftWallAABB.max.x and -- Our center point is right of the left wall.
-		x < rightWallAABB.min.x	-- Our center point is left of the right wall.
-
-	return isInsideBounds
 end
 
 function meta:RemoveFromInventoryCells()
@@ -494,20 +386,6 @@ function meta:RemoveFromInventoryCells()
 	table.Empty(self.boundCells)
 	table.Empty(self.bindPointsCellIDX)
 end
-
--- Move from where it is back to inventory.
---[[
-function meta:Pop()
-	if self.isStatic then return end
-
-	self:RemoveFromInventoryCells()
-	self.isInGridInventory = false
-	self.isBeingPopped = true
-	self.popDir = (self:GetPopTo() - self.position):GetNormalized()
-
-	gamemode.Call("PlaySnd", "pop")
-end
-]]
 
 local ROT_STEP = math.PI * 0.5 -- 90 degrees
 function meta:GetNearest90()
