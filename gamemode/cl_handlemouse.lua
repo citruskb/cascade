@@ -19,19 +19,15 @@ function LookForClosestPickup()
 	local closestDist = math.HUGE
 	local rangeLimit = gamemode.Call("GetItemPickupRangeSqr")
 	local closest
-	for hitbox, _ in pairs(PhysObj2D.hitboxes) do
-		local physbox = hitbox.physbox
-		if not physbox.parent.MouseCanGrab then continue end
-		if not physbox.parent:MouseCanGrab() then continue end
+	for item, _ in pairs(GAMEMODE.itemObjs) do
+		if not item:MouseCanGrab() then continue end
 
-		local pointsObj = hitbox:GetHBScreenPointsObj()
-		local center = pointsObj:GetCenter()
-		local distSqr = mousePos:DistanceSqr(center)
+		local distSqr = mousePos:DistanceSqr(item.position)
 
 		if distSqr > rangeLimit then continue end
 		if distSqr >= closestDist then continue end
 
-		closest = physbox
+		closest = item
 		closestDist = distSqr
 	end
 
@@ -83,7 +79,7 @@ function GM:HandleMousePos()
 	-- If our panel exists, update it.
 	if IsValid(self.pItemData) then
 		if closestPickup then
-			self.pItemData:SetItemData(closestPickup.parent.itemData)
+			self.pItemData:SetItemData(closestPickup.itemData)
 		else
 			self.pItemData:Remove()
 		end
@@ -93,7 +89,7 @@ function GM:HandleMousePos()
 
 	if closestPickup then
 		self.pItemData = vgui.Create("PItemInfo")
-		self.pItemData:SetItemData(closestPickup.parent.itemData)
+		self.pItemData:SetItemData(closestPickup.itemData)
 	end
 
 
@@ -140,26 +136,26 @@ function GM:LeftMouseClick()
 	self.HeldItem = LookForClosestPickup()
 	if not self.HeldItem then return end
 
-	local insideBounds = self.HeldItem:IsInsideInventoryBounds()
-	self.HeldItem.parent:MousePickup(insideBounds)
-	gamemode.Call("InventoryItemPickedUp", self.HeldItem.parent, insideBounds)
+	local insideBounds = self.HeldItem.physbox:IsInsideInventoryBounds()
+	self.HeldItem:MousePickup(insideBounds)
+	gamemode.Call("InventoryItemPickedUp", self.HeldItem, insideBounds)
 end
 
 function GM:LeftMouseRelease()
 	if not self.HeldItem then return end
 
 	-- Check if we drop an item in our inventory.
-	self.HeldItem:EvalGridInventoryPlacement()
+	self.HeldItem.physbox:EvalGridInventoryPlacement()
 
-	if self.HeldItem.isInGridInventory then
+	if self.HeldItem.physbox.isInGridInventory then
 		self.HeldItem = nil
 		self.backpack:PopUncontainedItems()
 		return
 	end
 
-	local insideBounds = self.HeldItem:IsInsideInventoryBounds()
-	self.HeldItem.parent:MouseDrop(insideBounds)
-	gamemode.Call("InventoryItemDropped", self.HeldItem.parent, insideBounds)
+	local insideBounds = self.HeldItem.physbox:IsInsideInventoryBounds()
+	self.HeldItem:MouseDrop(insideBounds)
+	gamemode.Call("InventoryItemDropped", self.HeldItem, insideBounds)
 
 	self.HeldItem = nil
 	self.backpack:PopUncontainedItems()

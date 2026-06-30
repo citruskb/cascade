@@ -319,7 +319,7 @@ function meta:EvalBindPoints()
 	-- Calculate if we can be put in each bindpoint.
 	-- We only need to do this if we're the held item.
 	if not GAMEMODE.HeldItem then return end
-	if GAMEMODE.HeldItem ~= self then return end
+	if GAMEMODE.HeldItem.physbox ~= self then return end
 
 	local backpack = GAMEMODE.backpack
 

@@ -73,8 +73,8 @@ function PANEL:Paint()
 	local held = GAMEMODE.HeldItem
 	local contained = false
 	if held then
-		for i = 1, #held.backpackBindPoints do
-			local idx = held.backpackBindPoints[i]
+		for i = 1, #held.physbox.backpackBindPoints do
+			local idx = held.physbox.backpackBindPoints[i]
 			if idx ~= self.bindPointIndex then continue end
 
 			contained = true
