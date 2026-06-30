@@ -82,7 +82,7 @@ function PANEL:SetupPaintVars(obj)
 	vars.sizeAdjust = sizeAdjust
 	vars.camOrthoAdjScale = data.camOrthoAdjScale
 
-	vars.drawLayer = self:EvaluateDrawLayer(obj.physbox, isOrtho)
+	vars.drawLayer = self:EvaluateDrawLayer(obj, isOrtho)
 
 	table.insert(self.paintVars, vars)
 end
@@ -94,11 +94,11 @@ function PANEL:EvaluateOrthoLock(x, y, physbox)
 	physbox.isCamOrthoLocked = false
 end
 
-function PANEL:EvaluateDrawLayer(physbox, isOrtho)
-	if physbox.isInGridInventory and (physbox.parent.isNormalItem or physbox.parent.isAugment) then return DRAW_LAYER_PLACED_ITEM end
-	if physbox.isInGridInventory and physbox.parent.isContainer then return DRAW_LAYER_PLACED_CONTAINER end
-	if GAMEMODE.HeldItem and GAMEMODE.HeldItem.physbox == physbox then return physbox.parent.isContainer and DRAW_LAYER_PLACED_CONTAINER or DRAW_LAYER_HELD_ITEM end
-	if physbox.parent.isBeingPopped then return DRAW_LAYER_POPPED end
+function PANEL:EvaluateDrawLayer(obj, isOrtho)
+	if obj.isInGridInventory and (obj.isNormalItem or obj.isAugment) then return DRAW_LAYER_PLACED_ITEM end
+	if obj.isInGridInventory and obj.isContainer then return DRAW_LAYER_PLACED_CONTAINER end
+	if GAMEMODE.HeldItem and GAMEMODE.HeldItem == obj then return obj.isContainer and DRAW_LAYER_PLACED_CONTAINER or DRAW_LAYER_HELD_ITEM end
+	if obj.isBeingPopped then return DRAW_LAYER_POPPED end
 	if not isOrtho then return DRAW_LAYER_PHYSICS_INVENTORY end
 
 	return DRAW_LAYER_PHYSICS_INVENTORY
