@@ -1,7 +1,9 @@
+ITEM.sid = ITEM_C_HARDDRIVE
+ITEM.type = ITEM_TYPE_CONTAINER
+
 ITEM.id = "harddrive"
 ITEM.name = "Harddrive"
 ITEM.description = "Holds items: 1x2\n\nOn combat start: items inside trigger +10% faster"
-ITEM.type = ITEM_TYPE_CONTAINER
 ITEM.rarity = ITEM_RARITY_UNCOMMON
 
 ITEM.model = "models/props_lab/harddrive02.mdl"

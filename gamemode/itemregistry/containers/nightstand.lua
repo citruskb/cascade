@@ -1,7 +1,9 @@
+ITEM.sid = ITEM_C_NIGHTSTAND
+ITEM.type = ITEM_TYPE_CONTAINER
+
 ITEM.id = "nightstand"
 ITEM.name = "Nightstand"
 ITEM.description = "Holds items: 1x3\n\n-1 fatigue damage taken"
-ITEM.type = ITEM_TYPE_CONTAINER
 ITEM.rarity = ITEM_RARITY_RARE
 
 ITEM.model = "models/props_c17/FurnitureDrawer003a.mdl"

@@ -1,7 +1,9 @@
+ITEM.sid = ITEM_BLAST_DOOR
+ITEM.type = ITEM_TYPE_NORMAL
+
 ITEM.id = "blast_door"
 ITEM.name = "Blast Door"
 ITEM.description = "When hit by a melee attack: 35% chance to prevent 12 damage and remove 0.6 stamina from your opponent"
-ITEM.type = ITEM_TYPE_NORMAL
 ITEM.rarity = ITEM_RARITY_EPIC
 
 ITEM.model = "models/props_lab/blastdoor001c.mdl"

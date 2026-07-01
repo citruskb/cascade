@@ -1,7 +1,9 @@
+ITEM.sid = ITEM_PLANK
+ITEM.type = ITEM_TYPE_NORMAL
+
 ITEM.id = "plank"
 ITEM.name = "Plank"
 ITEM.description = "1-2 damage.\n\nOn hit: triggers 4% faster until you miss"
-ITEM.type = ITEM_TYPE_NORMAL
 ITEM.rarity = ITEM_RARITY_BASIC
 
 ITEM.model = "models/props_debris/wood_chunk04b.mdl"

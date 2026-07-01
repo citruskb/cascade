@@ -1,7 +1,9 @@
+ITEM.sid = ITEM_BRIEFCASE
+ITEM.type = ITEM_TYPE_NORMAL
+
 ITEM.id = "briefcase"
 ITEM.name = "Briefcase"
 ITEM.description = "When you enter the shop: +$1"
-ITEM.type = ITEM_TYPE_NORMAL
 ITEM.rarity = ITEM_RARITY_BASIC
 
 ITEM.model = "models/props_c17/BriefCase001a.mdl"

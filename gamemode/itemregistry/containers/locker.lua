@@ -1,7 +1,9 @@
+ITEM.sid = ITEM_C_LOCKER
+ITEM.type = ITEM_TYPE_CONTAINER
+
 ITEM.id = "locker"
 ITEM.name = "Locker"
 ITEM.description = "Holds items: 1x4\n\nWhen item inside triggers: +1 armor"
-ITEM.type = ITEM_TYPE_CONTAINER
 ITEM.rarity = ITEM_RARITY_EPIC
 
 ITEM.model = "models/props_lab/lockerdoorsingle.mdl"
