@@ -53,7 +53,30 @@ function meta:ClearGridDraw()
 	end
 end
 
+-- Accepts a starting vector, then a points object of vectors relative to that starting vector.
+-- Returns the vectors contained in the backpack along that config vector.
+function meta:GetCellsAlongConfiguration(origin, config)
+	local cells = {}
+	local configPoints = config:GetPoints()
+
+	for i = 1, #configPoints do
+		local idx = gamemode.Call("TranslateBindPointIndex", origin, configPoints[i])
+		table.Insert(cells, self.cells[idx])
+	end
+
+	return cells
+end
+
 function meta:IsPlaceableAt(itemid, origin, orientation)
+	local data = GAMEMODE.BackpackItems[itemid]
+	local gridPointsObj = data.gridPoints[orientation]
+	local cells = self:GetCellsAlongConfiguration(origin, gridPointsObj)
+
+	-- If all our configured points didnt find a place on the grid, then we surely don't fit.
+	if #cells ~= gridPointsObj:Count() then return false end
+
+	
+
 end
 
 --TODO: Adjust this to take
