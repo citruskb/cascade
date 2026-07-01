@@ -36,7 +36,7 @@ function meta:EvaluateBindPoints(origin, rotation)
 	if not self.gridPointsTable then Error("[PhysObj2D] Unbound gridpoints") end
 
 	local ang = math.Ang(rotation)
-	self.idx = math.Round(ang, 0) % 360
+	self.idx = ITEM_ANGLE_TO_ORIENTATION[math.Round(ang, 0) % 360]
 
 	if not self.gridPointsTable[self.idx] then Error("[PhysObj2D] No gridpoints for angle: " .. self.idx) end
 

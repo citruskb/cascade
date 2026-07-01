@@ -31,6 +31,11 @@ function meta:BindToPanel(pan)
 	end
 end
 
+function meta:GetItemAt(idx)
+	if not self.cells[idx] then return end
+	return self.cells[idx].heldItem
+end
+
 function meta:PopUncontainedItems()
 	for i = 1, #self.cells do
 		local cell = self.cells[i]
@@ -46,6 +51,9 @@ function meta:ClearGridDraw()
 		cell.canPlaceDraw = nil
 		cell.cannotPlaceDraw = nil
 	end
+end
+
+function meta:IsPlaceableAt(itemid, origin, orientation)
 end
 
 --TODO: Adjust this to take

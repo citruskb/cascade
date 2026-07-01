@@ -29,16 +29,16 @@ ITEM.hitboxPoints = {
 }
 
 ITEM.gridPoints = {
-	[0] = Points({Vector2(0, 0), Vector2(1, 0)}),
-	[90] = Points({Vector2(0, 0), Vector2(0, 1)}),
-	[180] = Points({Vector2(0, 0), Vector2(1, 0)}),
-	[270] = Points({Vector2(0, 0), Vector2(0, 1)}),
+	[ITEM_ORIENTATION_0] = Points({Vector2(0, 0), Vector2(1, 0)}),
+	[ITEM_ORIENTATION_90] = Points({Vector2(0, 0), Vector2(0, 1)}),
+	[ITEM_ORIENTATION_180] = Points({Vector2(0, 0), Vector2(1, 0)}),
+	[ITEM_ORIENTATION_270] = Points({Vector2(0, 0), Vector2(0, 1)}),
 }
 ITEM.gridPointsOffsets = {
-	[0] = Vector2(-25, -4),
-	[90] = Vector2(18, -42),
-	[180] = Vector2(-25, -4),
-	[270] = Vector2(18, -42),
+	[ITEM_ORIENTATION_0] = Vector2(-25, -4),
+	[ITEM_ORIENTATION_90] = Vector2(18, -42),
+	[ITEM_ORIENTATION_180] = Vector2(-25, -4),
+	[ITEM_ORIENTATION_270] = Vector2(18, -42),
 }
 
 ITEM.gridPointsSynergies = {}

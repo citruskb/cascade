@@ -25,16 +25,16 @@ ITEM.hitboxPoints = {
 }
 
 ITEM.gridPoints = {
-	[0] = Points({Vector2(0, 0), Vector2(0, 1), Vector2(0, 2), Vector2(0, 3)}),
-	[90] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(2, 0), Vector2(3, 0)}),
-	[180] = Points({Vector2(0, 0), Vector2(0, 1), Vector2(0, 2), Vector2(0, 3)}),
-	[270] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(2, 0), Vector2(3, 0)}),
+	[ITEM_ORIENTATION_0] = Points({Vector2(0, 0), Vector2(0, 1), Vector2(0, 2), Vector2(0, 3)}),
+	[ITEM_ORIENTATION_90] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(2, 0), Vector2(3, 0)}),
+	[ITEM_ORIENTATION_180] = Points({Vector2(0, 0), Vector2(0, 1), Vector2(0, 2), Vector2(0, 3)}),
+	[ITEM_ORIENTATION_270] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(2, 0), Vector2(3, 0)}),
 }
 ITEM.gridPointsOffsets = {
-	[0] = Vector2(-6, -10),
-	[90] = Vector2(-132, 115),
-	[180] = Vector2(-6, -10),
-	[270] = Vector2(-132, 115),
+	[ITEM_ORIENTATION_0] = Vector2(-6, -10),
+	[ITEM_ORIENTATION_90] = Vector2(-132, 115),
+	[ITEM_ORIENTATION_180] = Vector2(-6, -10),
+	[ITEM_ORIENTATION_270] = Vector2(-132, 115),
 }
 
 ITEM.gridPointsSynergies = {}
