@@ -18,3 +18,13 @@ ITEM_BLAST_DOOR = 2
 ITEM_PLANK = 3
 ITEM_BRIEFCASE = 4
 ITEM_HULA_DOLL = 5
+
+ITEM__UNSERIALIZE = {}
+
+-- Takes the item.
+-- Returns the serialization.
+function GM:SerializeItem(item) return item.itemData.sid end
+
+-- Takes an item serialization.
+--Returns the serialized item's id.
+function GM:DeserializeItem(serl) return ITEM__UNSERIALIZE[serl] end

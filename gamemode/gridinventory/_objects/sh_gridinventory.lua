@@ -45,6 +45,30 @@ function meta:PopUncontainedItems()
 	end
 end
 
+function meta:GetHeldContainers()
+	local tab = {}
+	for i = 1, #self.cells do
+		local cell = self.cells[i]
+		if not cell.heldContainer then continue end
+
+		table.Insert(tab, cell.heldContainer)
+	end
+
+	return tab
+end
+
+function meta:GetHeldItems()
+	local tab = {}
+	for i = 1, #self.cells do
+		local cell = self.cells[i]
+		if not cell.heldItem then continue end
+
+		table.Insert(tab, cell.heldItem)
+	end
+
+	return tab
+end
+
 function meta:ClearGridDraw()
 	for i = 1, #self.cells do
 		local cell = self.cells[i]
@@ -149,6 +173,13 @@ function meta:GetIsPlaceableOnBinds(item, indexes)
 
 	-- TODO augments
 	return canPlace, placeableTab, notPlaceableTab
+end
+
+function meta:Serialize()
+	local tab = {}
+
+	local 
+
 end
 
 --[[
