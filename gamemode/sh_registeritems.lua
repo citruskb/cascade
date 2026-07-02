@@ -46,7 +46,10 @@ if CLIENT then
 	}
 end
 
-function GM:RegisterBackpackItem(id, tab)
+
+
+function GM:RegisterBackpackItem(sid, id, tab)
+	self.BackpackItemsSIDtoID[sid] = id
 	self.BackpackItems[id] = tab
 	if tab.hidden then return end
 
@@ -70,6 +73,7 @@ end
 
 function GM:RegisterBackpackItems()
 	self.BackpackItems = {}
+	self.BackpackItemsSIDtoID = {}
 
 	local included = {}
 
@@ -80,7 +84,7 @@ function GM:RegisterBackpackItems()
 		AddCSLuaFile(dir .. fileName)
 		include(dir .. fileName)
 
-		self:RegisterBackpackItem(ITEM.id, ITEM)
+		self:RegisterBackpackItem(ITEM.sid, ITEM.id, ITEM)
 
 		included[fileName] = ITEM
 		ITEM = nil

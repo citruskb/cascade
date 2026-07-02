@@ -90,7 +90,7 @@ function meta:EvaluateDrawnBackpackGrid(item)
 	if GAMEMODE.HeldItem ~= item then return end
 
 	local backpack = GAMEMODE.backpack
-	local _, placeableList, notPlaceableList = backpack:GetIsPlaceableOnBinds(item, self.backpackBindPoints)
+	local _, placeableList, notPlaceableList = backpack:GetHeldIsPlaceableOnBinds(item, self.backpackBindPoints)
 
 	for i = 1, #self.bindPoints do
 		local id = self.backpackBindPoints[i]
@@ -104,7 +104,7 @@ end
 
 -- TODO this really belongs in the inventory obj. probably.
 function meta:BindItem(item)
-	local isPlaceable, _, _ = GAMEMODE.backpack:GetIsPlaceableOnBinds(item, self.backpackBindPoints)
+	local isPlaceable, _, _ = GAMEMODE.backpack:GetHeldIsPlaceableOnBinds(item, self.backpackBindPoints)
 	if not isPlaceable then return end
 
 	-- Bind!
