@@ -86,7 +86,7 @@ if SERVER then return end
 local function GetGridID(x, y) return ToString(x) .. "x" .. ToString(y) end
 local function GetGridCoords(id)
 	local tab = string.Explode("x", id)
-	return tab[1], tab[2]
+	return ToNumber(tab[1]), ToNumber(tab[2])
 end
 local function InitScreenWideGrid()
 	GAMEMODE.screenBindPoints = {}
@@ -140,4 +140,10 @@ function GM:TranslateBindPointIndex(id, vec2)
 	local x1, y1 = GetGridCoords(id)
 	local x2, y2 = vec2:Unpack()
 	return GetGridID(x1 + x2, y1 + y2)
+end
+
+function GM:BindPointToVector2(bindPoint)
+	local x, y = bindPoint:Unpack()
+	local siz = self:GetInventoryGridSize()
+	return Vector2(x * siz + siz * 0.5, y * siz + siz * 0.5)
 end

@@ -51,10 +51,10 @@ function meta:GetHeldContainers()
 		local cell = self.cells[i]
 		if not cell.heldContainer then continue end
 
-		table.Insert(tab, cell.heldContainer)
+		tab[cell.heldContainer] = true
 	end
 
-	return tab
+	return table.ToKeyValues(tab)
 end
 
 function meta:GetHeldItems()
@@ -63,10 +63,10 @@ function meta:GetHeldItems()
 		local cell = self.cells[i]
 		if not cell.heldItem then continue end
 
-		table.Insert(tab, cell.heldItem)
+		tab[cell.heldItem] = true
 	end
 
-	return tab
+	return table.ToKeyValues(tab)
 end
 
 function meta:ClearGridDraw()
@@ -77,6 +77,15 @@ function meta:ClearGridDraw()
 	end
 end
 
+function meta:Clear()
+	local allContainers = self:GetHeldContainers()
+	for i = 1, #allContainers do allContainers[i]:Remove() end
+
+	local allItems = self:GetHeldItems()
+	for i = 1, #allItems do allItems[i]:Remove() end
+end
+
+--[[
 -- Accepts a starting vector, then a points object of vectors relative to that starting vector.
 -- Returns the vectors contained in the backpack along that config vector.
 function meta:GetCellsAlongConfiguration(origin, config)
@@ -98,10 +107,8 @@ function meta:IsPlaceableAt(itemid, origin, orientation)
 
 	-- If all our configured points didnt find a place on the grid, then we surely don't fit.
 	if #cells ~= gridPointsObj:Count() then return false end
-
-	
-
 end
+]]
 
 --TODO: Adjust this to take
 -- 1. item id
@@ -175,11 +182,59 @@ function meta:GetIsPlaceableOnBinds(item, indexes)
 	return canPlace, placeableTab, notPlaceableTab
 end
 
+function meta:SerializeLine(line)
+	local ret = ""
+	for i = 1, #line do
+		local item = line[i]
+		local itemOrigin = item.gridPointEvaluator.bindPointsOriginIDX
+		local itemRot = item.gridPointEvaluator.rotidx
+		ret = ret .. gamemode.Call("SerializeBackpackItem", line[i], itemOrigin, itemRot) .. (i == #line and "" or ITEM_SERL_LINE_SEPARATOR)
+	end
+end
+
 function meta:Serialize()
 	local tab = {}
+	tab.c = self:SerializeLine(self:GetHeldContainers())
+	tab.i = self:SerializeLine(self:GetHeldItems())
 
-	local 
+	return util.TableToJSON(tab)
+end
 
+function meta:LoadFromSerializedLine(line)
+	for i = 1, #line do
+		local id, backpackidx, rotidx = gamemode.Call("DeserializeBackpackItem", line[i])
+
+		-- get a "good enough" position.
+		local originCell = self.cellsScreenIDX[backpackidx]
+		local bestBindPoint = originCell:GetAssocScreenBindPoint()
+
+		-- get our rotation.
+		local rot = ITEM_ORIENTATION_TO_ANGLE[rotidx]
+
+		-- Spawn the item.
+		local item = ItemObj:Create(id, bestBindPoint, rot)
+
+		-- We want to line up the item so that the origin bindpoint lines up with the origin backpack point.
+		item:StepBindPoints()
+		item.position = item.position + item:GetStepGridDelta()
+
+		-- Now we need to properly bind it.
+		item:StepBindPoints()
+		item.gridPointEvaluator:BindItem(item)
+	end
+end
+
+function meta:LoadFromSerialized(serl)
+	-- From combat we load from an empty board anyways. But what if we're inspecting previous builds of our's?
+	self:Clear()
+
+	local tab = util.JSONToTable(serl)
+
+	local serlContainers = string.Explode(ITEM_SERL_LINE_SEPARATOR, tab.c)
+	self:LoadFromSerializedLine(serlContainers)
+
+	local serlItems = string.Explode(ITEM_SERL_LINE_SEPARATOR, tab.i)
+	self:LoadFromSerializedLine(serlItems)
 end
 
 --[[

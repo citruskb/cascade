@@ -104,6 +104,9 @@ end
 
 function meta:Remove()
 	GAMEMODE.itemObjs[self] = nil
+
+	self.gridPointEvaluator:RemoveFromInventoryCells()
+
 	table.Empty(self)
 end
 

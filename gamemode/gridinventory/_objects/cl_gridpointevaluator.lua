@@ -11,7 +11,7 @@ function GridPointEvaluator:__Create(gridPointsTable, gridPointsOffsets, synergy
 	self.itemType = itemType
 
 	self.bindPoints = {}
-	self.bindPointOriginIDX = ""
+	self.bindPointsOriginIDX = ""
 	self.backpackBindPoints = {}
 	self.backpackSynergyPoints = {}
 	self.boundCells = {}
@@ -24,11 +24,11 @@ function GridPointEvaluator:ToString() return "[GridPointEvaluator]" end
 
 function meta:Clear()
 	self.bindPoints = {}
-	self.bindPointOriginIDX = ""
+	self.bindPointsOriginIDX = ""
 	self.backpackBindPoints = {}
 	self.boundCells = {}
 	self.bindPointsCellIDX = {}
-	self.idx = nil
+	self.rotidx = nil
 	self.cleared = true
 end
 
@@ -36,18 +36,18 @@ function meta:EvaluateBindPoints(origin, rotation)
 	if not self.gridPointsTable then Error("[PhysObj2D] Unbound gridpoints") end
 
 	local ang = math.Ang(rotation)
-	self.idx = ITEM_ANGLE_TO_ORIENTATION[math.Round(ang, 0) % 360]
+	self.rotidx = ITEM_ANGLE_TO_ORIENTATION[math.Round(ang, 0) % 360]
 
-	if not self.gridPointsTable[self.idx] then Error("[PhysObj2D] No gridpoints for angle: " .. self.idx) end
+	if not self.gridPointsTable[self.rotidx] then Error("[PhysObj2D] No gridpoints for angle: " .. self.rotidx) end
 
 	-- Calculate our bindpoints.
 	self.bindPoints = {}
-	local pointsTab = self.gridPointsTable[self.idx]:GetPoints()
+	local pointsTab = self.gridPointsTable[self.rotidx]:GetPoints()
 	local siz = gamemode.Call("GetInventoryGridSize")
 	origin = origin + Vector2(siz * 0.5, siz * 0.5)
 
 	for i = 1, #pointsTab do
-		self.bindPoints[i] = origin + self.gridPointsOffsets[self.idx] + pointsTab[i] * siz
+		self.bindPoints[i] = origin + self.gridPointsOffsets[self.rotidx] + pointsTab[i] * siz
 	end
 
 	self.cleared = false
@@ -62,7 +62,7 @@ function meta:EvaluateBackpackBindPoints()
 end
 
 function meta:CalculateBackpackPointsOriginIDX()
-	local gridPointsFirst = self.gridPointsTable[self.idx]:GetPoints()[1]
+	local gridPointsFirst = self.gridPointsTable[self.rotidx]:GetPoints()[1]
 	self.bindPointsOriginIDX =
 		gridPointsFirst:IsZero() and self.backpackBindPoints[1] or
 		gamemode.Call("TranslateBindPointIndex", self.backpackBindPoints[1], -gridPointsFirst)
@@ -71,7 +71,7 @@ end
 function meta:EvaluateBackpackSynergyPoints()
 	self.backpackSynergyPoints = {}
 
-	local data = self.synergyPointsTable[self.idx]
+	local data = self.synergyPointsTable[self.rotidx]
 	if not data then return end
 
 	for typ, pointsObj in pairs(data) do

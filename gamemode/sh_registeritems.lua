@@ -50,8 +50,6 @@ function GM:RegisterBackpackItem(id, tab)
 	self.BackpackItems[id] = tab
 	if tab.hidden then return end
 
-	ITEM__UNSERIALIZE[tab.sid] = tab.id
-
 	if CLIENT then
 		local ent = ClientsideModel(tab.model, RENDERGROUP_OTHER)
 		if not IsValid(ent) then return end

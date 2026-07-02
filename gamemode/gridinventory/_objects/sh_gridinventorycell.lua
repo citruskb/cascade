@@ -26,5 +26,6 @@ function meta:IsFilledButShouldntBe() return not self.heldContainer and self.hel
 
 function meta:GetAssocScreenBindPoint()
 	if not self.bindPointIndex then Error("[GridInventoryCell] - Unbound cell.") end
+
 	return GAMEMODE.screenBindPointsByID[self.bindPointIndex]
 end

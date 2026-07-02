@@ -19,12 +19,36 @@ ITEM_PLANK = 3
 ITEM_BRIEFCASE = 4
 ITEM_HULA_DOLL = 5
 
-ITEM__UNSERIALIZE = {}
+ITEM_SERL_SEPARATOR = "-"
+ITEM_SERL_LINE_SEPARATOR = ","
 
 -- Takes the item.
 -- Returns the serialization.
-function GM:SerializeItem(item) return item.itemData.sid end
+function GM:SerializeBackpackItem(item, backpackidx, rotidx)
+	local str = ""
+	str = str .. ToString(item.itemData.type) .. ITEM_SERL_SEPARATOR
+	str = str .. ToString(item.itemData.sid) .. ITEM_SERL_SEPARATOR
+	str = str .. backpackidx .. ITEM_SERL_SEPARATOR
+	str = str .. rotidx
+
+	return str
+end
 
 -- Takes an item serialization.
---Returns the serialized item's id.
-function GM:DeserializeItem(serl) return ITEM__UNSERIALIZE[serl] end
+-- Returns deserialized item data
+function GM:DeserializeBackpackItem(serl)
+	local str = string.Explode(ITEM_SERL_SEPARATOR, serl)
+	local typ, sid = ToNumber(str[1]), ToNumber(str[2])
+	local backpackidx = str[3]
+	local rotidx = ToNumber(str[4])
+
+	-- TODO: build a table to load this when registering items.
+	local foundid
+	for id, data in pairs(GAMEMODE.BackpackItems) do
+		if data.type ~= typ then continue end
+		if data.sid ~= sid then continue end
+		foundid = id
+	end
+
+	return foundid, backpackidx, rotidx
+end

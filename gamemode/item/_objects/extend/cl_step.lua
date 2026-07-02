@@ -19,13 +19,8 @@ function meta:StepItem()
 	if self.isInGridInventory then
 		self:StepGridInventory() end
 
-	-- Evaluate our bind points if necessary!
-	if self.isPickedUp or self.isInGridInventory then
-		self:StepBindPoints()
-	elseif not self.gridPointEvaluator.cleared then -- Clear them if not being used anymore.
-		self.gridPointEvaluator.bindPoints = {}
-		self.gridPointEvaluator.cleared = true
-	end
+	-- Evaluate our bind points.
+	self:StepBindPoints()
 
 	-- We applied rotation to the object. Make sure it rotates to completion.
 	-- But only if it's being held, being popped, or in the inventory.
@@ -66,19 +61,21 @@ function meta:StepPop()
 	self.physbox.velocity = self.popDir * PHYS2D_POP_VELOCITY
 end
 
-function meta:StepGridInventory()
+function meta:GetStepGridDelta()
 	local bindPoint = self.gridPointEvaluator.bindPoints[1]
 	local idx = self.gridPointEvaluator.bindPointsCellIDX[1]
 	local target = self.gridPointEvaluator.boundCells[idx]:GetAssocScreenBindPoint()
-	local delta = target - bindPoint
-
+	return target - bindPoint
+end
+function meta:StepGridInventory()
+	local delta = self:GetStepGridDelta()
 	if delta:IsEqualTol(VECTOR2_ZERO, 1E-4) then return end
 
 	self.position = LerpVector2(0.1, self.position, self.position + delta)
 end
 
 function meta:StepBindPoints()
-	self.gridPointEvaluator:EvaluateBindPoints(self:GetPhysboxPointsOrigin(), self.desiredRotation)
+	self.gridPointEvaluator:EvaluateBindPoints(self:GetPhysboxPointsOrigin(), self:GetNearest90())
 	self.gridPointEvaluator:EvaluateBackpackBindPoints()
 	self.gridPointEvaluator:CalculateBackpackPointsOriginIDX()
 	self.gridPointEvaluator:EvaluateBackpackSynergyPoints()
