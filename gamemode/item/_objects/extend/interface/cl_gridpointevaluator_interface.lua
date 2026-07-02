@@ -10,10 +10,17 @@ function meta:InitGridPointEvaluator()
 end
 
 function meta:EvaluateGridInventoryPlacement()
-	if not self.gridPointEvaluator:BindItem(self) then return end
+	GAMEMODE.backpack:BindItemObj(self:GetBackpackInputVars())
+end
 
+function meta:OnBackpackBind(originIDX, rotIDX)
+	local wasPickedUp = self.isPickedUp
+
+	self.isBound = true
+	self.bindOriginIDX = originIDX
+	self.desiredRotation = self:GetNearestAng(ITEM_ORIENTATION_TO_ANGLE[rotIDX])
 	self.isPickedUp = false
 	self.isInGridInventory = true
 
-	if self.itemData.PlayPlaceSound then self.itemData.PlayPlaceSound() end
+	if wasPickedUp and self.itemData.PlayPlaceSound then self.itemData.PlayPlaceSound() end
 end

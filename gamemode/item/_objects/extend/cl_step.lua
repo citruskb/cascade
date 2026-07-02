@@ -75,7 +75,7 @@ function meta:StepGridInventory()
 end
 
 function meta:StepBindPoints()
-	self.gridPointEvaluator:EvaluateBindPoints(self:GetPhysboxPointsOrigin(), self:GetNearest90())
+	self.gridPointEvaluator:EvaluateBindPoints(self:GetPhysboxPointsOrigin(), self:GetNearestAng(90))
 	self.gridPointEvaluator:EvaluateBackpackBindPoints()
 	self.gridPointEvaluator:CalculateBackpackPointsOriginIDX()
 	self.gridPointEvaluator:EvaluateBackpackSynergyPoints()

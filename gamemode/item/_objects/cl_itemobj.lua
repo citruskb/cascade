@@ -34,6 +34,7 @@ function ItemObj:__Create(itemDataID, position, rotation, owner)
 	self.poppedDir = Vector2()
 
 	self.isInGridInventory = false
+	self.isBound = false
 
 	self.isItemObj = true
 
@@ -55,7 +56,7 @@ function meta:MousePickup()
 	self.isPickedUp = true
 
 	self:DisablePhysics()
-	self:SnapToNearest90()
+	self:SnapToNearestAng(90)
 
 	self.physbox.isSleeping = false
 	self.isInGridInventory = false
@@ -100,6 +101,12 @@ function meta:IsInsideInventoryBounds()
 		x < rightWallAABB.min.x	-- Our center point is left of the right wall.
 
 	return isInsideBounds
+end
+
+function meta:GetBackpackInputVars()
+	local originIDX = self.gridPointEvaluator.bindPointsOriginIDX
+	local rotIDX = self:GetRotIDX()
+	return self, originIDX, rotIDX
 end
 
 function meta:Remove()

@@ -1,15 +1,17 @@
 local meta = FindMetaTable("ItemObj")
 
-local ROT_STEP = math.PI * 0.5 -- 90 degrees in radians
-function meta:GetNearest90()
+local ROT_STEP_90_DEGREES = math.PI * 0.5
+function meta:GetNearestAng(degrees)
+	local rotStep = degrees * math.PI / 180
+
 	local rot = math.Abs(self.rotation)
-	while rot > ROT_STEP do rot = rot - ROT_STEP end
+	while rot > rotStep do rot = rot - rotStep end
 
 	-- Are we closer to zero degrees or 90?
-	local closerToZero = rot - ROT_STEP * 0.5 < 0
+	local closerToZero = rot - rotStep * 0.5 < 0
 
 	local rotCloserToZero = rot
-	local rotFurtherFromZero = ROT_STEP - rot
+	local rotFurtherFromZero = rotStep - rot
 
 	-- Turn the opposite way if we are negative.
 	if self.rotation > 0 then
@@ -19,16 +21,20 @@ function meta:GetNearest90()
 	end
 end
 
-function meta:SnapToNearest90()
-	self.desiredRotation = self:GetNearest90()
+function meta:SnapToNearestAng(degrees)
+	self.desiredRotation = self:GetNearestAng(degrees)
 end
 
 function meta:Rotate90CW()
 	gamemode.Call("PlaySnd", "rotate", 0.7)
-	self.desiredRotation = (self.desiredRotation or 0) + ROT_STEP
+	self.desiredRotation = (self.desiredRotation or 0) + ROT_STEP_90_DEGREES
 end
 
 function meta:Rotate90CCW()
 	gamemode.Call("PlaySnd", "rotate", 0.7, 80)
-	self.desiredRotation = (self.desiredRotation or 0) - ROT_STEP
+	self.desiredRotation = (self.desiredRotation or 0) - ROT_STEP_90_DEGREES
+end
+
+function meta:GetRotIDX()
+	return ITEM_ANGLE_TO_ORIENTATION[self:GetNearestAng(90)]
 end

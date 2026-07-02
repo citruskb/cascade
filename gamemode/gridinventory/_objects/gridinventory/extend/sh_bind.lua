@@ -81,7 +81,7 @@ function meta:IsValidPlaceableAt(itemOrID, originIDX, orientation)
 	end
 
 	-- TODO augments
-	return canPlace, placeableTab, notPlaceableTab
+	return canPlace, table.ToKeyValues(placeableTab), table.ToKeyValues(notPlaceableTab)
 end
 
 --TODO: Adjust this to take
@@ -154,4 +154,46 @@ function meta:GetHeldIsPlaceableOnBinds(item, indexes)
 
 	-- TODO augments
 	return canPlace, placeableTab, notPlaceableTab
+end
+
+function self:UnbindItem(itemObj)
+	for i = 1, #self.cells do
+		local cell = self.cells[i]
+		if itemObj.isContainer and cell.heldContainer == itemObj then
+			cell.heldContainer = nil
+		elseif (itemObj.isNormalItem or itemObj.isAugment) and cell.heldItem == itemObj then
+			cell.heldItem = nil
+		end
+	end
+
+	itemObj.isBound = false
+	itemObj.bindOriginIDX = nil
+end
+
+function self:BindItemObj(itemObj, originIDX, rotIDX)
+	-- Are we placeable in this new spot & orientation?
+	local isPlaceable, placeableTab, _ = self:IsValidPlaceableAt(itemObj, originIDX, rotIDX)
+	if not isPlaceable then return end
+
+	-- First, make sure if we already contain this item that we remove its old location.
+	self:UnbindItem(itemObj)
+
+	-- Next, add it to relevant cells.
+	for i = 1, #placeableTab do
+		local cell = placeableTab[i]
+		if itemObj.isContainer then
+			cell.heldContainer = itemObj
+		elseif itemObj.isNormalItem or itemObj.isAugment then
+			cell.heldItem = itemObj
+		end
+	end
+
+	-- We want to save where we are on the item itself, for easing into a new position or rotation on the grid.
+	itemObj:OnBackpackBind(originIDX, rotIDX)
+end
+
+-- Make a new item. Insert it using BindItem.
+function self:BindNewItemObj(itemID, originIDX, rotIDX)
+	local item = ItemObj:Create(itemID, gamemode.Call("BindPointToVector2", originIDX), ITEM_ORIENTATION_TO_ANGLE[rotIDX])
+	self:BindItemObj(item, originIDX, rotIDX)
 end

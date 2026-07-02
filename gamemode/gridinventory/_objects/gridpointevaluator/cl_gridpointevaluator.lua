@@ -90,19 +90,20 @@ function meta:EvaluateDrawnBackpackGrid(item)
 	if GAMEMODE.HeldItem ~= item then return end
 
 	local backpack = GAMEMODE.backpack
-	local _, placeableList, notPlaceableList = backpack:GetHeldIsPlaceableOnBinds(item, self.backpackBindPoints)
+	local _, placeableList, notPlaceableList = backpack:IsValidPlaceableAt(item:GetBackpackInputVars())
 
-	for i = 1, #self.bindPoints do
-		local id = self.backpackBindPoints[i]
-		local cell = backpack.cellsScreenIDX[id]
-		if not cell then continue end
-
-		cell.canPlaceDraw = placeableList[i]
-		cell.cannotPlaceDraw = notPlaceableList[i]
+	for i = 1, #placeableList do
+		local cell = placeableList[i]
+		cell.canPlaceDraw = true
+	end
+	for i = 1, #notPlaceableList do
+		local cell = notPlaceableList[i]
+		cell.cannotPlaceDraw = true
 	end
 end
 
 -- TODO this really belongs in the inventory obj. probably.
+--[[
 function meta:BindItem(item)
 	local isPlaceable, _, _ = GAMEMODE.backpack:GetHeldIsPlaceableOnBinds(item, self.backpackBindPoints)
 	if not isPlaceable then return end
@@ -113,8 +114,8 @@ function meta:BindItem(item)
 	local indexes = self.backpackBindPoints
 	local backpack = GAMEMODE.backpack
 	for i = 1, #indexes do
-		local cell = backpack.cellsScreenIDX[indexes[i]]
-		self.boundCells[indexes[i]] = cell
+		local cell = backpack.cellsScreenIDX[indexes[i]--]
+		self.boundCells[indexes[i]--] = cell
 		self.bindPointsCellIDX[i] = indexes[i]
 
 		if self.itemType == ITEM_TYPE_CONTAINER then
@@ -126,6 +127,7 @@ function meta:BindItem(item)
 
 	return true
 end
+]]
 
 function meta:RemoveFromInventoryCells()
 	if table.Count(self.boundCells) <= 0 then return end
