@@ -63,9 +63,9 @@ end
 
 function meta:CalculateBackpackPointsOriginIDX()
 	local gridPointsFirst = self.gridPointsTable[self.rotidx]:GetPoints()[1]
-	self.bindPointsOriginIDX =
-		gridPointsFirst:IsZero() and self.backpackBindPoints[1] or
-		gamemode.Call("TranslateBindPointIndex", self.backpackBindPoints[1], -gridPointsFirst)
+	self.bindPointsOriginIDX = self.backpackBindPoints[1]
+		--gridPointsFirst:IsZero() and self.backpackBindPoints[1] or
+		--gamemode.Call("TranslateBindPointIndex", self.backpackBindPoints[1], -gridPointsFirst)
 end
 
 function meta:EvaluateBackpackSynergyPoints()
@@ -95,10 +95,12 @@ function meta:EvaluateDrawnBackpackGrid(item)
 	for i = 1, #placeableList do
 		local cell = placeableList[i]
 		cell.canPlaceDraw = true
+		cell.cannotPlaceDraw = nil
 	end
 	for i = 1, #notPlaceableList do
 		local cell = notPlaceableList[i]
 		cell.cannotPlaceDraw = true
+		cell.canPlaceDraw = nil
 	end
 end
 

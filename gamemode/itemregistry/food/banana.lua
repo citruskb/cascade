@@ -134,19 +134,20 @@ ITEM.hitboxPoints = newShape
 
 
 ITEM.gridPoints = {
-	[ITEM_ORIENTATION_0] = Points({Vector2(0, 0), Vector2(0, 1), Vector2(1, 1)}),
+	[ITEM_ORIENTATION_0] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(0, -1)}),
 	[ITEM_ORIENTATION_90] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(0, 1)}),
-	[ITEM_ORIENTATION_180] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)}),
-	[ITEM_ORIENTATION_270] = Points({Vector2(0, 1), Vector2(1, 1), Vector2(1, 0)}),
+	[ITEM_ORIENTATION_180] = Points({Vector2(0, 0), Vector2(-1, 0), Vector2(0, 1)}),
+	[ITEM_ORIENTATION_270] = Points({Vector2(0, 0), Vector2(-1, 0), Vector2(0, -1)}),
 }
 ITEM.gridPointsOffsets = {
-	[ITEM_ORIENTATION_0] = Vector2(-26, -32),
+	[ITEM_ORIENTATION_0] = Vector2(-26, 52),
 	[ITEM_ORIENTATION_90] = Vector2(-26, -32),
-	[ITEM_ORIENTATION_180] = Vector2(-26, -32),
-	[ITEM_ORIENTATION_270] = Vector2(-26, -32),
+	[ITEM_ORIENTATION_180] = Vector2(58, -32),
+	[ITEM_ORIENTATION_270] = Vector2(58, 52),
 }
 
 ITEM.gridPointsSynergies = {
+	--[[
 	[ITEM_ORIENTATION_0] = {
 		kite = Points({Vector2(0, -1), Vector2(1, 0), Vector2(2, 1), Vector2(1, 2), Vector2(0, 2), Vector2(-1, 1), Vector2(-1, 0)})
 	},
@@ -159,6 +160,7 @@ ITEM.gridPointsSynergies = {
 	[ITEM_ORIENTATION_270] = {
 		kite = Points({Vector2(0, 0), Vector2(1, -1), Vector2(2, 0), Vector2(2, 1), Vector2(1, 2), Vector2(0, 2), Vector2(-1, 1)})
 	}
+		]]
 }
 
 ITEM.PlayPlaceSound = function()

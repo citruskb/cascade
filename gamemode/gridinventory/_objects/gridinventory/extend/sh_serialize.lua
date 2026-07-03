@@ -2,6 +2,8 @@ local meta = FindMetaTable("GridInventory")
 
 -- Utility function for turning a table of contained items or containers into a single serialized string.
 local function SerializeLine(line)
+	print("line")
+	PrintTable(line)
 	local ret = ""
 	for i = 1, #line do
 		local item = line[i]

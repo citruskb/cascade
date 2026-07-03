@@ -252,7 +252,6 @@ function PANEL:Init()
 
 	--TossBoxes(32)
 
-	--[[
 	OneNightstand()
 	OneNightstand()
 	OneLocker()
@@ -261,14 +260,12 @@ function PANEL:Init()
 	OnePocketDimension()
 	OneBox()
 	OneBox()
+	OneBox()
 	GoBananas(2)
 	DoorBlast(1)
 	HulaTime(3)
 	OneBriefcase()
 	OnePlank()
-	]]
-
-	OneBox()
 
 	--MakeItem("briefcase", Vector2(0.5 * w, 0.5 * h))
 	--MakeItem("plank", Vector2(0.5 * w, 0.5 * h))

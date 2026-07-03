@@ -42,42 +42,49 @@ function meta:IsValidPlaceableAt(itemOrID, originIDX, orientation)
 		-- What if one cell is inside and the rest are out? We want to highlight that one part inside as invalid.
 		if isAnyPartOutside then
 			notPlaceableTab[cell] = true
+			placeableTab[cell] = nil
 			continue
 		end
 
 		-- Containers can only be placed on spots that are entirely empty.
-		if itemData.isContainer then
+		if itemData.type == ITEM_TYPE_CONTAINER then
 			if cell:IsCompletelyEmpty() then
 				placeableTab[cell] = true
+				notPlaceableTab[cell] = nil
 				continue
 			end
 
-			-- Handle case for if we are picking up an already placed container.
-			if item and cell.heldContainer and cell.heldContainer ~= item then
+			if cell.heldContainer and ((item and cell.heldContainer ~= item) or not item) then
 				notPlaceableTab[cell] = true
+				placeableTab[cell] = nil
 				canPlace = false
 			end
 		end
 
 		-- In contrast, normal items can only be placed on containers not holding anything else.
-		if itemData.isNormalItem then
+		if itemData.type == ITEM_TYPE_NORMAL or itemData.type == ITEM_TYPE_AUGMENT then
 			if cell:IsContainerButEmpty() then
 				placeableTab[cell] = true
+				notPlaceableTab[cell] = nil
 				continue
 			end
 			if not cell.heldContainer then
 				notPlaceableTab[cell] = true
+				placeableTab[cell] = nil
 				canPlace = false
 			end
 
 			-- Handle case for if we are pickup and already placed item.
-			if item and cell.heldItem and cell.heldItem ~= item then
+			if cell.heldItem and (item and cell.heldItem ~= item or not item) then
 				notPlaceableTab[cell] = true
+				placeableTab[cell] = nil
 				canPlace = false
 			end
 		end
 
-		placeableTab[cell] = not notPlaceableTab[cell]
+		-- if we haven't determined it isn't placeable, then it's placeable.
+		if notPlaceableTab[cell] ~= nil or not canPlace then continue end
+		placeableTab[cell] = true
 	end
 
 	-- TODO augments

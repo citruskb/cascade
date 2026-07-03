@@ -68,7 +68,7 @@ function meta:MouseDrop()
 	self.physbox:RerollRandomAirborneRotation()
 
 	if self:IsInsideInventoryBounds() then
-		self.gridPointEvaluator:RemoveFromInventoryCells()
+		if self.boundTo then self.boundTo:UnbindItem(self) end
 		self:EnablePhysics()
 
 		-- Mitigate tossing the ortho view upwards.
@@ -111,7 +111,7 @@ end
 function meta:Remove()
 	GAMEMODE.itemObjs[self] = nil
 
-	self.gridPointEvaluator:RemoveFromInventoryCells()
+	if self.boundTo then self.boundTo:UnbindItem(self) end
 
 	table.Empty(self)
 end

@@ -1,7 +1,8 @@
 local meta = FindMetaTable("ItemObj")
 
 function meta:Pop()
-	self.gridPointEvaluator:RemoveFromInventoryCells()
+	if self.boundTo then self.boundTo:UnbindItem(self) end
+
 	self.isInGridInventory = false
 	self.isBeingPopped = true
 	self.popTo = gamemode.Call("GetNewPopTo")
