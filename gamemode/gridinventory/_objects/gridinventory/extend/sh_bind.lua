@@ -8,7 +8,7 @@ function meta:GetCellsAlongConfiguration(originIDX, config)
 
 	for i = 1, #configPoints do
 		local idx = gamemode.Call("TranslateBindPointIndex", originIDX, configPoints[i])
-		table.Insert(cells, self.cells[idx])
+		table.Insert(cells, self.cellsScreenIDX[idx])
 	end
 
 	return cells
@@ -17,7 +17,14 @@ end
 -- Accepts an itemid, origin backpack gridIDX, and orientation enumerable
 -- Returns if it's placeable, valid cells, and invalid cells.
 function meta:IsValidPlaceableAt(itemOrID, originIDX, orientation)
-	local data = GAMEMODE.BackpackItems[itemid]
+	local id, item
+	if IsString(itemOrID) then
+		id = itemOrID
+	else
+		item = itemOrID
+	end
+
+	local data = item and item.itemData or GAMEMODE.BackpackItems[id]
 	local gridPointsObj = data.gridPoints[orientation]
 	local cells = self:GetCellsAlongConfiguration(originIDX, gridPointsObj)
 
@@ -26,13 +33,6 @@ function meta:IsValidPlaceableAt(itemOrID, originIDX, orientation)
 	-- If we find a bindpoint thats entirely outside the inventory, no dice.
 	local isAnyPartOutside = #cells ~= gridPointsObj:Count()
 	local canPlace = not isAnyPartOutside
-
-	local id, item
-	if IsString(itemOrID) then
-		id = itemOrID
-	else
-		item = itemOrID
-	end
 
 	-- We still want to find cells for relevant tables due to drawing preview.
 	local itemData = id and GAMEMODE.BackpackItems[id] or item.itemData
@@ -156,7 +156,7 @@ function meta:GetHeldIsPlaceableOnBinds(item, indexes)
 	return canPlace, placeableTab, notPlaceableTab
 end
 
-function self:UnbindItem(itemObj)
+function meta:UnbindItem(itemObj)
 	for i = 1, #self.cells do
 		local cell = self.cells[i]
 		if itemObj.isContainer and cell.heldContainer == itemObj then
@@ -166,11 +166,11 @@ function self:UnbindItem(itemObj)
 		end
 	end
 
-	itemObj.isBound = false
+	itemObj.boundTo = nil
 	itemObj.bindOriginIDX = nil
 end
 
-function self:BindItemObj(itemObj, originIDX, rotIDX)
+function meta:BindItemObj(itemObj, originIDX, rotIDX)
 	-- Are we placeable in this new spot & orientation?
 	local isPlaceable, placeableTab, _ = self:IsValidPlaceableAt(itemObj, originIDX, rotIDX)
 	if not isPlaceable then return end
@@ -188,12 +188,17 @@ function self:BindItemObj(itemObj, originIDX, rotIDX)
 		end
 	end
 
-	-- We want to save where we are on the item itself, for easing into a new position or rotation on the grid.
-	itemObj:OnBackpackBind(originIDX, rotIDX)
+	if not itemObj.desiredRotation then
+		itemObj.rotation = ITEM_ORIENTATION_TO_ANGLE[rotIDX]
+	else
+		itemObj:SnapToNearest90() -- This assumes the nearest 90 degrees corresponds to the input rotIDX if our item wasn't created this frame.
+	end
+
+	itemObj:OnBackpackBind(self, originIDX)
 end
 
 -- Make a new item. Insert it using BindItem.
-function self:BindNewItemObj(itemID, originIDX, rotIDX)
+function meta:BindNewItemObj(itemID, originIDX, rotIDX)
 	local item = ItemObj:Create(itemID, gamemode.Call("BindPointToVector2", originIDX), ITEM_ORIENTATION_TO_ANGLE[rotIDX])
 	self:BindItemObj(item, originIDX, rotIDX)
 end

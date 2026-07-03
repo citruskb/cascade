@@ -13,12 +13,11 @@ function meta:EvaluateGridInventoryPlacement()
 	GAMEMODE.backpack:BindItemObj(self:GetBackpackInputVars())
 end
 
-function meta:OnBackpackBind(originIDX, rotIDX)
+function meta:OnBackpackBind(backpack, originIDX)
 	local wasPickedUp = self.isPickedUp
 
-	self.isBound = true
+	self.boundTo = backpack
 	self.bindOriginIDX = originIDX
-	self.desiredRotation = self:GetNearestAng(ITEM_ORIENTATION_TO_ANGLE[rotIDX])
 	self.isPickedUp = false
 	self.isInGridInventory = true
 

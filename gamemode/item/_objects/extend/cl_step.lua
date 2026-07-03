@@ -63,8 +63,9 @@ end
 
 function meta:GetStepGridDelta()
 	local bindPoint = self.gridPointEvaluator.bindPoints[1]
-	local idx = self.gridPointEvaluator.bindPointsCellIDX[1]
-	local target = self.gridPointEvaluator.boundCells[idx]:GetAssocScreenBindPoint()
+	local targetCell = self.boundTo.cellsScreenIDX[self.bindOriginIDX]
+	local target = targetCell:GetAssocScreenBindPoint()
+
 	return target - bindPoint
 end
 function meta:StepGridInventory()
@@ -75,7 +76,7 @@ function meta:StepGridInventory()
 end
 
 function meta:StepBindPoints()
-	self.gridPointEvaluator:EvaluateBindPoints(self:GetPhysboxPointsOrigin(), self:GetNearestAng(90))
+	self.gridPointEvaluator:EvaluateBindPoints(self:GetPhysboxPointsOrigin(), self:GetNearest90())
 	self.gridPointEvaluator:EvaluateBackpackBindPoints()
 	self.gridPointEvaluator:CalculateBackpackPointsOriginIDX()
 	self.gridPointEvaluator:EvaluateBackpackSynergyPoints()

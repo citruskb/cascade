@@ -34,7 +34,6 @@ function ItemObj:__Create(itemDataID, position, rotation, owner)
 	self.poppedDir = Vector2()
 
 	self.isInGridInventory = false
-	self.isBound = false
 
 	self.isItemObj = true
 
@@ -56,7 +55,7 @@ function meta:MousePickup()
 	self.isPickedUp = true
 
 	self:DisablePhysics()
-	self:SnapToNearestAng(90)
+	self:SnapToNearest90()
 
 	self.physbox.isSleeping = false
 	self.isInGridInventory = false
