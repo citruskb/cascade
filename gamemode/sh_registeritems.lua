@@ -1,7 +1,5 @@
-if not backpackItemsRegistered then
-	GM.BackpackEntsMade = {}
-	backpackItemsRegistered = true
-end
+-- NOTE: Lua refresh infinitely makes clientside ents becuase they dont get automatically GC'd.
+-- For ease of development, I'll be fixing this later. TODO
 
 ITEM_TYPE_CONTAINER = 1
 ITEM_TYPE_NORMAL = 2
@@ -54,13 +52,11 @@ function GM:RegisterBackpackItem(sid, id, tab)
 	self.BackpackItems[id] = tab
 	self.BackpackItemsSIDToID[sid] = id
 
-	if tab.hidden or self.BackpackEntsMade[id] then return end
+	if tab.hidden then return end
 
 	if CLIENT then
 		local ent = ClientsideModel(tab.model, RENDERGROUP_OTHER)
 		if not IsValid(ent) then return end
-
-		self.BackpackEntsMade[id] = true
 
 		ent:SetNoDraw(true)
 
