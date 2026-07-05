@@ -15,12 +15,12 @@ function meta:StepItem()
 	if self.isBeingPopped then
 		self:StepPop() end
 
+	-- Evaluate our bind points.
+	self:StepBindPoints()
+
 	-- If we are placed in the grid inventory, ease the object into alignment with the grid.
 	if self.isInGridInventory then
 		self:StepGridInventory() end
-
-	-- Evaluate our bind points.
-	self:StepBindPoints()
 
 	-- We applied rotation to the object. Make sure it rotates to completion.
 	-- But only if it's being held, being popped, or in the inventory.

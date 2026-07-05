@@ -22,6 +22,7 @@ function ItemObj:__Create(itemDataID, position, rotation, owner)
 
 	self.position = position or Vector2(0, 0)
 	self.rotation = rotation or 0
+	self.desiredRotation = self.rotation
 	self.owner = owner
 
 	self:InitPhysbox()

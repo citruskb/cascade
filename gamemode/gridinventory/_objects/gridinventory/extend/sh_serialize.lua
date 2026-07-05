@@ -2,15 +2,14 @@ local meta = FindMetaTable("GridInventory")
 
 -- Utility function for turning a table of contained items or containers into a single serialized string.
 local function SerializeLine(line)
-	print("line")
-	PrintTable(line)
 	local ret = ""
 	for i = 1, #line do
 		local item = line[i]
-		local itemOrigin = item.gridPointEvaluator.bindPointsOriginIDX
-		local itemRot = item.gridPointEvaluator.rotidx
-		ret = ret .. gamemode.Call("SerializeBackpackItem", line[i], itemOrigin, itemRot) .. (i == #line and "" or ITEM_SERL_LINE_SEPARATOR)
+		local _, itemOrigin, itemRot = item:GetBackpackInputVars()
+		ret = ret .. gamemode.Call("SerializeBackpackItem", item, itemOrigin, itemRot) .. (i == #line and "" or ITEM_SERL_LINE_SEPARATOR)
 	end
+
+	return ret
 end
 
 -- Output our contents in serialized format. Used for saving our contents to file or database.
@@ -22,28 +21,10 @@ function meta:Serialize()
 	return util.TableToJSON(tab)
 end
 
---[[ TODO: Need to implement direct item insertion first.
 function meta:LoadFromSerializedLine(line)
 	for i = 1, #line do
 		local id, backpackidx, rotidx = gamemode.Call("DeserializeBackpackItem", line[i])
-
-		-- get a "good enough" position.
-		local originCell = self.cellsScreenIDX[backpackidx]
-		local bestBindPoint = originCell:GetAssocScreenBindPoint()
-
-		-- get our rotation.
-		local rot = ITEM_ORIENTATION_TO_ANGLE[rotidx]
-
-		-- Spawn the item.
-		local item = ItemObj:Create(id, bestBindPoint, rot)
-
-		-- We want to line up the item so that the origin bindpoint lines up with the origin backpack point.
-		item:StepBindPoints()
-		item.position = item.position + item:GetStepGridDelta()
-
-		-- Now we need to properly bind it.
-		item:StepBindPoints()
-		item.gridPointEvaluator:BindItem(item)
+		self:BindNewItemObj(id, backpackidx, rotidx)
 	end
 end
 
@@ -59,4 +40,3 @@ function meta:LoadFromSerialized(serl)
 	local serlItems = string.Explode(ITEM_SERL_LINE_SEPARATOR, tab.i)
 	self:LoadFromSerializedLine(serlItems)
 end
-]]

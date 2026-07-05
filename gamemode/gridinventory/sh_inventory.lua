@@ -142,8 +142,8 @@ function GM:TranslateBindPointIndex(id, vec2)
 	return GetGridID(x1 + x2, y1 + y2)
 end
 
-function GM:BindPointToVector2(bindPoint)
-	local x, y = bindPoint:Unpack()
+function GM:BindPointIDXToVector2(bindPointIDX)
+	local x, y = GetGridCoords(bindPointIDX)
 	local siz = self:GetInventoryGridSize()
 	return Vector2(x * siz + siz * 0.5, y * siz + siz * 0.5)
 end

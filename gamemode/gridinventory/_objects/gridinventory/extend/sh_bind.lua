@@ -206,6 +206,6 @@ end
 
 -- Make a new item. Insert it using BindItem.
 function meta:BindNewItemObj(itemID, originIDX, rotIDX)
-	local item = ItemObj:Create(itemID, gamemode.Call("BindPointToVector2", originIDX), ITEM_ORIENTATION_TO_ANGLE[rotIDX])
+	local item = ItemObj:Create(itemID, gamemode.Call("BindPointIDXToVector2", originIDX), math.Rad(ITEM_ORIENTATION_TO_ANGLE[rotIDX]))
 	self:BindItemObj(item, originIDX, rotIDX)
 end

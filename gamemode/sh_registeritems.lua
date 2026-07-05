@@ -1,3 +1,7 @@
+if not backpackItemsRegistered then
+	GM.BackpackEntsMade = {}
+	backpackItemsRegistered = true
+end
 
 ITEM_TYPE_CONTAINER = 1
 ITEM_TYPE_NORMAL = 2
@@ -46,16 +50,17 @@ if CLIENT then
 	}
 end
 
-
-
 function GM:RegisterBackpackItem(sid, id, tab)
-	self.BackpackItemsSIDtoID[sid] = id
 	self.BackpackItems[id] = tab
-	if tab.hidden then return end
+	self.BackpackItemsSIDToID[sid] = id
+
+	if tab.hidden or self.BackpackEntsMade[id] then return end
 
 	if CLIENT then
 		local ent = ClientsideModel(tab.model, RENDERGROUP_OTHER)
 		if not IsValid(ent) then return end
+
+		self.BackpackEntsMade[id] = true
 
 		ent:SetNoDraw(true)
 
@@ -73,7 +78,7 @@ end
 
 function GM:RegisterBackpackItems()
 	self.BackpackItems = {}
-	self.BackpackItemsSIDtoID = {}
+	self.BackpackItemsSIDToID = {}
 
 	local included = {}
 
