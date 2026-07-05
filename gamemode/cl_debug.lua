@@ -136,6 +136,17 @@ local function DrawItemBindPoints(item)
 end
 
 local function DrawBackpackBindPoints()
+	surface.SetDrawColor(COLOR_BLACK)
+	draw.NoTexture()
+
+	local s = 6
+	for i = 1, #GAMEMODE.screenBindPoints do
+		local point = GAMEMODE.screenBindPoints[i]
+		local x, y = point:Unpack()
+		surface.DrawRect(x - s * 0.5, y - s * 0.5, s, s)
+	end
+
+	--[[
 	if not IsValid(GAMEMODE.pGridInventory) then return end
 
 	local backpack = GAMEMODE.backpack
@@ -148,6 +159,7 @@ local function DrawBackpackBindPoints()
 		local x, y = cell:GetAssocScreenBindPoint():Unpack()
 		surface.DrawRect(x - s * 0.5, y - s * 0.5, s, s)
 	end
+	]]
 end
 
 local function DrawAux(physbox, hitbox)

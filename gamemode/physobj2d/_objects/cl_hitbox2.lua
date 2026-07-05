@@ -46,17 +46,17 @@ function meta:GetScreenOriginPoint() return self.physbox:GetScreenHitboxPointsOr
 
 function meta:GetScreenScaledPoints()
 	if not self.isScreenScaled then return self.pointsObj end
-	return self.pointsObj * (1 / GAMEMODE.UncappedScreenScale)
+	return self.pointsObj * (1 / GAMEMODE.UncappedScreenScaleW)
 end
 
 function meta:RecalculateScreenScaledPoints()
-	if not self.isScreenScaled or self.isScreenScaled and GAMEMODE.UncappedScreenScale == 1 then
+	if not self.isScreenScaled or self.isScreenScaled and GAMEMODE.UncappedScreenScaleW == 1 then
 		self.screenScaledPointsObj = self.pointsObj:Copy()
 	else
 		local pointsTab = self.pointsObj:GetPoints()
 		local scaledTab = {}
 		for i = 1, #pointsTab do
-			scaledTab[i] = pointsTab[i] * GAMEMODE.UncappedScreenScale
+			scaledTab[i] = pointsTab[i] * GAMEMODE.UncappedScreenScaleW
 		end
 		self.screenScaledPointsObj = Points(scaledTab)
 	end

@@ -22,6 +22,8 @@ function PANEL:Init()
 	-- Center top: Start button
 	-- Right: Shop ui
 
+	local cellSize = gamemode.Call("GetInventoryGridSize")
+
 	local left = vgui.Create("DPanel", self)
 	left:SetSize(w * 0.4, h)
 	left:SetBackgroundColor(Color(0, 0, 0, 0))
@@ -105,14 +107,15 @@ function PANEL:Init()
 	end
 	]]
 
-	GAMEMODE.InventoryFloor = MakeWall(Vector2(w * 0.4, h * 0.95), w * 0.25, h * 0.2)		-- Floor collision
-	GAMEMODE.InventoryLeftWall = MakeWall(Vector2(w * 0.35, -h), w * 0.05, 2 * h)			-- Left side wall
-	GAMEMODE.InventoryRightWall = MakeWall(Vector2(w * 0.65, -h), w * 0.05, 2 * h)			-- Right side wall
-	GAMEMODE.InventoryTop = MakeWall(Vector2(w * 0.4, -h + 0.05 * h), w * 0.25, h * 0.05)	-- Cap, out of view. just in case.
-	--local test = MakeWall2(Vector2(w * 0.4, -h + 0.05 * h), w * 0.25, h * 0.05)
-	
-	--
+	local wallW = cellSize * 2
+	local wallH = 2 * h
+	local floorW = cellSize * 5
+	local floorH = cellSize * 2
 
+	GAMEMODE.InventoryFloor = MakeWall(Vector2(cellSize * 7 + wallW, h * 0.95), floorW, floorH)					-- Floor collision
+	GAMEMODE.InventoryLeftWall = MakeWall(Vector2(cellSize * 7, -h), wallW, wallH)								-- Left side wall
+	GAMEMODE.InventoryRightWall = MakeWall(Vector2(cellSize * 7 + wallW + floorW, -h), wallW, wallH)			-- Right side wall
+	GAMEMODE.InventoryTop = MakeWall(Vector2(cellSize * 7 + wallW, -h +  floorH), floorW, floorH)				-- Cap, out of view. just in case.
 
 
 	local right = vgui.Create("DPanel", self)
@@ -252,6 +255,7 @@ function PANEL:Init()
 
 	--TossBoxes(32)
 
+	--[[
 	OneNightstand()
 	OneNightstand()
 	OneLocker()
@@ -266,6 +270,14 @@ function PANEL:Init()
 	HulaTime(3)
 	OneBriefcase()
 	OnePlank()
+	]]
+
+	OneBox()
+	OneBox()
+	OneHarddrive()
+	OneLocker()
+	OneNightstand()
+	OnePocketDimension()
 
 	--MakeItem("briefcase", Vector2(0.5 * w, 0.5 * h))
 	--MakeItem("plank", Vector2(0.5 * w, 0.5 * h))

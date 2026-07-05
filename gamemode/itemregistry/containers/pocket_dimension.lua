@@ -11,7 +11,7 @@ ITEM.modelScale = Vector(1, 1, 1)
 ITEM.fov = 60
 ITEM.camPos = Vector(0.5, 0, 0)
 ITEM.camScale = 1
-ITEM.camXYOffsetAdj = Vector2(0, 4)
+ITEM.camXYOffsetAdj = Vector2(0, 0)
 ITEM.camAngleOffsetAdj = 0
 ITEM.camOffScreenAdjScale = 1.68
 ITEM.camOrthoAdjScale = 76
@@ -20,14 +20,14 @@ ITEM.triggerDelay = 4
 ITEM.retriggerable = true
 
 ITEM.hitboxPoints = {
-	[1] = Points({	Vector2(0, 45),
+	[1] = Points({	Vector2(0, 40),
 			Vector2(16.5, 12),
 			Vector2(45, 0),
 			Vector2(73.5, 12),
-			Vector2(90, 45),
-			Vector2(73.5, 78),
+			Vector2(90, 40),
+			Vector2(73.5, 64),
 			Vector2(45, 90),
-			Vector2(16.5, 78)}),
+			Vector2(16.5, 64)}),
 }
 
 ITEM.gridPoints = {
@@ -37,10 +37,10 @@ ITEM.gridPoints = {
 	[ITEM_ORIENTATION_270] = Points({Vector2(0, 0)}),
 }
 ITEM.gridPointsOffsets = {
-	[ITEM_ORIENTATION_0] = Vector2(4, 4),
-	[ITEM_ORIENTATION_90] = Vector2(4, 4),
-	[ITEM_ORIENTATION_180] = Vector2(4, 4),
-	[ITEM_ORIENTATION_270] = Vector2(4, 4),
+	[ITEM_ORIENTATION_0] = Vector2(0, 0),
+	[ITEM_ORIENTATION_90] = Vector2(0, 0),
+	[ITEM_ORIENTATION_180] = Vector2(0, 0),
+	[ITEM_ORIENTATION_270] = Vector2(0, 0),
 }
 
 ITEM.gridPointsSynergies = {}

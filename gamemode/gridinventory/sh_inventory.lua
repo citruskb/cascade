@@ -4,6 +4,10 @@ if not inventoryLoaded then
 	inventoryLoaded = true
 end
 
+-- WARNING. This WILL badly break things if you mess with it. Be prepared.
+GM_SCREENGRIDX = 22
+GM_SCREENGRIDY = 12
+
 -- 9 x 7 = 63
 GM.BackpackGridX = 9
 GM.BackpackGridY = 7
@@ -27,8 +31,8 @@ function GM:GridInventoryCellIDToCoords(id)
 end
 
 function GM:GetInventoryGridSize()
-	local gridCountWide, gridCountHigh = GAMEMODE.BackpackGridX, GAMEMODE.BackpackGridY
-	local w, h = ScrW() * 0.4, ScrH() * 0.6
+	local gridCountWide, gridCountHigh = GM_SCREENGRIDX, GM_SCREENGRIDY
+	local w, h = ScrW(), ScrH()
 	local colWide = math.Floor(w / gridCountWide)
 	local rowHigh = math.Floor(h / gridCountHigh)
 

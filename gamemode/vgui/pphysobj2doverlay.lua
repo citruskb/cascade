@@ -151,7 +151,7 @@ function PANEL:EvaluateCameraPos(center, camPosOffset, dist, x, y, camOffScreenA
 		local xMag = x < 0 and -x or 0
 		local yMag = y < 0 and -y or 0
 		local adjustDir = self:GetOrthoAdjustDir(camPosOffset, xMag, yMag) --Vector(0, xMag, -yMag)
-		local adjust = adjustDir * (camOffScreenAdjScale or 1)
+		local adjust = adjustDir * camOffScreenAdjScale / GAMEMODE.UncappedScreenScaleW
 		adjust:Rotate(Angle(0, 0, -objAng))
 
 		return center + adjust, center + adjust + camPosOffset * dist, math.Max(x, 0), math.Max(y, 0), 0 --adjust:LengthSqr()

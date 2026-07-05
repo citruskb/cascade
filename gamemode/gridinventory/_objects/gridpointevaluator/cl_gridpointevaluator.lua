@@ -47,7 +47,7 @@ function meta:EvaluateBindPoints(origin, rotation)
 	origin = origin + Vector2(siz * 0.5, siz * 0.5)
 
 	for i = 1, #pointsTab do
-		self.bindPoints[i] = origin + self.gridPointsOffsets[self.rotidx] + pointsTab[i] * siz
+		self.bindPoints[i] = origin + self.gridPointsOffsets[self.rotidx] * GAMEMODE.UncappedScreenScaleW + pointsTab[i] * siz
 	end
 
 	self.cleared = false

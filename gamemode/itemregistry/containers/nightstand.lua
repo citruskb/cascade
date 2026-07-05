@@ -7,23 +7,23 @@ ITEM.description = "Holds items: 1x3\n\n-1 fatigue damage taken"
 ITEM.rarity = ITEM_RARITY_RARE
 
 ITEM.model = "models/props_c17/FurnitureDrawer003a.mdl"
-ITEM.modelScale = Vector(1, 1, 1)
-ITEM.fov = 57
+ITEM.modelScale = Vector(1, 1, 0.83)
+ITEM.fov = 50
 ITEM.camPos = Vector(1, 0, 0)
 ITEM.camScale = 1
 ITEM.camXYOffsetAdj = VECTOR2_ZERO
 ITEM.camAngleOffsetAdj = 0
-ITEM.camOffScreenAdjScale = 0.18
-ITEM.camOrthoAdjScale = 23.5
+ITEM.camOffScreenAdjScale = 0.138
+ITEM.camOrthoAdjScale = 20
 
 ITEM.triggerDelay = 4
 ITEM.retriggerable = true
 
 ITEM.hitboxPoints = {
 	[1] = Points({	Vector2(0, 0),
-			Vector2(70, 0),
-			Vector2(70, 249),
-			Vector2(0, 249)}),
+			Vector2(93, 0),
+			Vector2(93, 271),
+			Vector2(0, 271)}),
 }
 
 ITEM.gridPoints = {
@@ -33,10 +33,10 @@ ITEM.gridPoints = {
 	[ITEM_ORIENTATION_270] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(2, 0)}),
 }
 ITEM.gridPointsOffsets = {
-	[ITEM_ORIENTATION_0] = Vector2(-8, -4),
-	[ITEM_ORIENTATION_90] = Vector2(-93, 83),
-	[ITEM_ORIENTATION_180] = Vector2(-8, -4),
-	[ITEM_ORIENTATION_270] = Vector2(-93, 83),
+	[ITEM_ORIENTATION_0] = Vector2(4, 6),
+	[ITEM_ORIENTATION_90] = Vector2(-84, 91),
+	[ITEM_ORIENTATION_180] = Vector2(4, 6),
+	[ITEM_ORIENTATION_270] = Vector2(-84, 91),
 }
 
 ITEM.gridPointsSynergies = {}

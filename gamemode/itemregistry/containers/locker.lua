@@ -7,13 +7,13 @@ ITEM.description = "Holds items: 1x4\n\nWhen item inside triggers: +1 armor"
 ITEM.rarity = ITEM_RARITY_EPIC
 
 ITEM.model = "models/props_lab/lockerdoorsingle.mdl"
-ITEM.modelScale = Vector(1, 1, 1)
+ITEM.modelScale = Vector(1, 1.12, 1)
 ITEM.fov = 53
 ITEM.camPos = Vector(1, 0, 0)
 ITEM.camScale = 1
 ITEM.camXYOffsetAdj = VECTOR2_ZERO
 ITEM.camAngleOffsetAdj = 0
-ITEM.camOffScreenAdjScale = 0.194
+ITEM.camOffScreenAdjScale = 0.178
 ITEM.camOrthoAdjScale = 32
 
 ITEM.triggerDelay = 4
@@ -21,9 +21,9 @@ ITEM.retriggerable = true
 
 ITEM.hitboxPoints = {
 	[1] = Points({	Vector2(0, 0),
-			Vector2(75, 0),
-			Vector2(75, 320),
-			Vector2(0, 320)}),
+			Vector2(88, 0),
+			Vector2(88, 352),
+			Vector2(0, 352)}),
 }
 
 ITEM.gridPoints = {
@@ -33,10 +33,10 @@ ITEM.gridPoints = {
 	[ITEM_ORIENTATION_270] = Points({Vector2(0, 0), Vector2(1, 0), Vector2(2, 0), Vector2(3, 0)}),
 }
 ITEM.gridPointsOffsets = {
-	[ITEM_ORIENTATION_0] = Vector2(-6, -10),
-	[ITEM_ORIENTATION_90] = Vector2(-132, 115),
-	[ITEM_ORIENTATION_180] = Vector2(-6, -10),
-	[ITEM_ORIENTATION_270] = Vector2(-132, 115),
+	[ITEM_ORIENTATION_0] = Vector2(0, 2),
+	[ITEM_ORIENTATION_90] = Vector2(-132, 132),
+	[ITEM_ORIENTATION_180] = Vector2(0, 2),
+	[ITEM_ORIENTATION_270] = Vector2(-132, 132),
 }
 
 ITEM.gridPointsSynergies = {}

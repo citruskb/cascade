@@ -5,7 +5,7 @@ function meta:InitPhysbox()
 
 	for i = 1, #self.itemData.hitboxPoints do
 		local pointObj = self.itemData.hitboxPoints[i]
-		self.physbox:AddHitbox(pointObj * GAMEMODE.UncappedScreenScale)
+		self.physbox:AddHitbox(pointObj * GAMEMODE.UncappedScreenScaleW)
 	end
 end
 
