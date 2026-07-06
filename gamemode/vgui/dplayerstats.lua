@@ -1,16 +1,13 @@
 PANEL = {}
 
 function PANEL:Init()
-	local w, h = ScrW(), ScrH()
-
-	self:SetPos(w * 0.2, h * 0.6)
-	self:SetSize(w * 0.2, h * 0.4)
-
 	self.lastRefresh = CurTime()
 
 	self.frame = vgui.Create("DFrame", self)
 	self.title = vgui.Create("DLabel", self.frame)
 	self.richText = vgui.Create("RichText", self.frame)
+
+	self:InvalidateLayout()
 end
 
 function PANEL:SetPlayer(pl)
@@ -36,6 +33,11 @@ function PANEL:Think()
 end
 
 function PANEL:PerformLayout()
+	local cellSize = gamemode.Call("GetInventoryGridSize")
+	local w, h = ScrW(), ScrH()
+	self:SetPos(cellSize * 4, h - cellSize * 4.5)
+	self:SetSize(cellSize * 5, cellSize * 4.5)
+
 	self.frame:SetTitle("")
 	self.frame:SetSize(self:GetSize())
 	self.frame:ShowCloseButton(false)

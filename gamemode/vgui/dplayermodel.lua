@@ -1,13 +1,10 @@
 PANEL = {}
 
 function PANEL:Init()
-	local w, h = ScrW(), ScrH()
-
 	self.fov = 50
 	self.camPosOffset = Vector(0.2, -0.8, 0)
 
-	self:SetPos(0, h * 0.6)
-	self:SetSize(w * 0.2, h * 0.4)
+	self:InvalidateLayout()
 end
 
 function PANEL:SetPlayer(pl)
@@ -27,6 +24,12 @@ function PANEL:SetPlayer(pl)
 
 	-- idle_melee_angry looks quite good for your own model.
 	self:SendSequence("idle_melee_angry")
+end
+
+function PANEL:PerformLayout()
+	local cellSize = gamemode.Call("GetInventoryGridSize")
+	self:SetPos(0, h - cellSize * 4.5)
+	self:SetSize(cellSize * 4, cellSize * 4.5)
 end
 
 function PANEL:SendSequence(seq)
