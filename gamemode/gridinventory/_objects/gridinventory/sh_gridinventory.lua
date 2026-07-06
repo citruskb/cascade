@@ -39,16 +39,6 @@ function meta:GetItemAt(idx)
 	return self.cells[idx].heldItem
 end
 
--- Return items that are contained inside our cells but outside of containers to the physics inventory.
-function meta:PopUncontainedItems()
-	for i = 1, #self.cells do
-		local cell = self.cells[i]
-		if not cell:IsFilledButShouldntBe() then continue end
-
-		cell.heldItem:Pop()
-	end
-end
-
 -- Return an iterable list of all containers we hold.
 function meta:GetHeldContainers()
 	local tab = {}
@@ -91,4 +81,15 @@ function meta:Clear()
 
 	local allItems = self:GetHeldItems()
 	for i = 1, #allItems do allItems[i]:Remove() end
+end
+
+-- Return items that are contained inside our cells but outside of containers to the physics inventory.
+-- Doubles to make sure that serverside what is contained is legal.
+function meta:Validate()
+	for i = 1, #self.cells do
+		local cell = self.cells[i]
+
+		if not cell:IsFilledButShouldntBe() then continue end
+		cell.heldItem:Pop()
+	end
 end

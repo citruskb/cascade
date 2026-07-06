@@ -25,6 +25,7 @@ function meta:LoadFromSerializedLine(line)
 	for i = 1, #line do
 		local id, backpackidx, rotidx = gamemode.Call("DeserializeBackpackItem", line[i])
 		self:BindNewItemObj(id, backpackidx, rotidx)
+		self:Validate()
 	end
 end
 

@@ -132,7 +132,7 @@ function GM:LeftMouseRelease()
 
 	if self.HeldItem.isInGridInventory then
 		self.HeldItem = nil
-		self.backpack:PopUncontainedItems()
+		self.backpack:Validate()
 		return
 	end
 
@@ -140,7 +140,7 @@ function GM:LeftMouseRelease()
 	gamemode.Call("InventoryItemDropped", self.HeldItem, self.HeldItem:IsInsideInventoryBounds())
 
 	self.HeldItem = nil
-	self.backpack:PopUncontainedItems()
+	self.backpack:Validate()
 end
 
 function GM:HandleMouseRight()
