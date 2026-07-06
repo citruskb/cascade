@@ -82,6 +82,8 @@ function PANEL:SetupPaintVars(obj)
 	vars.sizeAdjust = sizeAdjust
 	vars.camOrthoAdjScale = data.camOrthoAdjScale
 
+	vars.isContainer = data.type == ITEM_TYPE_CONTAINER
+
 	vars.drawLayer = self:EvaluateDrawLayer(obj, isOrtho)
 
 	table.insert(self.paintVars, vars)
@@ -161,7 +163,9 @@ end
 function PANEL:PaintPhysObj2D(vars)
 	cam.Start3D(vars.camPos, vars.ang, vars.fov, vars.x, vars.y, vars.w, vars.h, 8, 512 * vars.sizeAdjust)
 		render.OverrideDepthEnable(true, false)
+			if vars.isContainer then render.SetColorModulation(0.8, 0.8, 0.8) end
 			vars.clEnt:DrawModel()
+			if vars.isContainer then render.SetColorModulation(1, 1, 1) end
 		render.OverrideDepthEnable(false)
 	cam.End3D()
 end
@@ -193,6 +197,7 @@ function PANEL:PaintOrthoPhysObj2D(vars)
 	}
 	cam.Start(camData)
 		render.OverrideDepthEnable(true, false)
+			if vars.isContainer then render.SetColorModulation(0.8, 0.8, 0.8) end
 
 			-- TODO - might be able to use cam.ApplyShake() to do some interesting effects..
 			-- Say when items activate?
@@ -200,6 +205,8 @@ function PANEL:PaintOrthoPhysObj2D(vars)
 			-- TODO - might be able to mess with the FOV to affect perceived object size.
 
 			vars.clEnt:DrawModel()
+
+			if vars.isContainer then render.SetColorModulation(1, 1, 1) end
 		render.OverrideDepthEnable(false)
 	cam.End3D()
 end
