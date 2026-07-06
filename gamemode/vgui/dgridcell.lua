@@ -15,7 +15,7 @@ function PANEL:Init()
 	self:SetZPos(GM_ZPOS_PGRID)
 	self.fov = 45
 	self.camPosOffset = Vector(0.6, 0, 0)
-	self.buffer = 8
+	self.buffer = 8 * GAMEMODE.UncappedScreenScaleW
 
 	self.shapeImg = vgui.Create("DImage", self)
 	self.shapeImg:SetImage("kite.png")
@@ -26,6 +26,8 @@ function PANEL:Init()
 end
 
 function PANEL:PerformLayout()
+	self.buffer = 8 * GAMEMODE.UncappedScreenScaleW
+
 	local w, h = self:GetSize()
 	self.shapeImg:SetSize(w * 0.5, h * 0.5)
 	self.shapeImg:SetPos(w * 0.25 + self.buffer / 4, h * 0.25 + self.buffer / 4)
