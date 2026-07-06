@@ -8,7 +8,7 @@ local meta = FindMetaTable("CombatEvent")
 Pass:
 the winner.
 ]]
-COMBAT_EVENT_ENDED = 1			-- A winner was decided.
+CE_ENDED = 1			-- A winner was decided.
 
 --[[ Play visual effect of item attacking target. Damage taken by target.
 Pass:
@@ -17,30 +17,42 @@ damage type
 damage amount
 damage target
 ]]
-COMBAT_EVENT_DAMAGE = 2			-- Damage (melee, ranged, unaspected, toxic, fatigue)
+CE_DAMAGE = 2			-- Damage (melee, ranged, unaspected, toxic, fatigue)
 
 --[[ Apply healing to target.
 Pass:
 healing amount.
 healing target.
 ]]
-COMBAT_EVENT_HEAL = 3			-- Healing
+CE_HEAL = 3			-- Healing
 
 --[[ Play the visual trigger effect. Do the "on trigger" effect.
 Pass:
-id of item triggered
+The board. (either 1 or 2, 1 = mine, 2 = opponent's)
+The backpack grid location of the itemObj triggered.
+The itemObj type.
 ]]
-COMBAT_EVENT_ITEM_TRIGGER = 4	-- An item triggered.
+CE_ITEM_TRIGGER = 4	-- An item triggered.
 
-function CombatEvent:__Create(timeStep, subStep, eventType, eventData)
+CE_TO_NAME = {
+	[CE_ENDED] = "round_ended",
+	[CE_DAMAGE] = "damage",
+	[CE_HEAL] = "heal",
+	[CE_ITEM_TRIGGER] = "item_trigger"
+}
+
+function CombatEvent:__Create()
+	Error("[CE] - you should never be creating this base class directly.")
+end
+
+function CombatEvent:ToString()
+	local suffix = ToString(CE_TO_NAME[self.eventType])
+	if not suffix then Error("[CE] - invalid ToString().") end
+
+	return "[CE_" .. suffix .. "]"
+end
+
+function meta:Init(timeStep, subStep)
 	self.timeStep = timeStep
 	self.subStep = subStep
-	self.eventType = eventType
-
-	self:SetupEvent(eventData)
-
-	self.isCombatEvent = true
-
-	return self
 end
-function CombatEvent:ToString() return "[CombatEvent]" end
