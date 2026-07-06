@@ -201,6 +201,19 @@ function meta:Rotate(angle)
 	Rawset(self, "y", x * sin + y * cos)
 end
 
+-- Returns a new vector rotated by the given angle.
+function meta:GetRotated(angle)
+	local rad = angle * math_PI / 180
+	local cos = math_Cos(rad)
+	local sin = math_Sin(rad)
+	local x, y = Rawget(self, "x"), Rawget(self, "y")
+
+	return Vector2(
+		x * cos - y * sin,
+		x * sin + y * cos
+	)
+end
+
 -- Copies values from the second vector to this one.
 function meta:Set(other)
 	Rawset(self, "x", Rawget(other, "x"))
