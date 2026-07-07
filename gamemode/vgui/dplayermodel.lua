@@ -28,6 +28,7 @@ end
 
 function PANEL:PerformLayout()
 	local cellSize = gamemode.Call("GetInventoryGridSize")
+	local w, h = ScrW(), ScrH()
 	self:SetPos(0, h - cellSize * 4.5)
 	self:SetSize(cellSize * 4, cellSize * 4.5)
 end

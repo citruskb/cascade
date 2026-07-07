@@ -1,8 +1,12 @@
 --[[
 	The idea here is the combat log can be determined serverside almost immediately and networked to the client once.
-	The client can effectively just play back this result.
-	This prevents the client from determining whether they won or lost and avoids stutters due to latency.
-	This has the benefit of creating the combat log too.
+	The client can just play back this result.
+	This keeps winning and losing server authoritating and avoids stutters due to latency.
+	This has the benefit of creating a combat log too. (far future TODO)
+
+	However, when saving match history, we want to take a different approach. The full combat log can get loooooong.
+	So instead we save our board, our opponent's board, and if we won or lost.
+	We can also run quick simulations to see what the odds of beating their board are.
 ]]
 
 if not CombatOrchestrator then
